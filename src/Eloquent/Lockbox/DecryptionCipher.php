@@ -17,7 +17,7 @@ namespace Eloquent\Lockbox;
 class DecryptionCipher implements DecryptionCipherInterface
 {
     /**
-     * Decrypt a data packet,
+     * Decrypt a data packet.
      *
      * @param Key\PrivateKeyInterface $key  The key to decrypt with.
      * @param string                  $data The data to decrypt.

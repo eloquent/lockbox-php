@@ -17,7 +17,7 @@ namespace Eloquent\Lockbox;
 interface BoundDecryptionCipherInterface
 {
     /**
-     * Decrypt a data packet,
+     * Decrypt a data packet.
      *
      * @param string $data The data to decrypt.
      *
