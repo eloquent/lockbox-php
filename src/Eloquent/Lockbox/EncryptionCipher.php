@@ -17,26 +17,107 @@ namespace Eloquent\Lockbox;
 class EncryptionCipher implements EncryptionCipherInterface
 {
     /**
+     * Construct a new encryption cipher.
+     *
+     * @param integer|null $randomSource The random source to use.
+     */
+    public function __construct($randomSource = null)
+    {
+        if (null === $randomSource) {
+            $randomSource = MCRYPT_DEV_URANDOM;
+        }
+
+        $this->randomSource = $randomSource;
+    }
+
+    /**
+     * @return integer
+     */
+    public function randomSource()
+    {
+        return $this->randomSource;
+    }
+
+    /**
      * Encrypt a data packet.
      *
      * @param Key\PublicKeyInterface $key  The key to encrypt with.
      * @param string                 $data The data to encrypt.
      *
-     * @return string                              The encrypted data.
-     * @throws Exception\EncryptionFailedException If the encryption failed.
+     * @return string The encrypted data.
      */
     public function encrypt(Key\PublicKeyInterface $key, $data)
     {
-        $result = openssl_seal(
-            sha1($data, true) . $data,
-            $encrypted,
-            $envelopes,
-            array($key->handle())
-        );
-        if (false === $result) {
-            throw new Exception\EncryptionFailedException;
-        }
+        $generatedKey = $this->generateKey();
+        $iv = $this->generateIv();
 
-        return base64_encode($envelopes[0] . $encrypted);
+        openssl_public_encrypt(
+            $generatedKey . $iv,
+            $encryptedKeyAndIv,
+            $key->handle()
+        );
+
+        return base64_encode(
+            $encryptedKeyAndIv .
+            $this->encryptAes($generatedKey, $iv, sha1($data, true) . $data)
+        );
     }
+
+    /**
+     * Generate an encryption key.
+     *
+     * @return string The encryption key.
+     */
+    protected function generateKey()
+    {
+        return mcrypt_create_iv(32, $this->randomSource());
+    }
+
+    /**
+     * Generate an initialization vector.
+     *
+     * @return string The initialization vector.
+     */
+    protected function generateIv()
+    {
+        return mcrypt_create_iv(16, $this->randomSource());
+    }
+
+    /**
+     * Encrypt some data with AES and PKCS #7 padding.
+     *
+     * @param string $key  The key to use.
+     * @param string $iv   The initialization vector to use.
+     * @param string $data The data to encrypt.
+     *
+     * @return string The encrypted data.
+     */
+    protected function encryptAes($key, $iv, $data)
+    {
+        return mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_128,
+            $key,
+            $this->pad($data),
+            MCRYPT_MODE_CBC,
+            $iv
+        );
+    }
+
+    /**
+     * Pad a string using PKCS #7 (RFC 2315) padding.
+     *
+     * @link http://tools.ietf.org/html/rfc2315
+     *
+     * @param string $data The data to pad.
+     *
+     * @return string The padded data.
+     */
+    protected function pad($data)
+    {
+        $padSize = intval(16 - (strlen($data) % 16));
+
+        return $data . str_repeat(chr($padSize), $padSize);
+    }
+
+    private $randomSource;
 }

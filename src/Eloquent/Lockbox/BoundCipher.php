@@ -88,8 +88,7 @@ class BoundCipher implements
      *
      * @param string $data The data to encrypt.
      *
-     * @return string                              The encrypted data.
-     * @throws Exception\EncryptionFailedException If the encryption failed.
+     * @return string The encrypted data.
      */
     public function encrypt($data)
     {
