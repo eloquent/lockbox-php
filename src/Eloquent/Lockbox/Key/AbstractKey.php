@@ -67,7 +67,7 @@ abstract class AbstractKey implements KeyInterface
      *
      * @param string $name The name of the detail.
      *
-     * @return mixed The value of the detail.
+     * @return mixed                            The value of the detail.
      * @throws Exception\MissingDetailException If the detail is not present.
      */
     protected function detail($name)

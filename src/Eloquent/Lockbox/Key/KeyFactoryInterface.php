@@ -19,7 +19,7 @@ interface KeyFactoryInterface
     /**
      * Create a new private key.
      *
-     * @param string $key           The PEM formatted private key.
+     * @param string      $key      The PEM formatted private key.
      * @param string|null $password The key password.
      *
      * @return PrivateKeyInterface
@@ -40,7 +40,7 @@ interface KeyFactoryInterface
     /**
      * Create a new private key from a file.
      *
-     * @param string      $path The path to the PEM formatted private key.
+     * @param string      $path     The path to the PEM formatted private key.
      * @param string|null $password The key password.
      *
      * @return PrivateKeyInterface
