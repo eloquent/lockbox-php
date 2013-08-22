@@ -27,7 +27,7 @@ class DecryptionCipher implements DecryptionCipherInterface
      */
     public function decrypt(Key\PrivateKeyInterface $key, $data)
     {
-        $data = base64_decode($data);
+        $data = base64_decode($data, true);
         if (false === $data) {
             throw new Exception\DecryptionFailedException;
         }

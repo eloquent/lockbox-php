@@ -68,4 +68,79 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($data, $decrypted);
     }
+
+    public function testDecryptFailureNotBase64()
+    {
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, 'foo:bar');
+    }
+
+    public function testDecryptFailureBadData()
+    {
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, 'foobar==');
+    }
+
+    public function testDecryptFailureEmptyKey()
+    {
+        openssl_public_encrypt('', $data, $this->publicKey->handle());
+        $data = base64_encode($data);
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, $data);
+    }
+
+    public function testDecryptFailureEmptyIv()
+    {
+        openssl_public_encrypt(mcrypt_create_iv(32, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
+        $data = base64_encode($data);
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, $data);
+    }
+
+    public function testDecryptFailureBadAesData()
+    {
+        openssl_public_encrypt(mcrypt_create_iv(48, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
+        $data = base64_encode($data . 'foobar');
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, $data);
+    }
+
+    public function testDecryptFailureBadPadding()
+    {
+        $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
+        $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
+        $data = base64_encode(
+            $data .
+            mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, 'foobar' . chr(10), MCRYPT_MODE_CBC, $iv)
+        );
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, $data);
+    }
+
+    public function testDecryptFailureBadHash()
+    {
+        $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
+        $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
+
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
+        $data = base64_encode(
+            $data .
+            mcrypt_encrypt(
+                MCRYPT_RIJNDAEL_128,
+                $key,
+                sha1('barfoo', true) . 'foobar' . str_repeat(chr(6), 6),
+                MCRYPT_MODE_CBC,
+                $iv
+            )
+        );
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
+        $this->cipher->decrypt($this->privateKey, $data);
+    }
 }
