@@ -1,0 +1,28 @@
+{
+    "name": "eloquent/lockbox",
+    "description": "Simple, strong encryption for PHP.",
+    "keywords": ["encryption", "openssl", "two", "way", "security", "strong", "simple"],
+    "homepage": "https://github.com/eloquent/lockbox",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Erin Millard",
+            "email": "ezzatron@gmail.com",
+            "homepage": "http://ezzatron.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3",
+        "ext-openssl": "*",
+        "icecave/isolator": "~2"
+    },
+    "require-dev": {
+        "eloquent/liberator": "~1",
+        "icecave/archer": "1.0.0-alpha.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "Eloquent\\Lockbox": "src"
+        }
+    }
+}
