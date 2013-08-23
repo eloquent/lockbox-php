@@ -9,6 +9,11 @@
  * file that was distributed with this source code.
  */
 
+use Eloquent\Lockbox\BoundDecryptionCipher;
+use Eloquent\Lockbox\BoundEncryptionCipher;
+use Eloquent\Lockbox\DecryptionCipher;
+use Eloquent\Lockbox\EncryptionCipher;
+use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyFactory;
 
 class FunctionalTest extends PHPUnit_Framework_TestCase
@@ -17,16 +22,13 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->encryptionCipher = Phake::partialMock(
-            'Eloquent\Lockbox\EncryptionCipher'
-        );
-        $this->decryptionCipher = Phake::partialMock(
-            'Eloquent\Lockbox\DecryptionCipher'
-        );
+        $this->encryptionCipher = Phake::partialMock('Eloquent\Lockbox\EncryptionCipher');
+        $this->decryptionCipher = Phake::partialMock('Eloquent\Lockbox\DecryptionCipher');
 
+        $this->fixturePath = __DIR__ . '/../fixture/pem';
         $this->keyFactory = new KeyFactory;
         $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
-            __DIR__ . '/../fixture/pem/rsa-2048-nopass.private.pem'
+            $this->fixturePath . '/rsa-2048-nopass.private.pem'
         );
         $this->publicKey = $this->privateKey->publicKey();
     }
@@ -92,5 +94,83 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     public function testSpecVectorsDecryption($data, $key, $iv, $encrypted)
     {
         $this->assertSame($data, $this->decryptionCipher->decrypt($this->privateKey, $encrypted));
+    }
+
+    public function testEncryptingData()
+    {
+        $data = 'Super secret data.';
+
+        $keyFactory = new KeyFactory;
+        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+        $publicKey = $privateKey->publicKey();
+
+        $cipher = new EncryptionCipher;
+        $encrypted = $cipher->encrypt($publicKey, $data);
+
+        $this->assertTrue(true);
+    }
+
+    public function testEncryptingMultipleData()
+    {
+        $data = array(
+            'Super secret data.',
+            'Extra secret data.',
+            'Mega secret data.',
+        );
+
+        $keyFactory = new KeyFactory;
+        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+        $publicKey = $privateKey->publicKey();
+
+        $cipher = new BoundEncryptionCipher($publicKey);
+
+        $encrypted = array();
+        foreach ($data as $string) {
+            $encrypted[] = $cipher->encrypt($string);
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function testDecryptingData()
+    {
+        $encrypted = '<some encrypted data>';
+
+        $keyFactory = new KeyFactory;
+        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+
+        $cipher = new DecryptionCipher;
+
+        try {
+            $data = $cipher->decrypt($privateKey, $encrypted);
+        } catch (DecryptionFailedException $e) {
+            // decryption failed
+        }
+
+        $this->assertTrue(true);
+    }
+
+    public function testDecryptingMultipleData()
+    {
+        $encrypted = array(
+            '<some encrypted data>',
+            '<more encrypted data>',
+            '<other encrypted data>',
+        );
+
+        $keyFactory = new KeyFactory;
+        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+
+        $cipher = new BoundDecryptionCipher($privateKey);
+
+        foreach ($encrypted as $string) {
+            try {
+                $data = $cipher->decrypt($string);
+            } catch (DecryptionFailedException $e) {
+                // decryption failed
+            }
+        }
+
+        $this->assertTrue(true);
     }
 }

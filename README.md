@@ -67,7 +67,7 @@ use Eloquent\Lockbox\Key\KeyFactory;
 $data = 'Super secret data.';
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem');
+$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 $publicKey = $privateKey->publicKey();
 
 $cipher = new EncryptionCipher;
@@ -90,7 +90,7 @@ $data = array(
 );
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem');
+$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 $publicKey = $privateKey->publicKey();
 
 $cipher = new BoundEncryptionCipher($publicKey);
@@ -111,7 +111,7 @@ use Eloquent\Lockbox\Key\KeyFactory;
 $encrypted = '<some encrypted data>';
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem');
+$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
 $cipher = new DecryptionCipher;
 
@@ -136,7 +136,7 @@ $encrypted = array(
 );
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem');
+$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
 $cipher = new BoundDecryptionCipher($privateKey);
 
