@@ -151,7 +151,11 @@ foreach ($encrypted as $string) {
 
 ## How does *Lockbox* actually work?
 
-*Lockbox* uses [OpenSSL] with [PEM] formatted keys. Rather
+*Lockbox* uses [OpenSSL] with [PEM] formatted keys. *Lockbox* is similar in
+operation to the PHP functions [openssl_seal()] and [openssl_open()]. Where
+*Lockbox* differs, is in its use of [AES-256] instead of [RC4] as the secondary
+encryption algorithm. In addition, *Lockbox* includes data verification steps
+that allow unsuccessful decryption to be detected.
 
 ### Encryption process
 
@@ -159,7 +163,7 @@ foreach ($encrypted as $string) {
 2. A [SHA-1] hash of the data and the data itself are concatenated together.
 3. This hash and data concatenation is padded using [PKCS #7] padding.
 4. A random 256-bit key and 128-bit [initialization vector][] (IV) are
-   generated.
+   generated (by default, *Lockbox* uses /dev/urandom as the random source).
 5. The padded hash and data are encrypted using the generated key and IV and
    [AES-256] encryption.
 6. The generated key and IV are concatenated together and encrypted with the
@@ -271,10 +275,13 @@ time because it utilizes a random seed. Therefore only the ciphertext after the
 [Base64 with a URI and filename safe alphabet]: http://tools.ietf.org/html/rfc4648#section-5
 [initialization vector]: http://en.wikipedia.org/wiki/Initialization_vector
 [OpenSSL]: http://www.openssl.org/
+[openssl_open()]: http://php.net/openssl_open
+[openssl_seal()]: http://php.net/openssl_seal
 [PEM]: http://en.wikipedia.org/wiki/Privacy_Enhanced_Mail
 [PKCS #7]: http://tools.ietf.org/html/rfc2315
 [private key]: http://en.wikipedia.org/wiki/Public-key_cryptography
 [public key]: http://en.wikipedia.org/wiki/Public-key_cryptography
+[RC4]: http://en.wikipedia.org/wiki/RC4
 [SHA-1]: http://tools.ietf.org/html/rfc3174
 [US-ASCII]: http://en.wikipedia.org/wiki/ASCII
 
