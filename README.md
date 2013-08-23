@@ -151,11 +151,12 @@ foreach ($encrypted as $string) {
 
 ## How does *Lockbox* actually work?
 
-*Lockbox* uses [OpenSSL] with [PEM] formatted keys. *Lockbox* is similar in
-operation to the PHP functions [openssl_seal()] and [openssl_open()]. Where
-*Lockbox* differs, is in its use of [AES-256] instead of [RC4] as the secondary
-encryption algorithm. In addition, *Lockbox* includes data verification steps
-that allow unsuccessful decryption to be detected.
+*Lockbox* uses [OpenSSL] with [PEM] formatted keys, and is similar in operation
+to the PHP functions [openssl_seal()] and [openssl_open()].
+
+Where *Lockbox* differs, is in its use of [AES-256] instead of [RC4] as the
+secondary encryption algorithm. In addition, *Lockbox* includes data
+verification steps that allow unsuccessful decryption to be detected.
 
 ### Encryption process
 
