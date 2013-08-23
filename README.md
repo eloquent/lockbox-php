@@ -124,6 +124,9 @@ try {
 
 ### Decrypting multiple data packets with the same key
 
+*Lockbox* includes 'bound' ciphers that are locked to a particular key. These
+type of ciphers are convenient for decrypting multiple data packets.
+
 ```php
 use Eloquent\Lockbox\BoundDecryptionCipher;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
@@ -233,9 +236,9 @@ All test vectors use the following key:
 All test vector values below are expressed as [US-ASCII] encoded strings.
 Newlines are added only for readability, and do not make up part of the value.
 
-Note that the [OpenSSL] encrypted portion of the cipher will be different each
-time because it utilizes a random seed. Therefore only the ciphertext after the
-342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
+Note that the [OpenSSL] encrypted portion of the ciphertext will be different
+each time because it utilizes a random seed. Therefore only the ciphertext after
+the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 
     Data:               1234
     Generated key:      12345678901234567890123456789012
