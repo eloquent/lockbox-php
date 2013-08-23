@@ -37,27 +37,26 @@ class PrivateKeyTest extends PHPUnit_Framework_TestCase
 
     public function keyData()
     {
-        //                                        name                           password    bits  envelopeSize publicKey
+        //                                        name                           password    bits  publicKey
         return array(
-            'DSA, 2048-bit, no password' => array('dsa-2048-nopass.private.pem', null,       2048, 256,         'dsa-2048-nopass.public.pem'),
-            'DSA, 2048-bit'              => array('dsa-2048.private.pem',        'password', 2048, 256,         'dsa-2048.public.pem'),
-            'DSA, 4096-bit, no password' => array('dsa-4096-nopass.private.pem', null,       4096, 512,         'dsa-4096-nopass.public.pem'),
-            'RSA, 2048-bit, no password' => array('rsa-2048-nopass.private.pem', null,       2048, 256,         'rsa-2048-nopass.public.pem'),
-            'RSA, 2048-bit'              => array('rsa-2048.private.pem',        'password', 2048, 256,         'rsa-2048.public.pem'),
-            'RSA, 4096-bit, no password' => array('rsa-4096-nopass.private.pem', null,       4096, 512,         'rsa-4096-nopass.public.pem'),
+            'DSA, 2048-bit, no password' => array('dsa-2048-nopass.private.pem', null,       2048, 'dsa-2048-nopass.public.pem'),
+            'DSA, 2048-bit'              => array('dsa-2048.private.pem',        'password', 2048, 'dsa-2048.public.pem'),
+            'DSA, 4096-bit, no password' => array('dsa-4096-nopass.private.pem', null,       4096, 'dsa-4096-nopass.public.pem'),
+            'RSA, 2048-bit, no password' => array('rsa-2048-nopass.private.pem', null,       2048, 'rsa-2048-nopass.public.pem'),
+            'RSA, 2048-bit'              => array('rsa-2048.private.pem',        'password', 2048, 'rsa-2048.public.pem'),
+            'RSA, 4096-bit, no password' => array('rsa-4096-nopass.private.pem', null,       4096, 'rsa-4096-nopass.public.pem'),
         );
     }
 
     /**
      * @dataProvider keyData
      */
-    public function testKey($name, $password, $bits, $envelopeSize, $publicName)
+    public function testKey($name, $password, $bits, $publicName)
     {
         $key = $this->factory->createPrivateKeyFromFile(sprintf('%s/%s', $this->fixturePath, $name), $password);
         $publicKey = $this->factory->createPublicKeyFromFile(sprintf('%s/%s', $this->fixturePath, $publicName));
 
         $this->assertSame($bits, $key->bits());
-        $this->assertSame($envelopeSize, $key->envelopeSize());
         $this->assertSame($publicKey->string(), $key->publicKey()->string());
     }
 

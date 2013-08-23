@@ -53,16 +53,6 @@ abstract class AbstractKey implements KeyInterface
     }
 
     /**
-     * Get the size of envelopes produced by this key.
-     *
-     * @return integer The enveolpe size.
-     */
-    public function envelopeSize()
-    {
-        return $this->bits() / 8;
-    }
-
-    /**
      * Get a specific detail from the key details.
      *
      * @param string $name The name of the detail.

@@ -57,7 +57,7 @@ class EncryptionCipher implements EncryptionCipherInterface
             $key->handle()
         );
 
-        return base64_encode(
+        return $this->base64UriEncode(
             $encryptedKeyAndIv .
             $this->encryptAes($generatedKey, $iv, sha1($data, true) . $data)
         );
@@ -117,6 +117,21 @@ class EncryptionCipher implements EncryptionCipherInterface
         $padSize = intval(16 - (strlen($data) % 16));
 
         return $data . str_repeat(chr($padSize), $padSize);
+    }
+
+    /**
+     * Encode a string using Base 64 encoding with URI and filename safe
+     * alphabet.
+     *
+     * @link http://tools.ietf.org/html/rfc4648#section-5
+     *
+     * @param string $data The data to encode.
+     *
+     * @return string The encoded data.
+     */
+    protected function base64UriEncode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
     private $randomSource;

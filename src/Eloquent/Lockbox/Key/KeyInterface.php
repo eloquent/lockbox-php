@@ -22,11 +22,4 @@ interface KeyInterface
      * @return integer The number of bits.
      */
     public function bits();
-
-    /**
-     * Get the size of envelopes produced by this key.
-     *
-     * @return integer The enveolpe size.
-     */
-    public function envelopeSize();
 }

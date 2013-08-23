@@ -27,9 +27,10 @@ class DecryptionCipher implements DecryptionCipherInterface
      */
     public function decrypt(Key\PrivateKeyInterface $key, $data)
     {
-        $data = base64_decode($data, true);
-        if (false === $data) {
-            throw new Exception\DecryptionFailedException;
+        try {
+            $data = $this->base64UriDecode($data);
+        } catch (Exception\InvalidEncodingException $e) {
+            throw new Exception\DecryptionFailedException($e);
         }
 
         $keyAndIv = substr($data, 0, $key->bits() / 8);
@@ -113,5 +114,34 @@ class DecryptionCipher implements DecryptionCipherInterface
         }
 
         return substr($data, 0, -$padSize);
+    }
+
+    /**
+     * Decode a string encoded using Base 64 encoding with URI and filename safe
+     * alphabet.
+     *
+     * @link http://tools.ietf.org/html/rfc4648#section-5
+     *
+     * @param string $data The encoded data.
+     *
+     * @return string                             The decoded data.
+     * @throws Exception\InvalidEncodingException If the encoding is invalid.
+     */
+    protected function base64UriDecode($data)
+    {
+        $data = base64_decode(
+            str_pad(
+                strtr($data, '-_', '+/'),
+                strlen($data) % 4,
+                '=',
+                STR_PAD_RIGHT
+            ),
+            true
+        );
+        if (false === $data) {
+            throw new Exception\InvalidEncodingException;
+        }
+
+        return $data;
     }
 }
