@@ -289,12 +289,12 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 [SHA-1]: http://tools.ietf.org/html/rfc3174
 [US-ASCII]: http://en.wikipedia.org/wiki/ASCII
 
-[API documentation]: http://lqnt.co/lockbox/artifacts/documentation/api/
-[Build Status]: https://api.travis-ci.org/eloquent/lockbox.png?branch=master
+[API documentation]: http://lqnt.co/lockbox-php/artifacts/documentation/api/
+[Build Status]: https://api.travis-ci.org/eloquent/lockbox-php.png?branch=master
 [Composer]: http://getcomposer.org/
 [eloquent/lockbox]: https://packagist.org/packages/eloquent/lockbox
-[Latest build]: https://travis-ci.org/eloquent/lockbox
+[Latest build]: https://travis-ci.org/eloquent/lockbox-php
 [SemVer]: http://semver.org/
-[Test coverage report]: https://coveralls.io/r/eloquent/lockbox
-[Test Coverage]: https://coveralls.io/repos/eloquent/lockbox/badge.png?branch=master
+[Test coverage report]: https://coveralls.io/r/eloquent/lockbox-php
+[Test Coverage]: https://coveralls.io/repos/eloquent/lockbox-php/badge.png?branch=master
 [Uses Semantic Versioning]: http://b.repl.ca/v1/semver-yes-brightgreen.png

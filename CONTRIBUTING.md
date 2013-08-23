@@ -1,7 +1,7 @@
 # Contributing
 
-**Lockbox** is open source software; contributions from the community are
-encouraged. Please take a moment to read these guidelines before submitting
+**Lockbox for PHP** is open source software; contributions from the community
+are encouraged. Please take a moment to read these guidelines before submitting
 changes.
 
 ### Code style

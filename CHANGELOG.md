@@ -1,4 +1,4 @@
-# Lockbox changelog
+# Lockbox for PHP changelog
 
 ### 0.1.0 (unreleased)
 
