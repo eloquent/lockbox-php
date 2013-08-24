@@ -169,7 +169,7 @@ verification steps that allow unsuccessful decryption to be detected.
 4. A random 256-bit key and 128-bit [initialization vector][] (IV) are
    generated (by default, *Lockbox* uses /dev/urandom as the random source).
 5. The padded hash and data are encrypted using the generated key and IV and
-   [AES-256] encryption.
+   [AES-256] encryption in [cipher block chaining] mode.
 6. The generated key and IV are concatenated together and encrypted with the
    public key using [OpenSSL] and [OAEP padding].
 7. The encrypted key and IV, and the encrypted hash and data are concatenated
@@ -192,7 +192,7 @@ verification steps that allow unsuccessful decryption to be detected.
 6.  The first 256 bits of the decrypted data are extracted as the key.
 7.  The next 128 bits of the decrypted data are extracted as the IV.
 8.  The encrypted data from step 4 is decrypted using the recovered key and IV
-    from steps 6 and 7 and [AES-256] encryption.
+    from steps 6 and 7 and [AES-256] encryption in [cipher block chaining] mode.
 9.  Padding is removed from the decrypted data in accordance with the [PKCS #7]
     padding scheme.
 10. The first 160 bits of the unpadded data are extracted as the verification
@@ -293,6 +293,7 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 
 [AES-256]: http://en.wikipedia.org/wiki/Advanced_Encryption_Standard
 [Base64 with a URI and filename safe alphabet]: http://tools.ietf.org/html/rfc4648#section-5
+[cipher block chaining]: http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher-block_chaining_.28CBC.29
 [initialization vector]: http://en.wikipedia.org/wiki/Initialization_vector
 [OEAP padding]: http://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding
 [OpenSSL]: http://www.openssl.org/
