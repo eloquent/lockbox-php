@@ -240,6 +240,22 @@ Note that the [OpenSSL] encrypted portion of the ciphertext will be different
 each time because it utilizes a random seed. Therefore only the ciphertext after
 the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 
+    Data:               <empty>
+    Generated key:      12345678901234567890123456789012
+    Generated IV:       1234567890123456
+    Example ciphertext: FzFcxXm57XqDzsZm4vVUaspsK1-Hcw7fN
+                        jAqadl-WhwR_Kfwv4gM7v7OnDGWfpDOTl
+                        I_nlQvvwP3TP98tOhyrsJkpDDMZ0WSQVP
+                        cl23xTk6xbLvwl2qRVdZa8isKCXXcuKt5
+                        XIv1Mexp2Dzyn8w8TNYOdK0EiNj1v2PUk
+                        7X2QUPvK0poT_3fUlN13aK28KBqg-CGw0
+                        xzsGSG4k7CN8FEfGqbSBfuNxumH0eJyzZ
+                        1s4cYbcn3OWdlQln7asp21WZHj7SEMWIf
+                        dsrtoWL85uEAnLxYG_CXD1nteVXffAwFv
+                        ByMT1UmNQ0AWjm8KJiH8hLXPr09rbo5Vz
+                        s6c5lSrjMmM9itNTFRhW3KMfhqusPDqWJ
+                        7K37AvEHDaLULPKBNj24c
+
     Data:               1234
     Generated key:      12345678901234567890123456789012
     Generated IV:       1234567890123456

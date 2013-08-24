@@ -23,7 +23,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->encryptionCipher = Phake::partialMock('Eloquent\Lockbox\EncryptionCipher');
-        $this->decryptionCipher = Phake::partialMock('Eloquent\Lockbox\DecryptionCipher');
+        $this->decryptionCipher = new DecryptionCipher;
 
         $this->fixturePath = __DIR__ . '/../fixture/pem';
         $this->keyFactory = new KeyFactory;
@@ -37,6 +37,24 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         return array(
             'Test vector 1' => array(
+                '',
+                '12345678901234567890123456789012',
+                '1234567890123456',
+                'FzFcxXm57XqDzsZm4vVUaspsK1-Hcw7fN' .
+                'jAqadl-WhwR_Kfwv4gM7v7OnDGWfpDOTl' .
+                'I_nlQvvwP3TP98tOhyrsJkpDDMZ0WSQVP' .
+                'cl23xTk6xbLvwl2qRVdZa8isKCXXcuKt5' .
+                'XIv1Mexp2Dzyn8w8TNYOdK0EiNj1v2PUk' .
+                '7X2QUPvK0poT_3fUlN13aK28KBqg-CGw0' .
+                'xzsGSG4k7CN8FEfGqbSBfuNxumH0eJyzZ' .
+                '1s4cYbcn3OWdlQln7asp21WZHj7SEMWIf' .
+                'dsrtoWL85uEAnLxYG_CXD1nteVXffAwFv' .
+                'ByMT1UmNQ0AWjm8KJiH8hLXPr09rbo5Vz' .
+                's6c5lSrjMmM9itNTFRhW3KMfhqusPDqWJ' .
+                '7K37AvEHDaLULPKBNj24c'
+            ),
+
+            'Test vector 2' => array(
                 '1234',
                 '12345678901234567890123456789012',
                 '1234567890123456',
@@ -54,7 +72,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 'ER4TURlVKf14sPeDgRUo88-zvM7BWpMv'
             ),
 
-            'Test vector 2' => array(
+            'Test vector 3' => array(
                 '1234567890123456',
                 '12345678901234567890123456789012',
                 '1234567890123456',

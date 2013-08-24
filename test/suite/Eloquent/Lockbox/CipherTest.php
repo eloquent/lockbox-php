@@ -78,13 +78,13 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureBadData()
     {
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
-        $this->cipher->decrypt($this->privateKey, 'foobar==');
+        $this->cipher->decrypt($this->privateKey, 'foobar');
     }
 
     public function testDecryptFailureEmptyKey()
     {
         openssl_public_encrypt('', $data, $this->publicKey->handle());
-        $data = base64_encode($data);
+        $data = $this->base64UriEncode($data);
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
         $this->cipher->decrypt($this->privateKey, $data);
@@ -93,7 +93,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureEmptyIv()
     {
         openssl_public_encrypt(mcrypt_create_iv(32, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
-        $data = base64_encode($data);
+        $data = $this->base64UriEncode($data);
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
         $this->cipher->decrypt($this->privateKey, $data);
@@ -102,7 +102,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureBadAesData()
     {
         openssl_public_encrypt(mcrypt_create_iv(48, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
-        $data = base64_encode($data . 'foobar');
+        $data = $this->base64UriEncode($data . 'foobar');
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
         $this->cipher->decrypt($this->privateKey, $data);
@@ -114,9 +114,9 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
         openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
-        $data = base64_encode(
+        $data = $this->base64UriEncode(
             $data .
-            mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, 'foobar' . chr(10), MCRYPT_MODE_CBC, $iv)
+            mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, sha1('foobar', true) . 'foobar' . chr(10), MCRYPT_MODE_CBC, $iv)
         );
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
@@ -129,7 +129,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
         openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
-        $data = base64_encode(
+        $data = $this->base64UriEncode(
             $data .
             mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_128,
@@ -142,5 +142,10 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
         $this->cipher->decrypt($this->privateKey, $data);
+    }
+
+    protected function base64UriEncode($data)
+    {
+        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 }
