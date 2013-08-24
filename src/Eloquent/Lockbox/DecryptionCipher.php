@@ -34,7 +34,14 @@ class DecryptionCipher implements DecryptionCipherInterface
         }
 
         $keyAndIv = substr($data, 0, $key->bits() / 8);
-        if (!openssl_private_decrypt($keyAndIv, $keyAndIv, $key->handle())) {
+        if (
+            !openssl_private_decrypt(
+                $keyAndIv,
+                $keyAndIv,
+                $key->handle(),
+                OPENSSL_PKCS1_OAEP_PADDING
+            )
+        ) {
             throw new Exception\DecryptionFailedException;
         }
 

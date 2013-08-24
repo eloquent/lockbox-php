@@ -54,7 +54,8 @@ class EncryptionCipher implements EncryptionCipherInterface
         openssl_public_encrypt(
             $generatedKey . $iv,
             $encryptedKeyAndIv,
-            $key->handle()
+            $key->handle(),
+            OPENSSL_PKCS1_OAEP_PADDING
         );
 
         return $this->base64UriEncode(

@@ -171,7 +171,7 @@ verification steps that allow unsuccessful decryption to be detected.
 5. The padded hash and data are encrypted using the generated key and IV and
    [AES-256] encryption.
 6. The generated key and IV are concatenated together and encrypted with the
-   public key using [OpenSSL].
+   public key using [OpenSSL] and [OAEP padding].
 7. The encrypted key and IV, and the encrypted hash and data are concatenated
    together.
 8. This concatenation of encrypted data is then encoded using [Base64 with a URI
@@ -188,7 +188,7 @@ verification steps that allow unsuccessful decryption to be detected.
     vector] (IV).
 4.  The remaining bits of the ciphertext are extracted as the encrypted data
 5.  The encrypted key and IV from step 3 are decrypted with the private key
-    using [OpenSSL].
+    using [OpenSSL] and [OAEP padding].
 6.  The first 256 bits of the decrypted data are extracted as the key.
 7.  The next 128 bits of the decrypted data are extracted as the IV.
 8.  The encrypted data from step 4 is decrypted using the recovered key and IV
@@ -243,33 +243,33 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
     Data:               1234
     Generated key:      12345678901234567890123456789012
     Generated IV:       1234567890123456
-    Example ciphertext: E737-vERr-QWfApBhllwqBpVXMMBqTBg
-                        yMk1F9jh663iyz5nQlgQX_SHsEk6Ga7c
-                        ZAS059kTdF9t9re24qts68UjMqGivwVU
-                        IuP_wwPTCFvRHz5fuaU8lqjENZZs9vAn
-                        LJlm58nZiNit4aBoM9LHXw9djHCojE6b
-                        lrFL0qS8-p3CE1rXlvT8nN8afFrVNAdn
-                        yAIY2lbTdiZzPP6tyTf2NLYbB7WahVxG
-                        -06NHp31wYmPURK1EbP3DE89IX0opOWq
-                        J6MBGjzUZhtknp3gKoWQNGNVJEwzmgaZ
-                        BS8m71hO3yuFqoeMDZeZ1liNFAb8uaIQ
-                        D9SgRrwWJqfsXXF2H3Jzeqtq9JEj6E2S
+    Example ciphertext: wdPXCy5amuY7U8tGD0M-nnK5LGc4DC1h
+                        VwvNWVLCyqOMHgDF3fpsY-8MQkMUuI0T
+                        eNoutU-TpuGsm6D-KIXeAaWIYuUAaNZ-
+                        V_5WwmRFT5BEyhQwZ3PFybrs39o4sAlO
+                        d5IVvLNMMgwRD-FmQc8KU10d3KDd71wW
+                        r50y7R33xTnyJplx9uqcOrB6ooQLjFcF
+                        bFU87YPnhkxZK5JryTxAlaDJjfFs-3XM
+                        zgoJ35rpBgDVywPXbye1C8u5gw81awid
+                        Xgei_a27MZog1lUvETzMXqqZ4VlhckDV
+                        m71f4TLMKHTz-CmYinvzj7G_pYmvtHeh
+                        uxDzjdrT4lbetTuESm-YHKtq9JEj6E2S
                         ER4TURlVKf14sPeDgRUo88-zvM7BWpMv
 
     Data:               1234567890123456
     Generated key:      12345678901234567890123456789012
     Generated IV:       1234567890123456
-    Example ciphertext: jJTdLagcU1e3NYGKdaj2_vuTJgD8ukC-
-                        ImPA9_2gcDIamh5LEpKF-VVhyZ891tqy
-                        FDjfr0yBOD-fQTr47AFmnqV2GT1FfHUx
-                        fPyiIFKxXrNQ05z-KDkAIySxKCkR52M1
-                        0gs7Pf9LzzQRNdQHHIz9TF3sMBJ47-Mc
-                        kPEWjyu3wlJ0XkcMdJxXjgGOBBaAEvo9
-                        0wYJyeiosYLB7gxoyMmXpkxpNa22fV_t
-                        HzNWTvYRlKkDv-dqFsElDTv1pBSAXWCV
-                        whEmpmjJPe5uu84wGPx6lF9hxW7WiEu8
-                        lRWobJqSnA9QNFbw1xc6W6uNN1Pn7gzS
-                        28dON8xkrg15R04ok9GNgSBlVmSYgUJa
+    Example ciphertext: umvbDKEQtKldCN15bgyGyLm5K5LEDNGJ
+                        kXbyYask_sgSi9lkGa5ByDZKVs1SMgp0
+                        mif4GDfyg5xVadsPzoH9-jdSoTB7pNxz
+                        ns8CNP8KIWEcU6TATwjbW9bP5FBQKxRO
+                        OTHdLLJ7ADqvuT0QxH1Yy1xzlVGXUXxk
+                        coMBey_CxiboqjLm_cEl1dA0HyidgxTn
+                        rArsM7porZPj__gbWIEv58L0S2xv11YL
+                        0IQMGkQiupJhHKiyAIH4KchZ8whV_aAZ
+                        193U7toEJ7Ojd7uu6hzMiVDCIRPDa5Ek
+                        zyBFoNsr2hcTFcU4oxBkRbUottvH9Dji
+                        SxIPU4O8vomXpUqWzneJ4CBlVmSYgUJa
                         4zsJUnll4lufFRTYTYjuCgQhunOAIVS2
                         DxuQH8bSZZrHKNIghc0D3Q
 
@@ -278,6 +278,7 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 [AES-256]: http://en.wikipedia.org/wiki/Advanced_Encryption_Standard
 [Base64 with a URI and filename safe alphabet]: http://tools.ietf.org/html/rfc4648#section-5
 [initialization vector]: http://en.wikipedia.org/wiki/Initialization_vector
+[OEAP padding]: http://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding
 [OpenSSL]: http://www.openssl.org/
 [openssl_open()]: http://php.net/openssl_open
 [openssl_seal()]: http://php.net/openssl_seal
