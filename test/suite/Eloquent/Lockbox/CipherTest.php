@@ -14,9 +14,9 @@ namespace Eloquent\Lockbox;
 use PHPUnit_Framework_TestCase;
 
 /**
- * @covers Eloquent\Lockbox\Cipher
- * @covers Eloquent\Lockbox\EncryptionCipher
- * @covers Eloquent\Lockbox\DecryptionCipher
+ * @covers \Eloquent\Lockbox\Cipher
+ * @covers \Eloquent\Lockbox\EncryptionCipher
+ * @covers \Eloquent\Lockbox\DecryptionCipher
  */
 class CipherTest extends PHPUnit_Framework_TestCase
 {
@@ -83,7 +83,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureEmptyKey()
     {
-        openssl_public_encrypt('', $data, $this->publicKey->handle());
+        openssl_public_encrypt('', $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode($data);
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
@@ -92,7 +92,12 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureEmptyIv()
     {
-        openssl_public_encrypt(mcrypt_create_iv(32, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
+        openssl_public_encrypt(
+            mcrypt_create_iv(32, MCRYPT_DEV_URANDOM),
+            $data,
+            $this->publicKey->handle(),
+            OPENSSL_PKCS1_OAEP_PADDING
+        );
         $data = $this->base64UriEncode($data);
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
@@ -101,7 +106,12 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadAesData()
     {
-        openssl_public_encrypt(mcrypt_create_iv(48, MCRYPT_DEV_URANDOM), $data, $this->publicKey->handle());
+        openssl_public_encrypt(
+            mcrypt_create_iv(48, MCRYPT_DEV_URANDOM),
+            $data,
+            $this->publicKey->handle(),
+            OPENSSL_PKCS1_OAEP_PADDING
+        );
         $data = $this->base64UriEncode($data . 'foobar');
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
@@ -113,7 +123,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
-        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode(
             $data .
             mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, sha1('foobar', true) . 'foobar' . chr(10), MCRYPT_MODE_CBC, $iv)
@@ -128,7 +138,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
-        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle());
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode(
             $data .
             mcrypt_encrypt(
