@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1377426428">
+  <project timestamp="1377426428">
+    <package name="Eloquent\Lockbox">
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/BoundCipher.php">
+        <class name="BoundCipher" namespace="Eloquent\Lockbox">
+          <metrics methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="17" coveredstatements="17" elements="24" coveredelements="24"/>
+        </class>
+        <line num="28" type="method" name="__construct" crap="3" count="5"/>
+        <line num="33" type="stmt" count="5"/>
+        <line num="34" type="stmt" count="1"/>
+        <line num="35" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="5"/>
+        <line num="37" type="stmt" count="1"/>
+        <line num="38" type="stmt" count="1"/>
+        <line num="40" type="stmt" count="5"/>
+        <line num="41" type="stmt" count="5"/>
+        <line num="42" type="stmt" count="5"/>
+        <line num="43" type="stmt" count="5"/>
+        <line num="44" type="stmt" count="5"/>
+        <line num="51" type="method" name="privateKey" crap="1" count="4"/>
+        <line num="53" type="stmt" count="4"/>
+        <line num="61" type="method" name="publicKey" crap="1" count="4"/>
+        <line num="63" type="stmt" count="4"/>
+        <line num="71" type="method" name="encryptionCipher" crap="1" count="5"/>
+        <line num="73" type="stmt" count="5"/>
+        <line num="81" type="method" name="decryptionCipher" crap="1" count="5"/>
+        <line num="83" type="stmt" count="5"/>
+        <line num="93" type="method" name="encrypt" crap="1" count="3"/>
+        <line num="95" type="stmt" count="3"/>
+        <line num="106" type="method" name="decrypt" crap="1" count="3"/>
+        <line num="108" type="stmt" count="3"/>
+        <line num="116" type="stmt" count="0"/>
+        <metrics loc="115" ncloc="62" classes="1" methods="7" coveredmethods="7" conditionals="0" coveredconditionals="0" statements="17" coveredstatements="17" elements="24" coveredelements="24"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/BoundDecryptionCipher.php">
+        <class name="BoundDecryptionCipher" namespace="Eloquent\Lockbox">
+          <metrics methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="13" coveredelements="13"/>
+        </class>
+        <line num="25" type="method" name="__construct" crap="2" count="6"/>
+        <line num="29" type="stmt" count="6"/>
+        <line num="30" type="stmt" count="2"/>
+        <line num="31" type="stmt" count="2"/>
+        <line num="33" type="stmt" count="6"/>
+        <line num="34" type="stmt" count="6"/>
+        <line num="35" type="stmt" count="6"/>
+        <line num="42" type="method" name="key" crap="1" count="5"/>
+        <line num="44" type="stmt" count="5"/>
+        <line num="52" type="method" name="cipher" crap="1" count="6"/>
+        <line num="54" type="stmt" count="6"/>
+        <line num="65" type="method" name="decrypt" crap="1" count="4"/>
+        <line num="67" type="stmt" count="4"/>
+        <line num="73" type="stmt" count="0"/>
+        <metrics loc="72" ncloc="37" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="13" coveredelements="13"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/BoundEncryptionCipher.php">
+        <class name="BoundEncryptionCipher" namespace="Eloquent\Lockbox">
+          <metrics methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="13" coveredelements="13"/>
+        </class>
+        <line num="25" type="method" name="__construct" crap="2" count="6"/>
+        <line num="29" type="stmt" count="6"/>
+        <line num="30" type="stmt" count="2"/>
+        <line num="31" type="stmt" count="2"/>
+        <line num="33" type="stmt" count="6"/>
+        <line num="34" type="stmt" count="6"/>
+        <line num="35" type="stmt" count="6"/>
+        <line num="42" type="method" name="key" crap="1" count="5"/>
+        <line num="44" type="stmt" count="5"/>
+        <line num="52" type="method" name="cipher" crap="1" count="6"/>
+        <line num="54" type="stmt" count="6"/>
+        <line num="64" type="method" name="encrypt" crap="1" count="4"/>
+        <line num="66" type="stmt" count="4"/>
+        <line num="72" type="stmt" count="0"/>
+        <metrics loc="71" ncloc="37" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="9" coveredstatements="9" elements="13" coveredelements="13"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Cipher.php">
+        <class name="Cipher" namespace="Eloquent\Lockbox">
+          <metrics methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="13" coveredstatements="13" elements="18" coveredelements="18"/>
+        </class>
+        <line num="25" type="method" name="__construct" crap="3" count="12"/>
+        <line num="29" type="stmt" count="12"/>
+        <line num="30" type="stmt" count="1"/>
+        <line num="31" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="12"/>
+        <line num="33" type="stmt" count="1"/>
+        <line num="34" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="12"/>
+        <line num="37" type="stmt" count="12"/>
+        <line num="38" type="stmt" count="12"/>
+        <line num="45" type="method" name="encryptionCipher" crap="1" count="5"/>
+        <line num="47" type="stmt" count="5"/>
+        <line num="55" type="method" name="decryptionCipher" crap="1" count="12"/>
+        <line num="57" type="stmt" count="12"/>
+        <line num="68" type="method" name="encrypt" crap="1" count="3"/>
+        <line num="70" type="stmt" count="3"/>
+        <line num="82" type="method" name="decrypt" crap="1" count="10"/>
+        <line num="84" type="stmt" count="10"/>
+        <line num="90" type="stmt" count="0"/>
+        <metrics loc="89" ncloc="45" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="13" coveredstatements="13" elements="18" coveredelements="18"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/DecryptionCipher.php">
+        <class name="DecryptionCipher" namespace="Eloquent\Lockbox">
+          <metrics methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="55" coveredstatements="55" elements="59" coveredelements="59"/>
+        </class>
+        <line num="28" type="method" name="decrypt" crap="7" count="15"/>
+        <line num="31" type="stmt" count="15"/>
+        <line num="32" type="stmt" count="15"/>
+        <line num="33" type="stmt" count="3"/>
+        <line num="36" type="stmt" count="12"/>
+        <line num="38" type="stmt" count="12"/>
+        <line num="39" type="stmt" count="12"/>
+        <line num="40" type="stmt" count="12"/>
+        <line num="41" type="stmt" count="12"/>
+        <line num="43" type="stmt" count="12"/>
+        <line num="44" type="stmt" count="12"/>
+        <line num="45" type="stmt" count="1"/>
+        <line num="48" type="stmt" count="11"/>
+        <line num="49" type="stmt" count="11"/>
+        <line num="50" type="stmt" count="1"/>
+        <line num="53" type="stmt" count="10"/>
+        <line num="54" type="stmt" count="10"/>
+        <line num="55" type="stmt" count="1"/>
+        <line num="58" type="stmt" count="9"/>
+        <line num="59" type="stmt" count="9"/>
+        <line num="60" type="stmt" count="9"/>
+        <line num="61" type="stmt" count="9"/>
+        <line num="62" type="stmt" count="9"/>
+        <line num="64" type="stmt" count="7"/>
+        <line num="65" type="stmt" count="7"/>
+        <line num="66" type="stmt" count="7"/>
+        <line num="67" type="stmt" count="2"/>
+        <line num="68" type="stmt" count="2"/>
+        <line num="70" type="stmt" count="7"/>
+        <line num="71" type="stmt" count="1"/>
+        <line num="74" type="stmt" count="6"/>
+        <line num="86" type="method" name="decryptAes" crap="2" count="9"/>
+        <line num="88" type="stmt" count="9"/>
+        <line num="89" type="stmt" count="9"/>
+        <line num="90" type="stmt" count="9"/>
+        <line num="91" type="stmt" count="9"/>
+        <line num="92" type="stmt" count="9"/>
+        <line num="94" type="stmt" count="9"/>
+        <line num="97" type="stmt" count="9"/>
+        <line num="98" type="stmt" count="9"/>
+        <line num="99" type="stmt" count="2"/>
+        <line num="102" type="stmt" count="7"/>
+        <line num="115" type="method" name="unpad" crap="2" count="9"/>
+        <line num="117" type="stmt" count="9"/>
+        <line num="118" type="stmt" count="9"/>
+        <line num="119" type="stmt" count="9"/>
+        <line num="120" type="stmt" count="2"/>
+        <line num="123" type="stmt" count="7"/>
+        <line num="137" type="method" name="base64UriDecode" crap="2" count="15"/>
+        <line num="139" type="stmt" count="15"/>
+        <line num="140" type="stmt" count="15"/>
+        <line num="141" type="stmt" count="15"/>
+        <line num="142" type="stmt" count="15"/>
+        <line num="143" type="stmt" count="15"/>
+        <line num="145" type="stmt" count="15"/>
+        <line num="147" type="stmt" count="15"/>
+        <line num="148" type="stmt" count="15"/>
+        <line num="149" type="stmt" count="3"/>
+        <line num="152" type="stmt" count="12"/>
+        <line num="155" type="stmt" count="0"/>
+        <metrics loc="154" ncloc="104" classes="1" methods="4" coveredmethods="4" conditionals="0" coveredconditionals="0" statements="55" coveredstatements="55" elements="59" coveredelements="59"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/EncryptionCipher.php">
+        <class name="EncryptionCipher" namespace="Eloquent\Lockbox">
+          <metrics methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="27" coveredstatements="27" elements="35" coveredelements="35"/>
+        </class>
+        <line num="24" type="method" name="__construct" crap="2" count="22"/>
+        <line num="26" type="stmt" count="22"/>
+        <line num="27" type="stmt" count="22"/>
+        <line num="28" type="stmt" count="22"/>
+        <line num="30" type="stmt" count="22"/>
+        <line num="31" type="stmt" count="22"/>
+        <line num="36" type="method" name="randomSource" crap="1" count="5"/>
+        <line num="38" type="stmt" count="5"/>
+        <line num="49" type="method" name="encrypt" crap="1" count="8"/>
+        <line num="51" type="stmt" count="8"/>
+        <line num="52" type="stmt" count="8"/>
+        <line num="54" type="stmt" count="8"/>
+        <line num="55" type="stmt" count="8"/>
+        <line num="56" type="stmt" count="8"/>
+        <line num="57" type="stmt" count="8"/>
+        <line num="59" type="stmt" count="8"/>
+        <line num="61" type="stmt" count="8"/>
+        <line num="63" type="stmt" count="8"/>
+        <line num="64" type="stmt" count="8"/>
+        <line num="72" type="method" name="generateKey" crap="1" count="5"/>
+        <line num="74" type="stmt" count="5"/>
+        <line num="82" type="method" name="generateIv" crap="1" count="5"/>
+        <line num="84" type="stmt" count="5"/>
+        <line num="96" type="method" name="encryptAes" crap="1" count="8"/>
+        <line num="98" type="stmt" count="8"/>
+        <line num="99" type="stmt" count="8"/>
+        <line num="100" type="stmt" count="8"/>
+        <line num="101" type="stmt" count="8"/>
+        <line num="102" type="stmt" count="8"/>
+        <line num="104" type="stmt" count="8"/>
+        <line num="116" type="method" name="pad" crap="1" count="8"/>
+        <line num="118" type="stmt" count="8"/>
+        <line num="120" type="stmt" count="8"/>
+        <line num="133" type="method" name="base64UriEncode" crap="1" count="8"/>
+        <line num="135" type="stmt" count="8"/>
+        <line num="140" type="stmt" count="0"/>
+        <metrics loc="139" ncloc="74" classes="1" methods="8" coveredmethods="8" conditionals="0" coveredconditionals="0" statements="27" coveredstatements="27" elements="35" coveredelements="35"/>
+      </file>
+    </package>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/BoundDecryptionCipherInterface.php">
+      <line num="29" type="stmt" count="0"/>
+      <metrics loc="28" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/BoundEncryptionCipherInterface.php">
+      <line num="28" type="stmt" count="0"/>
+      <metrics loc="27" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/DecryptionCipherInterface.php">
+      <line num="30" type="stmt" count="0"/>
+      <metrics loc="29" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/EncryptionCipherInterface.php">
+      <line num="29" type="stmt" count="0"/>
+      <metrics loc="28" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <package name="Eloquent\Lockbox\Exception">
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Exception/DecryptionFailedException.php">
+        <class name="DecryptionFailedException" namespace="Eloquent\Lockbox\Exception">
+          <metrics methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+        </class>
+        <line num="26" type="method" name="__construct" crap="1" count="3"/>
+        <line num="28" type="stmt" count="3"/>
+        <line num="29" type="stmt" count="3"/>
+        <line num="31" type="stmt" count="0"/>
+        <metrics loc="30" ncloc="14" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Exception/InvalidEncodingException.php">
+        <class name="InvalidEncodingException" namespace="Eloquent\Lockbox\Exception">
+          <metrics methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+        </class>
+        <line num="26" type="method" name="__construct" crap="1" count="3"/>
+        <line num="28" type="stmt" count="3"/>
+        <line num="29" type="stmt" count="3"/>
+        <line num="31" type="stmt" count="0"/>
+        <metrics loc="30" ncloc="14" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Exception/InvalidPaddingException.php">
+        <class name="InvalidPaddingException" namespace="Eloquent\Lockbox\Exception">
+          <metrics methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+        </class>
+        <line num="26" type="method" name="__construct" crap="1" count="1"/>
+        <line num="28" type="stmt" count="1"/>
+        <line num="29" type="stmt" count="1"/>
+        <line num="31" type="stmt" count="0"/>
+        <metrics loc="30" ncloc="14" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="2" coveredstatements="2" elements="3" coveredelements="3"/>
+      </file>
+    </package>
+    <package name="Eloquent\Lockbox\Key">
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/AbstractKey.php">
+        <class name="AbstractKey" namespace="Eloquent\Lockbox\Key">
+          <metrics methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="15" coveredelements="15"/>
+        </class>
+        <line num="24" type="method" name="__construct" crap="1" count="26"/>
+        <line num="26" type="stmt" count="26"/>
+        <line num="27" type="stmt" count="26"/>
+        <line num="28" type="stmt" count="26"/>
+        <line num="30" type="method" name="__destruct" crap="1" count="20"/>
+        <line num="32" type="stmt" count="20"/>
+        <line num="33" type="stmt" count="20"/>
+        <line num="40" type="method" name="handle" crap="1" count="26"/>
+        <line num="42" type="stmt" count="26"/>
+        <line num="50" type="method" name="bits" crap="1" count="15"/>
+        <line num="52" type="stmt" count="15"/>
+        <line num="63" type="method" name="detail" crap="2" count="24"/>
+        <line num="65" type="stmt" count="24"/>
+        <line num="66" type="stmt" count="2"/>
+        <line num="69" type="stmt" count="22"/>
+        <line num="75" type="stmt" count="0"/>
+        <metrics loc="74" ncloc="40" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="10" coveredstatements="10" elements="15" coveredelements="15"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/KeyFactory.php">
+        <class name="KeyFactory" namespace="Eloquent\Lockbox\Key">
+          <metrics methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="18" elements="23" coveredelements="23"/>
+        </class>
+        <line num="0" type="stmt" count="0"/>
+        <line num="27" type="method" name="__construct" crap="1" count="20"/>
+        <line num="29" type="stmt" count="20"/>
+        <line num="30" type="stmt" count="20"/>
+        <line num="41" type="method" name="createPrivateKey" crap="2" count="15"/>
+        <line num="43" type="stmt" count="15"/>
+        <line num="44" type="stmt" count="15"/>
+        <line num="45" type="stmt" count="1"/>
+        <line num="48" type="stmt" count="14"/>
+        <line num="59" type="method" name="createPublicKey" crap="2" count="17"/>
+        <line num="61" type="stmt" count="17"/>
+        <line num="62" type="stmt" count="17"/>
+        <line num="63" type="stmt" count="1"/>
+        <line num="66" type="stmt" count="16"/>
+        <line num="79" type="method" name="createPrivateKeyFromFile" crap="2" count="13"/>
+        <line num="82" type="stmt" count="13"/>
+        <line num="83" type="stmt" count="13"/>
+        <line num="84" type="stmt" count="1"/>
+        <line num="87" type="stmt" count="12"/>
+        <line num="99" type="method" name="createPublicKeyFromFile" crap="2" count="2"/>
+        <line num="102" type="stmt" count="2"/>
+        <line num="103" type="stmt" count="2"/>
+        <line num="104" type="stmt" count="1"/>
+        <line num="107" type="stmt" count="1"/>
+        <line num="112" type="stmt" count="0"/>
+        <metrics loc="111" ncloc="59" classes="1" methods="5" coveredmethods="5" conditionals="0" coveredconditionals="0" statements="18" coveredstatements="18" elements="23" coveredelements="23"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/PrivateKey.php">
+        <class name="PrivateKey" namespace="Eloquent\Lockbox\Key">
+          <metrics methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="4" elements="5" coveredelements="5"/>
+        </class>
+        <line num="0" type="stmt" count="0"/>
+        <line num="26" type="method" name="publicKey" crap="2" count="16"/>
+        <line num="28" type="stmt" count="16"/>
+        <line num="29" type="stmt" count="16"/>
+        <line num="30" type="stmt" count="16"/>
+        <line num="32" type="stmt" count="16"/>
+        <line num="35" type="stmt" count="0"/>
+        <metrics loc="34" ncloc="16" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="4" coveredstatements="4" elements="5" coveredelements="5"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/PublicKey.php">
+        <class name="PublicKey" namespace="Eloquent\Lockbox\Key">
+          <metrics methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
+        </class>
+        <line num="24" type="method" name="string" crap="1" count="6"/>
+        <line num="26" type="stmt" count="6"/>
+        <line num="29" type="stmt" count="0"/>
+        <metrics loc="28" ncloc="12" classes="1" methods="1" coveredmethods="1" conditionals="0" coveredconditionals="0" statements="1" coveredstatements="1" elements="2" coveredelements="2"/>
+      </file>
+    </package>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/Exception/InvalidKeyExceptionInterface.php">
+      <line num="20" type="stmt" count="0"/>
+      <metrics loc="19" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <package name="Eloquent\Lockbox\Key\Exception">
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/Exception/InvalidPrivateKeyException.php">
+        <class name="InvalidPrivateKeyException" namespace="Eloquent\Lockbox\Key\Exception">
+          <metrics methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+        </class>
+        <line num="28" type="method" name="__construct" crap="1" count="1"/>
+        <line num="30" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="1"/>
+        <line num="33" type="stmt" count="1"/>
+        <line num="34" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="1"/>
+        <line num="37" type="stmt" count="1"/>
+        <line num="44" type="method" name="key" crap="1" count="1"/>
+        <line num="46" type="stmt" count="1"/>
+        <line num="51" type="stmt" count="0"/>
+        <metrics loc="50" ncloc="28" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/Exception/InvalidPublicKeyException.php">
+        <class name="InvalidPublicKeyException" namespace="Eloquent\Lockbox\Key\Exception">
+          <metrics methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+        </class>
+        <line num="28" type="method" name="__construct" crap="1" count="1"/>
+        <line num="30" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="1"/>
+        <line num="33" type="stmt" count="1"/>
+        <line num="34" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="1"/>
+        <line num="37" type="stmt" count="1"/>
+        <line num="44" type="method" name="key" crap="1" count="1"/>
+        <line num="46" type="stmt" count="1"/>
+        <line num="51" type="stmt" count="0"/>
+        <metrics loc="50" ncloc="28" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/Exception/MissingDetailException.php">
+        <class name="MissingDetailException" namespace="Eloquent\Lockbox\Key\Exception">
+          <metrics methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+        </class>
+        <line num="27" type="method" name="__construct" crap="1" count="1"/>
+        <line num="29" type="stmt" count="1"/>
+        <line num="31" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="1"/>
+        <line num="33" type="stmt" count="1"/>
+        <line num="35" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="1"/>
+        <line num="43" type="method" name="name" crap="1" count="1"/>
+        <line num="45" type="stmt" count="1"/>
+        <line num="50" type="stmt" count="0"/>
+        <metrics loc="49" ncloc="27" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+      </file>
+      <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/Exception/ReadException.php">
+        <class name="ReadException" namespace="Eloquent\Lockbox\Key\Exception">
+          <metrics methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+        </class>
+        <line num="27" type="method" name="__construct" crap="1" count="1"/>
+        <line num="29" type="stmt" count="1"/>
+        <line num="31" type="stmt" count="1"/>
+        <line num="32" type="stmt" count="1"/>
+        <line num="33" type="stmt" count="1"/>
+        <line num="35" type="stmt" count="1"/>
+        <line num="36" type="stmt" count="1"/>
+        <line num="43" type="method" name="path" crap="1" count="1"/>
+        <line num="45" type="stmt" count="1"/>
+        <line num="50" type="stmt" count="0"/>
+        <metrics loc="49" ncloc="27" classes="1" methods="2" coveredmethods="2" conditionals="0" coveredconditionals="0" statements="7" coveredstatements="7" elements="9" coveredelements="9"/>
+      </file>
+    </package>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/KeyFactoryInterface.php">
+      <line num="63" type="stmt" count="0"/>
+      <metrics loc="62" ncloc="15" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/KeyInterface.php">
+      <line num="26" type="stmt" count="0"/>
+      <metrics loc="25" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/PrivateKeyInterface.php">
+      <line num="28" type="stmt" count="0"/>
+      <metrics loc="27" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/home/travis/build/eloquent/lockbox-php/src/Eloquent/Lockbox/Key/PublicKeyInterface.php">
+      <line num="26" type="stmt" count="0"/>
+      <metrics loc="25" ncloc="9" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <metrics files="26" loc="1445" ncloc="724" classes="17" methods="55" coveredmethods="55" conditionals="0" coveredconditionals="0" statements="197" coveredstatements="197" elements="252" coveredelements="252"/>
+  </project>
+</coverage>

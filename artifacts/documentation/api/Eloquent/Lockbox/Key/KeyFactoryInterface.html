@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="robots" content="index, follow, all" />
+        <title>Eloquent\Lockbox\Key\KeyFactoryInterface | Lockbox API</title>
+                    <link rel="stylesheet" type="text/css" href="../../../stylesheet.css">
+                            </head>
+        <body id="class">
+            <div class="header">
+        <ul>
+            <li><a href="../../../classes.html">Classes</a></li>
+                            <li><a href="../../../namespaces.html">Namespaces</a></li>
+                        <li><a href="../../../interfaces.html">Interfaces</a></li>
+            <li><a href="../../../doc-index.html">Index</a></li>
+            
+        </ul>
+
+        <div id="title">Lockbox API</div>
+
+            <div class="type">Interface</div>
+    <h1><a href="../../../Eloquent/Lockbox/Key.html">Eloquent\Lockbox\Key</a>\KeyFactoryInterface</h1>
+    </div>
+        <div class="content">
+                <p>interface    <strong>KeyFactoryInterface</strong></p>
+
+            <div class="description">
+            <p>The interface implemented by encryption key factories.</p>
+            <p>
+</p>
+        </div>
+    
+    
+    
+            <h2>Methods</h2>
+
+            <table>
+                    <tr>
+                <td class="type">
+                    <a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a>
+                </td>
+                <td class="last">
+                    <a href="#method_createPrivateKey">createPrivateKey</a>(string $key, string|null $password = null)
+                    <p>Create a new private key.</p>
+                </td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type">
+                    <a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a>
+                </td>
+                <td class="last">
+                    <a href="#method_createPublicKey">createPublicKey</a>(string $key)
+                    <p>Create a new public key.</p>
+                </td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type">
+                    <a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a>
+                </td>
+                <td class="last">
+                    <a href="#method_createPrivateKeyFromFile">createPrivateKeyFromFile</a>(string $path, string|null $password = null)
+                    <p>Create a new private key from a file.</p>
+                </td>
+                <td></td>
+            </tr>
+                    <tr>
+                <td class="type">
+                    <a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a>
+                </td>
+                <td class="last">
+                    <a href="#method_createPublicKeyFromFile">createPublicKeyFromFile</a>(string $path)
+                    <p>Create a new public key from a file.</p>
+                </td>
+                <td></td>
+            </tr>
+            </table>
+
+
+        <h2>Details</h2>
+
+                        <h3 id="method_createPrivateKey">
+        <div class="location">at line 28</div>
+        <code>            public            <a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a>
+    <strong>createPrivateKey</strong>(string $key, string|null $password = null)</code>
+    </h3>
+    <div class="details">
+        <p>Create a new private key.</p>
+        <p>
+</p>
+        <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table>
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td>The PEM formatted private key.</td>
+            </tr>
+                    <tr>
+                <td>string|null</td>
+                <td>$password</td>
+                <td>The key password.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table>
+        <tr>
+            <td><a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a></td>
+            <td>
+</td>
+        </tr>
+    </table>
+
+            
+                            <h4>Exceptions</h4>
+
+                    <table>
+                    <tr>
+                <td><abbr title="Exception\InvalidPrivateKeyException">InvalidPrivateKeyException</abbr></td>
+                <td>If the key is invalid.</td>
+            </tr>
+            </table>
+
+            
+                    </div>
+    </div>
+
+                <h3 id="method_createPublicKey">
+        <div class="location">at line 38</div>
+        <code>            public            <a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a>
+    <strong>createPublicKey</strong>(string $key)</code>
+    </h3>
+    <div class="details">
+        <p>Create a new public key.</p>
+        <p>
+</p>
+        <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table>
+                    <tr>
+                <td>string</td>
+                <td>$key</td>
+                <td>The PEM formatted public key.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table>
+        <tr>
+            <td><a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a></td>
+            <td>
+</td>
+        </tr>
+    </table>
+
+            
+                            <h4>Exceptions</h4>
+
+                    <table>
+                    <tr>
+                <td><abbr title="Exception\InvalidPublicKeyException">InvalidPublicKeyException</abbr></td>
+                <td>If the key is invalid.</td>
+            </tr>
+            </table>
+
+            
+                    </div>
+    </div>
+
+                <h3 id="method_createPrivateKeyFromFile">
+        <div class="location">at line 50</div>
+        <code>            public            <a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a>
+    <strong>createPrivateKeyFromFile</strong>(string $path, string|null $password = null)</code>
+    </h3>
+    <div class="details">
+        <p>Create a new private key from a file.</p>
+        <p>
+</p>
+        <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table>
+                    <tr>
+                <td>string</td>
+                <td>$path</td>
+                <td>The path to the PEM formatted private key.</td>
+            </tr>
+                    <tr>
+                <td>string|null</td>
+                <td>$password</td>
+                <td>The key password.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table>
+        <tr>
+            <td><a href="../../../Eloquent/Lockbox/Key/PrivateKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PrivateKeyInterface">PrivateKeyInterface</abbr></a></td>
+            <td>
+</td>
+        </tr>
+    </table>
+
+            
+                            <h4>Exceptions</h4>
+
+                    <table>
+                    <tr>
+                <td><abbr title="Exception\ReadException">ReadException</abbr></td>
+                <td>If the file cannot be read.</td>
+            </tr>
+                    <tr>
+                <td><abbr title="Exception\InvalidPrivateKeyException">InvalidPrivateKeyException</abbr></td>
+                <td>If the key is invalid.</td>
+            </tr>
+            </table>
+
+            
+                    </div>
+    </div>
+
+                <h3 id="method_createPublicKeyFromFile">
+        <div class="location">at line 61</div>
+        <code>            public            <a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a>
+    <strong>createPublicKeyFromFile</strong>(string $path)</code>
+    </h3>
+    <div class="details">
+        <p>Create a new public key from a file.</p>
+        <p>
+</p>
+        <div class="tags">
+                            <h4>Parameters</h4>
+
+                    <table>
+                    <tr>
+                <td>string</td>
+                <td>$path</td>
+                <td>The path to the PEM formatted public key.</td>
+            </tr>
+            </table>
+
+            
+                            <h4>Return Value</h4>
+
+                    <table>
+        <tr>
+            <td><a href="../../../Eloquent/Lockbox/Key/PublicKeyInterface.html"><abbr title="Eloquent\Lockbox\Key\PublicKeyInterface">PublicKeyInterface</abbr></a></td>
+            <td>
+</td>
+        </tr>
+    </table>
+
+            
+                            <h4>Exceptions</h4>
+
+                    <table>
+                    <tr>
+                <td><abbr title="Exception\ReadException">ReadException</abbr></td>
+                <td>If the file cannot be read.</td>
+            </tr>
+                    <tr>
+                <td><abbr title="Exception\InvalidPublicKeyException">InvalidPublicKeyException</abbr></td>
+                <td>If the key is invalid.</td>
+            </tr>
+            </table>
+
+            
+                    </div>
+    </div>
+
+    
+            </div>
+            <div id="footer">
+        Generated by <a href="http://sami.sensiolabs.org/" target="_top">Sami, the API Documentation Generator</a>.
+    </div>
+    </body>
+</html>

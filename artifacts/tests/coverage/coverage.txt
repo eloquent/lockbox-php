@@ -1,0 +1,44 @@
+
+
+Code Coverage Report 
+  2013-08-25 10:27:08
+
+ Summary: 
+  Classes: 100.00% (17/17)
+  Methods: 100.00% (55/55)
+  Lines:   100.00% (197/197)
+
+\Eloquent\Lockbox::BoundCipher
+  Methods: 100.00% ( 7/ 7)   Lines: 100.00% ( 17/ 17)
+\Eloquent\Lockbox::BoundDecryptionCipher
+  Methods: 100.00% ( 4/ 4)   Lines: 100.00% (  9/  9)
+\Eloquent\Lockbox::BoundEncryptionCipher
+  Methods: 100.00% ( 4/ 4)   Lines: 100.00% (  9/  9)
+\Eloquent\Lockbox::Cipher
+  Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 13/ 13)
+\Eloquent\Lockbox::DecryptionCipher
+  Methods: 100.00% ( 4/ 4)   Lines: 100.00% ( 55/ 55)
+\Eloquent\Lockbox::EncryptionCipher
+  Methods: 100.00% ( 8/ 8)   Lines: 100.00% ( 27/ 27)
+\Eloquent\Lockbox\Exception::DecryptionFailedException
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  2/  2)
+\Eloquent\Lockbox\Exception::InvalidEncodingException
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  2/  2)
+\Eloquent\Lockbox\Exception::InvalidPaddingException
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  2/  2)
+\Eloquent\Lockbox\Key::AbstractKey
+  Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 10/ 10)
+\Eloquent\Lockbox\Key::KeyFactory
+  Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 18/ 18)
+\Eloquent\Lockbox\Key::PrivateKey
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  4/  4)
+\Eloquent\Lockbox\Key::PublicKey
+  Methods: 100.00% ( 1/ 1)   Lines: 100.00% (  1/  1)
+\Eloquent\Lockbox\Key\Exception::InvalidPrivateKeyException
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)
+\Eloquent\Lockbox\Key\Exception::InvalidPublicKeyException
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)
+\Eloquent\Lockbox\Key\Exception::MissingDetailException
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)
+\Eloquent\Lockbox\Key\Exception::ReadException
+  Methods: 100.00% ( 2/ 2)   Lines: 100.00% (  7/  7)

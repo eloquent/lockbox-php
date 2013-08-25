@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="" tests="70" assertions="114" failures="0" errors="0" time="0.669798">
+    <testsuite name="Eloquent\Lockbox\BoundCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundCipherTest.php" namespace="Eloquent\Lockbox" fullPackage="Eloquent.Lockbox" tests="5" assertions="9" failures="0" errors="0" time="0.178148">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\BoundCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundCipherTest.php" line="33" assertions="4" time="0.128810"/>
+      <testcase name="testConstructorDefaults" class="Eloquent\Lockbox\BoundCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundCipherTest.php" line="41" assertions="2" time="0.018126"/>
+      <testsuite name="Eloquent\Lockbox\BoundCipherTest::testEncryptDecrypt" tests="3" assertions="3" failures="0" errors="0" time="0.031212">
+        <testcase name="testEncryptDecrypt with data set &quot;Empty string&quot;" assertions="1" time="0.010881"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Short data&quot;" assertions="1" time="0.009797"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Long data&quot;" assertions="1" time="0.010534"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\BoundDecryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundDecryptionCipherTest.php" namespace="Eloquent\Lockbox" fullPackage="Eloquent.Lockbox" tests="5" assertions="6" failures="0" errors="0" time="0.042086">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\BoundDecryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundDecryptionCipherTest.php" line="32" assertions="2" time="0.005329"/>
+      <testcase name="testConstructorDefaults" class="Eloquent\Lockbox\BoundDecryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundDecryptionCipherTest.php" line="38" assertions="1" time="0.005126"/>
+      <testsuite name="Eloquent\Lockbox\BoundDecryptionCipherTest::testEncryptDecrypt" tests="3" assertions="3" failures="0" errors="0" time="0.031631">
+        <testcase name="testEncryptDecrypt with data set &quot;Empty string&quot;" assertions="1" time="0.010809"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Short data&quot;" assertions="1" time="0.010147"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Long data&quot;" assertions="1" time="0.010675"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\BoundEncryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundEncryptionCipherTest.php" namespace="Eloquent\Lockbox" fullPackage="Eloquent.Lockbox" tests="5" assertions="6" failures="0" errors="0" time="0.041800">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\BoundEncryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundEncryptionCipherTest.php" line="33" assertions="2" time="0.004946"/>
+      <testcase name="testConstructorDefaults" class="Eloquent\Lockbox\BoundEncryptionCipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/BoundEncryptionCipherTest.php" line="39" assertions="1" time="0.006054"/>
+      <testsuite name="Eloquent\Lockbox\BoundEncryptionCipherTest::testEncryptDecrypt" tests="3" assertions="3" failures="0" errors="0" time="0.030800">
+        <testcase name="testEncryptDecrypt with data set &quot;Empty string&quot;" assertions="1" time="0.010072"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Short data&quot;" assertions="1" time="0.010275"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Long data&quot;" assertions="1" time="0.010453"/>
+      </testsuite>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" namespace="Eloquent\Lockbox" fullPackage="Eloquent.Lockbox" tests="12" assertions="14" failures="0" errors="0" time="0.103532">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="38" assertions="2" time="0.004976"/>
+      <testcase name="testConstructorDefaults" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="44" assertions="2" time="0.006569"/>
+      <testsuite name="Eloquent\Lockbox\CipherTest::testEncryptDecrypt" tests="3" assertions="3" failures="0" errors="0" time="0.031481">
+        <testcase name="testEncryptDecrypt with data set &quot;Empty string&quot;" assertions="1" time="0.009934"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Short data&quot;" assertions="1" time="0.009698"/>
+        <testcase name="testEncryptDecrypt with data set &quot;Long data&quot;" assertions="1" time="0.011849"/>
+      </testsuite>
+      <testcase name="testDecryptFailureNotBase64" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="72" assertions="1" time="0.007531"/>
+      <testcase name="testDecryptFailureBadData" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="78" assertions="1" time="0.009188"/>
+      <testcase name="testDecryptFailureEmptyKey" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="84" assertions="1" time="0.007885"/>
+      <testcase name="testDecryptFailureEmptyIv" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="93" assertions="1" time="0.007879"/>
+      <testcase name="testDecryptFailureBadAesData" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="107" assertions="1" time="0.009204"/>
+      <testcase name="testDecryptFailureBadPadding" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="121" assertions="1" time="0.009446"/>
+      <testcase name="testDecryptFailureBadHash" class="Eloquent\Lockbox\CipherTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/CipherTest.php" line="136" assertions="1" time="0.009373"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Exception\DecryptionFailedExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/DecryptionFailedExceptionTest.php" namespace="Eloquent\Lockbox\Exception" fullPackage="Eloquent.Lockbox.Exception" tests="1" assertions="3" failures="0" errors="0" time="0.003720">
+      <testcase name="testException" class="Eloquent\Lockbox\Exception\DecryptionFailedExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/DecryptionFailedExceptionTest.php" line="19" assertions="3" time="0.003720"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Exception\InvalidEncodingExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/InvalidEncodingExceptionTest.php" namespace="Eloquent\Lockbox\Exception" fullPackage="Eloquent.Lockbox.Exception" tests="1" assertions="3" failures="0" errors="0" time="0.003686">
+      <testcase name="testException" class="Eloquent\Lockbox\Exception\InvalidEncodingExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/InvalidEncodingExceptionTest.php" line="19" assertions="3" time="0.003686"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Exception\InvalidPaddingExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/InvalidPaddingExceptionTest.php" namespace="Eloquent\Lockbox\Exception" fullPackage="Eloquent.Lockbox.Exception" tests="1" assertions="3" failures="0" errors="0" time="0.003640">
+      <testcase name="testException" class="Eloquent\Lockbox\Exception\InvalidPaddingExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Exception/InvalidPaddingExceptionTest.php" line="19" assertions="3" time="0.003640"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\Exception\InvalidPrivateKeyExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/InvalidPrivateKeyExceptionTest.php" namespace="Eloquent\Lockbox\Key\Exception" fullPackage="Eloquent.Lockbox.Key.Exception" tests="1" assertions="4" failures="0" errors="0" time="0.004485">
+      <testcase name="testException" class="Eloquent\Lockbox\Key\Exception\InvalidPrivateKeyExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/InvalidPrivateKeyExceptionTest.php" line="19" assertions="4" time="0.004485"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\Exception\InvalidPublicKeyExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/InvalidPublicKeyExceptionTest.php" namespace="Eloquent\Lockbox\Key\Exception" fullPackage="Eloquent.Lockbox.Key.Exception" tests="1" assertions="4" failures="0" errors="0" time="0.004237">
+      <testcase name="testException" class="Eloquent\Lockbox\Key\Exception\InvalidPublicKeyExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/InvalidPublicKeyExceptionTest.php" line="19" assertions="4" time="0.004237"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\Exception\MissingDetailExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/MissingDetailExceptionTest.php" namespace="Eloquent\Lockbox\Key\Exception" fullPackage="Eloquent.Lockbox.Key.Exception" tests="1" assertions="4" failures="0" errors="0" time="0.004229">
+      <testcase name="testException" class="Eloquent\Lockbox\Key\Exception\MissingDetailExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/MissingDetailExceptionTest.php" line="19" assertions="4" time="0.004229"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\Exception\ReadExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/ReadExceptionTest.php" namespace="Eloquent\Lockbox\Key\Exception" fullPackage="Eloquent.Lockbox.Key.Exception" tests="1" assertions="4" failures="0" errors="0" time="0.004177">
+      <testcase name="testException" class="Eloquent\Lockbox\Key\Exception\ReadExceptionTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/Exception/ReadExceptionTest.php" line="19" assertions="4" time="0.004177"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" namespace="Eloquent\Lockbox\Key" fullPackage="Eloquent.Lockbox.Key" tests="10" assertions="16" failures="0" errors="0" time="0.108042">
+      <testcase name="testCreatePrivateKeyWithPassword" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="117" assertions="2" time="0.054929"/>
+      <testcase name="testCreatePrivateKeyNoPassword" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="125" assertions="2" time="0.005166"/>
+      <testcase name="testCreatePrivateKeyFailure" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="133" assertions="1" time="0.004661"/>
+      <testcase name="testCreatePublicKey" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="139" assertions="2" time="0.004812"/>
+      <testcase name="testCreatePublicKeyFailure" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="147" assertions="1" time="0.004659"/>
+      <testcase name="testCreatePrivateKeyFromFileWithPassword" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="153" assertions="2" time="0.006460"/>
+      <testcase name="testCreatePrivateKeyFromFileNoPassword" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="161" assertions="2" time="0.006351"/>
+      <testcase name="testCreatePrivateKeyFromFileFailure" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="169" assertions="1" time="0.007743"/>
+      <testcase name="testCreatePublicKeyFromFile" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="178" assertions="2" time="0.006269"/>
+      <testcase name="testCreatePublicKeyFromFileFailure" class="Eloquent\Lockbox\Key\KeyFactoryTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/KeyFactoryTest.php" line="186" assertions="1" time="0.006992"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\PrivateKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PrivateKeyTest.php" namespace="Eloquent\Lockbox\Key" fullPackage="Eloquent.Lockbox.Key" tests="8" assertions="14" failures="0" errors="0" time="0.040370">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\Key\PrivateKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PrivateKeyTest.php" line="31" assertions="1" time="0.004663"/>
+      <testsuite name="Eloquent\Lockbox\Key\PrivateKeyTest::testKey" tests="6" assertions="12" failures="0" errors="0" time="0.028895">
+        <testcase name="testKey with data set &quot;DSA, 2048-bit, no password&quot;" assertions="2" time="0.004798"/>
+        <testcase name="testKey with data set &quot;DSA, 2048-bit&quot;" assertions="2" time="0.004847"/>
+        <testcase name="testKey with data set &quot;DSA, 4096-bit, no password&quot;" assertions="2" time="0.004944"/>
+        <testcase name="testKey with data set &quot;RSA, 2048-bit, no password&quot;" assertions="2" time="0.004715"/>
+        <testcase name="testKey with data set &quot;RSA, 2048-bit&quot;" assertions="2" time="0.004818"/>
+        <testcase name="testKey with data set &quot;RSA, 4096-bit, no password&quot;" assertions="2" time="0.004773"/>
+      </testsuite>
+      <testcase name="testDetailFailure" class="Eloquent\Lockbox\Key\PrivateKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PrivateKeyTest.php" line="63" assertions="1" time="0.006812"/>
+    </testsuite>
+    <testsuite name="Eloquent\Lockbox\Key\PublicKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PublicKeyTest.php" namespace="Eloquent\Lockbox\Key" fullPackage="Eloquent.Lockbox.Key" tests="8" assertions="14" failures="0" errors="0" time="0.033115">
+      <testcase name="testConstructor" class="Eloquent\Lockbox\Key\PublicKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PublicKeyTest.php" line="31" assertions="1" time="0.003875"/>
+      <testsuite name="Eloquent\Lockbox\Key\PublicKeyTest::testKey" tests="6" assertions="12" failures="0" errors="0" time="0.024688">
+        <testcase name="testKey with data set &quot;DSA, 2048-bit, no password&quot;" assertions="2" time="0.004081"/>
+        <testcase name="testKey with data set &quot;DSA, 2048-bit&quot;" assertions="2" time="0.004089"/>
+        <testcase name="testKey with data set &quot;DSA, 4096-bit, no password&quot;" assertions="2" time="0.004099"/>
+        <testcase name="testKey with data set &quot;RSA, 2048-bit, no password&quot;" assertions="2" time="0.004194"/>
+        <testcase name="testKey with data set &quot;RSA, 2048-bit&quot;" assertions="2" time="0.004090"/>
+        <testcase name="testKey with data set &quot;RSA, 4096-bit, no password&quot;" assertions="2" time="0.004135"/>
+      </testsuite>
+      <testcase name="testDetailFailure" class="Eloquent\Lockbox\Key\PublicKeyTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/Eloquent/Lockbox/Key/PublicKeyTest.php" line="63" assertions="1" time="0.004552"/>
+    </testsuite>
+    <testsuite name="FunctionalTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/FunctionalTest.php" tests="10" assertions="10" failures="0" errors="0" time="0.094531">
+      <testsuite name="FunctionalTest::testSpecVectorsEncryption" tests="3" assertions="3" failures="0" errors="0" time="0.037355">
+        <testcase name="testSpecVectorsEncryption with data set &quot;Test vector 1&quot;" assertions="1" time="0.015348"/>
+        <testcase name="testSpecVectorsEncryption with data set &quot;Test vector 2&quot;" assertions="1" time="0.010863"/>
+        <testcase name="testSpecVectorsEncryption with data set &quot;Test vector 3&quot;" assertions="1" time="0.011144"/>
+      </testsuite>
+      <testsuite name="FunctionalTest::testSpecVectorsDecryption" tests="3" assertions="3" failures="0" errors="0" time="0.027162">
+        <testcase name="testSpecVectorsDecryption with data set &quot;Test vector 1&quot;" assertions="1" time="0.009118"/>
+        <testcase name="testSpecVectorsDecryption with data set &quot;Test vector 2&quot;" assertions="1" time="0.009066"/>
+        <testcase name="testSpecVectorsDecryption with data set &quot;Test vector 3&quot;" assertions="1" time="0.008978"/>
+      </testsuite>
+      <testcase name="testEncryptingData" class="FunctionalTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/FunctionalTest.php" line="117" assertions="1" time="0.007449"/>
+      <testcase name="testEncryptingMultipleData" class="FunctionalTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/FunctionalTest.php" line="131" assertions="1" time="0.008765"/>
+      <testcase name="testDecryptingData" class="FunctionalTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/FunctionalTest.php" line="153" assertions="1" time="0.006219"/>
+      <testcase name="testDecryptingMultipleData" class="FunctionalTest" file="/home/travis/build/eloquent/lockbox-php/test/suite/FunctionalTest.php" line="171" assertions="1" time="0.007580"/>
+    </testsuite>
+  </testsuite>
+</testsuites>
