@@ -14,8 +14,8 @@
 ## What is *Lockbox*?
 
 *Lockbox* is designed to be the simplest possible way to implement strong,
-two-way, public-key encryption. *Lockbox* uses a combination of well-established
-technologies to ensure the safety of data.
+two-way, public-key encryption for use in applications. *Lockbox* uses a
+combination of well-established technologies to ensure the safety of data.
 
 ### Design goals
 
@@ -30,6 +30,53 @@ technologies to ensure the safety of data.
 - To make integration as simple as possible.
 - To eliminate the need for configuration.
 - To be simple to implement across many languages and platforms.
+
+## Why use *Lockbox*?
+
+### Avoiding poor choices
+
+Encryption is a complicated subject. The are a myriad of options to choose from
+when deciding on an encryption scheme: algorithms, key sizes, modes, padding
+schemes, and encodings. Knowing what choices to make can be daunting even with a
+decent knowledge of cryptography.
+
+*Lockbox* removes the burden of overwhelming choice. There is no configuration;
+*Lockbox* simply works in the best possible way straight out of the box.
+
+### Cross-platform compatibility
+
+Anyone who's ever attempted to encrypt data in one language, and decrypt it in
+another, can explain how much of an arduous task it can be. Encryption must work
+**exactly**, byte-for-byte, the same across platforms in order to be compatible.
+
+Libraries for *Lockbox* are available in multiple languages. Any combination of
+these libraries will work together flawlessly without any extra effort on the
+developer's part.
+
+### Excellent portability
+
+Storage and/or transmission of encrypted data can pose problems of its own.
+Usually, the ciphertext produced by an encryption algorithm contains data that
+cannot be represented as a 'normal' string of text. This raw data is easily
+misinterpreted, and hence corrupted, by databases and other systems that may
+have to handle the data. The most common solution to this issue is to encode the
+data using something like [Base64] encoding; but even Base64 causes issues for
+URIs and file names.
+
+*Lockbox* uses a [variant of Base64] designed specifically to address these
+issues. It's almost impossible to accidentally corrupt the data produced by
+*Lockbox*.
+
+### Public-key flexibility
+
+[Public-key cryptography] allows for more flexible usage than [symmetric
+cryptography]. Encryption requires only the [public key], but decryption
+requires access to the [private key]. This means that the public key can be
+published without compromising security. The practical upshot is that data can
+be securely shared without an initial secured exchange of secret keys.
+
+*Lockbox* implements a public-key encryption system, allowing the developer to
+harness these features if they are required.
 
 ## Usage
 
@@ -293,6 +340,7 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 
 [AES-256]: http://en.wikipedia.org/wiki/Advanced_Encryption_Standard
 [Base64 with a URI and filename safe alphabet]: http://tools.ietf.org/html/rfc4648#section-5
+[Base64]: http://tools.ietf.org/html/rfc4648
 [cipher block chaining]: http://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Cipher-block_chaining_.28CBC.29
 [initialization vector]: http://en.wikipedia.org/wiki/Initialization_vector
 [OAEP padding]: http://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding
@@ -303,9 +351,12 @@ the 342<sup>nd</sup> byte is guaranteed to be the same for all ciphertext.
 [PKCS #7]: http://tools.ietf.org/html/rfc2315
 [private key]: http://en.wikipedia.org/wiki/Public-key_cryptography
 [public key]: http://en.wikipedia.org/wiki/Public-key_cryptography
+[Public-key cryptography]: http://en.wikipedia.org/wiki/Public-key_cryptography
 [RC4]: http://en.wikipedia.org/wiki/RC4
 [SHA-1]: http://tools.ietf.org/html/rfc3174
+[symmetric cryptography]: http://en.wikipedia.org/wiki/Symmetric-key_algorithm
 [US-ASCII]: http://en.wikipedia.org/wiki/ASCII
+[variant of Base64]: http://tools.ietf.org/html/rfc4648#section-5
 
 [API documentation]: http://lqnt.co/lockbox-php/artifacts/documentation/api/
 [Build Status]: https://api.travis-ci.org/eloquent/lockbox-php.png?branch=master
