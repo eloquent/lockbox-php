@@ -32,6 +32,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
             __DIR__ . '/../../../fixture/pem/rsa-2048-nopass.private.pem'
         );
+        $this->publicKey = $this->privateKey->publicKey();
     }
 
     public function testConstructor()
@@ -82,7 +83,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureEmptyKey()
     {
-        openssl_public_encrypt('', $data, $this->privateKey->publicKey()->handle(), OPENSSL_PKCS1_OAEP_PADDING);
+        openssl_public_encrypt('', $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode($data);
 
         $this->setExpectedException(__NAMESPACE__ . '\Exception\DecryptionFailedException');
@@ -94,7 +95,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         openssl_public_encrypt(
             mcrypt_create_iv(32, MCRYPT_DEV_URANDOM),
             $data,
-            $this->privateKey->publicKey()->handle(),
+            $this->publicKey->handle(),
             OPENSSL_PKCS1_OAEP_PADDING
         );
         $data = $this->base64UriEncode($data);
@@ -108,7 +109,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         openssl_public_encrypt(
             mcrypt_create_iv(48, MCRYPT_DEV_URANDOM),
             $data,
-            $this->privateKey->publicKey()->handle(),
+            $this->publicKey->handle(),
             OPENSSL_PKCS1_OAEP_PADDING
         );
         $data = $this->base64UriEncode($data . 'foobar');
@@ -122,7 +123,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
-        openssl_public_encrypt($key . $iv, $data, $this->privateKey->publicKey()->handle(), OPENSSL_PKCS1_OAEP_PADDING);
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode(
             $data .
             mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, sha1('foobar', true) . 'foobar' . chr(10), MCRYPT_MODE_CBC, $iv)
@@ -137,7 +138,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $key = mcrypt_create_iv(32, MCRYPT_DEV_URANDOM);
         $iv = mcrypt_create_iv(16, MCRYPT_DEV_URANDOM);
 
-        openssl_public_encrypt($key . $iv, $data, $this->privateKey->publicKey()->handle(), OPENSSL_PKCS1_OAEP_PADDING);
+        openssl_public_encrypt($key . $iv, $data, $this->publicKey->handle(), OPENSSL_PKCS1_OAEP_PADDING);
         $data = $this->base64UriEncode(
             $data .
             mcrypt_encrypt(

@@ -37,14 +37,11 @@ class PrivateKeyTest extends PHPUnit_Framework_TestCase
 
     public function keyData()
     {
-        //                                        name                           password    bits  publicKey
+        //                                   name                           password    bits  publicKey
         return array(
-            'DSA, 2048-bit, no password' => array('dsa-2048-nopass.private.pem', null,       2048, 'dsa-2048-nopass.public.pem'),
-            'DSA, 2048-bit'              => array('dsa-2048.private.pem',        'password', 2048, 'dsa-2048.public.pem'),
-            'DSA, 4096-bit, no password' => array('dsa-4096-nopass.private.pem', null,       4096, 'dsa-4096-nopass.public.pem'),
-            'RSA, 2048-bit, no password' => array('rsa-2048-nopass.private.pem', null,       2048, 'rsa-2048-nopass.public.pem'),
-            'RSA, 2048-bit'              => array('rsa-2048.private.pem',        'password', 2048, 'rsa-2048.public.pem'),
-            'RSA, 4096-bit, no password' => array('rsa-4096-nopass.private.pem', null,       4096, 'rsa-4096-nopass.public.pem'),
+            '2048-bit, no password' => array('rsa-2048-nopass.private.pem', null,       2048, 'rsa-2048-nopass.public.pem'),
+            '2048-bit'              => array('rsa-2048.private.pem',        'password', 2048, 'rsa-2048.public.pem'),
+            '4096-bit, no password' => array('rsa-4096-nopass.private.pem', null,       4096, 'rsa-4096-nopass.public.pem'),
         );
     }
 

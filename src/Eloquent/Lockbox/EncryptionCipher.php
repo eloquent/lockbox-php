@@ -50,11 +50,12 @@ class EncryptionCipher implements EncryptionCipherInterface
     {
         $generatedKey = $this->generateKey();
         $iv = $this->generateIv();
+        $publicKey = $key->publicKey();
 
         openssl_public_encrypt(
             $generatedKey . $iv,
             $encryptedKeyAndIv,
-            $key->publicKey()->handle(),
+            $publicKey->handle(),
             OPENSSL_PKCS1_OAEP_PADDING
         );
 
