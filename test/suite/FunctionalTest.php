@@ -37,6 +37,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         return array(
             'Test vector 1' => array(
+                2048,
                 '',
                 '12345678901234567890123456789012',
                 '1234567890123456',
@@ -51,10 +52,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 'dsrtoWL85uEAnLxYG_CXD1nteVXffAwFv' .
                 'ByMT1UmNQ0AWjm8KJiH8hLXPr09rbo5Vz' .
                 's6c5lSrjMmM9itNTFRhW3KMfhqusPDqWJ' .
-                '7K37AvEHDaLULPKBNj24c'
+                '7K37AvEHDaLULPKBNj24c',
+                342
             ),
 
             'Test vector 2' => array(
+                2048,
                 '1234',
                 '12345678901234567890123456789012',
                 '1234567890123456',
@@ -69,10 +72,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 'Xgei_a27MZog1lUvETzMXqqZ4VlhckDV' .
                 'm71f4TLMKHTz-CmYinvzj7G_pYmvtHeh' .
                 'uxDzjdrT4lbetTuESm-YHKtq9JEj6E2S' .
-                'ER4TURlVKf14sPeDgRUo88-zvM7BWpMv'
+                'ER4TURlVKf14sPeDgRUo88-zvM7BWpMv',
+                342
             ),
 
             'Test vector 3' => array(
+                2048,
                 '1234567890123456',
                 '12345678901234567890123456789012',
                 '1234567890123456',
@@ -88,7 +93,40 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 'zyBFoNsr2hcTFcU4oxBkRbUottvH9Dji' .
                 'SxIPU4O8vomXpUqWzneJ4CBlVmSYgUJa' .
                 '4zsJUnll4lufFRTYTYjuCgQhunOAIVS2' .
-                'DxuQH8bSZZrHKNIghc0D3Q'
+                'DxuQH8bSZZrHKNIghc0D3Q',
+                342
+            ),
+
+            'Test vector 4' => array(
+                4096,
+                '1234567890123456',
+                '12345678901234567890123456789012',
+                '1234567890123456',
+                'XncYhc3C20kG5Zb8VPB0OGBik6N6a6JY' .
+                '333Hz6VN3lQ21xMoc16XW0873AzuyvDI' .
+                'YAjNzN0pAQo0CosedUptYLLwRtGrsfUr' .
+                'XIZxteHNZ7JiEXGZ8W_6bz9jlbnpfNdH' .
+                'GxaR-aePTZWSbyPyPdQysGJlqclXJb_K' .
+                'dKfqGHLYOf0LO93kvljQ4ccux18vm8PQ' .
+                'GIeAH-L5qMfzfOHzcCXbVU746pZf7mNR' .
+                'uIEgfp0AM-JEKItYTIZxr8kP7-WlVDf0' .
+                '7cjQkZuUEQ7d9FQLKOWviuQ-PQd2enwI' .
+                'MYo3btEiu2XHmUcZEcI2esz_vwBGxHNM' .
+                'HGrshgpuP_EvPPR_1EogS2EGHs0l_owU' .
+                'hHx4V8LvgMBnO3O2nO9p2WA7ZKH1zMZU' .
+                'gGaxMAlZrMweaGvEcke2nwnfLUBVytYd' .
+                'QNOBV7TmJ3XMXwgpavZ2eKvVXUpdKfcm' .
+                'fsGDxjkJRN8BqDTrSZZmSKZe9VZkGSNS' .
+                '99jF9BEa6dmy7RTLy3xSaWdPwbElX3pA' .
+                'pgQR5BKHz6DP5p86gaQITelAMMYaZQK3' .
+                'tNvW6ncRfJGlD3ax_TezCOtrEmlzVCRe' .
+                'OsbK51H_xfST_0PO-hXG35NIGC1vDV8r' .
+                'iDMr47HbRIFwm9NxT1VR0hDF0LbIIbkS' .
+                'YucMkD_Zv9JjoL4FX0rM0T0fvDJBeJXw' .
+                'Zt1ifDOvWxogZVZkmIFCWuM7CVJ5ZeJb' .
+                'nxUU2E2I7goEIbpzgCFUtg8bkB_G0mWa' .
+                'xyjSIIXNA90',
+                684
             ),
         );
     }
@@ -96,12 +134,17 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsEncryption($data, $key, $iv, $encrypted)
+    public function testSpecVectorsEncryption($bits, $data, $key, $iv, $encrypted, $rsaLength)
     {
+        $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
+            sprintf('%s/rsa-%s-nopass.private.pem', $this->fixturePath, $bits)
+        );
+        $this->publicKey = $this->privateKey->publicKey();
         Phake::when($this->encryptionCipher)->generateKey()->thenReturn($key);
         Phake::when($this->encryptionCipher)->generateIv()->thenReturn($iv);
-        $expected = substr($encrypted, 342);
-        $actual = substr($this->encryptionCipher->encrypt($this->publicKey, $data), 342);
+        $actual = $this->encryptionCipher->encrypt($this->publicKey, $data);
+        $actual = substr($actual, $rsaLength);
+        $expected = substr($encrypted, $rsaLength);
 
         $this->assertSame($expected, $actual);
     }
@@ -109,8 +152,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsDecryption($data, $key, $iv, $encrypted)
+    public function testSpecVectorsDecryption($bits, $data, $key, $iv, $encrypted, $rsaLength)
     {
+        $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
+            sprintf('%s/rsa-%s-nopass.private.pem', $this->fixturePath, $bits)
+        );
+
         $this->assertSame($data, $this->decryptionCipher->decrypt($this->privateKey, $encrypted));
     }
 
