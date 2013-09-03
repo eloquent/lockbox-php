@@ -22,4 +22,13 @@ interface KeyInterface
      * @return integer The number of bits.
      */
     public function bits();
+
+    /**
+     * Get the public key for this key.
+     *
+     * @param KeyFactoryInterface|null $factory The key factory to use.
+     *
+     * @return PublicKeyInterface The public key.
+     */
+    public function publicKey(KeyFactoryInterface $factory = null);
 }

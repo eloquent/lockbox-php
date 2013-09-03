@@ -17,6 +17,18 @@ namespace Eloquent\Lockbox\Key;
 class PublicKey extends AbstractKey implements PublicKeyInterface
 {
     /**
+     * Get the public key for this key.
+     *
+     * @param KeyFactoryInterface|null $factory The key factory to use.
+     *
+     * @return PublicKeyInterface The public key.
+     */
+    public function publicKey(KeyFactoryInterface $factory = null)
+    {
+        return $this;
+    }
+
+    /**
      * Get the string representation of this key.
      *
      * @return string The string representation.

@@ -63,7 +63,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($data)
     {
-        $encrypted = $this->cipher->encrypt($this->publicKey, $data);
+        $encrypted = $this->cipher->encrypt($this->privateKey, $data);
         $decrypted = $this->cipher->decrypt($this->privateKey, $encrypted);
 
         $this->assertSame($data, $decrypted);

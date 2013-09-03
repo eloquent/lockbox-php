@@ -37,14 +37,11 @@ class PublicKeyTest extends PHPUnit_Framework_TestCase
 
     public function keyData()
     {
-        //                                        name                          password    bits
+        //                                   name                          password    bits
         return array(
-            'DSA, 2048-bit, no password' => array('dsa-2048-nopass.public.pem', null,       2048),
-            'DSA, 2048-bit'              => array('dsa-2048.public.pem',        'password', 2048),
-            'DSA, 4096-bit, no password' => array('dsa-4096-nopass.public.pem', null,       4096),
-            'RSA, 2048-bit, no password' => array('rsa-2048-nopass.public.pem', null,       2048),
-            'RSA, 2048-bit'              => array('rsa-2048.public.pem',        'password', 2048),
-            'RSA, 4096-bit, no password' => array('rsa-4096-nopass.public.pem', null,       4096),
+            '2048-bit, no password' => array('rsa-2048-nopass.public.pem', null,       2048),
+            '2048-bit'              => array('rsa-2048.public.pem',        'password', 2048),
+            '4096-bit, no password' => array('rsa-4096-nopass.public.pem', null,       4096),
         );
     }
 
@@ -57,6 +54,7 @@ class PublicKeyTest extends PHPUnit_Framework_TestCase
         $key = $this->factory->createPublicKeyFromFile($path, $password);
 
         $this->assertSame($bits, $key->bits());
+        $this->assertSame($key, $key->publicKey());
         $this->assertSame(file_get_contents($path), $key->string());
     }
 
