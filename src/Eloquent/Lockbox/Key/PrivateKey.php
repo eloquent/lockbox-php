@@ -17,7 +17,7 @@ namespace Eloquent\Lockbox\Key;
 class PrivateKey extends AbstractKey implements PrivateKeyInterface
 {
     /**
-     * Get the public key for this private key.
+     * Get the public key for this key.
      *
      * @param KeyFactoryInterface|null $factory The key factory to use.
      *

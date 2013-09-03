@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox;
 /**
  * The standard Lockbox bi-directional cipher.
  */
-class Cipher implements EncryptionCipherInterface, DecryptionCipherInterface
+class Cipher implements CipherInterface
 {
     /**
      * Construct a new bi-directional encryption cipher.
@@ -60,12 +60,12 @@ class Cipher implements EncryptionCipherInterface, DecryptionCipherInterface
     /**
      * Encrypt a data packet.
      *
-     * @param Key\PublicKeyInterface $key  The key to encrypt with.
-     * @param string                 $data The data to encrypt.
+     * @param Key\KeyInterface $key  The key to encrypt with.
+     * @param string           $data The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\PublicKeyInterface $key, $data)
+    public function encrypt(Key\KeyInterface $key, $data)
     {
         return $this->encryptionCipher()->encrypt($key, $data);
     }

@@ -9,11 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Key;
+namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by private encryption keys.
+ * The interface implemented by bi-directional ciphers that use a bound key.
  */
-interface PrivateKeyInterface extends KeyInterface
+interface BoundCipherInterface extends
+    BoundEncryptionCipherInterface,
+    BoundDecryptionCipherInterface
 {
 }

@@ -57,6 +57,7 @@ class PublicKeyTest extends PHPUnit_Framework_TestCase
         $key = $this->factory->createPublicKeyFromFile($path, $password);
 
         $this->assertSame($bits, $key->bits());
+        $this->assertSame($key, $key->publicKey());
         $this->assertSame(file_get_contents($path), $key->string());
     }
 

@@ -14,9 +14,7 @@ namespace Eloquent\Lockbox;
 /**
  * The standard Lockbox bi-directional cipher, with a bound key.
  */
-class BoundCipher implements
-    BoundEncryptionCipherInterface,
-    BoundDecryptionCipherInterface
+class BoundCipher implements BoundCipherInterface
 {
     /**
      * Construct a new bound bi-directional encryption cipher.

@@ -22,14 +22,16 @@ information, see the [Lockbox website].
 
 ### Generating keys
 
-Generating of keys is handled by the `openssl` command line tool (not part of
-*Lockbox*). Generating a private 2048-bit RSA key in PEM format with no password
-can be done with this command:
+*Lockbox* uses [RSA] keys in [PEM] format. This is a standard format understood
+by [OpenSSL]. Generating of keys is handled by the `openssl` command line tool
+(not part of *Lockbox*). Generating a 2048-bit private key can be achieved with
+this command:
 
     openssl genrsa -out private.pem 2048
 
-To create a key with a password, simply add the `-des3` flag, which will prompt
-for password input before the key is created:
+Private keys can have password protection. To create a key with a password,
+simply add the `-des3` flag, which will prompt for password input before the key
+is created:
 
     openssl genrsa -des3 -out private.pem 2048
 
@@ -40,12 +42,14 @@ responsible for encrypting data.
 
 *Lockbox* is capable of extracting public keys from private keys, there is no
 need to create matching public key files; but if for some reason a public key
-file is required, this command will create one (from an RSA key in this
-example):
+file is required, this command will create one:
 
     openssl rsa -pubout -in private.pem -out public.pem
 
 ### Encrypting data
+
+**Note:** Encryption only requires a public key, but *Lockbox* will also accept
+private keys, as in this example.
 
 ```php
 use Eloquent\Lockbox\EncryptionCipher;
@@ -54,17 +58,19 @@ use Eloquent\Lockbox\Key\KeyFactory;
 $data = 'Super secret data.';
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
-$publicKey = $privateKey->publicKey();
+$key = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
 $cipher = new EncryptionCipher;
-$encrypted = $cipher->encrypt($publicKey, $data);
+$encrypted = $cipher->encrypt($key, $data);
 ```
 
 ### Encrypting multiple data packets with the same key
 
 *Lockbox* includes 'bound' ciphers that are locked to a particular key. These
 type of ciphers are convenient for encrypting multiple data packets.
+
+**Note:** Encryption only requires a public key, but *Lockbox* will also accept
+private keys, as in this example.
 
 ```php
 use Eloquent\Lockbox\BoundEncryptionCipher;
@@ -77,10 +83,9 @@ $data = array(
 );
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
-$publicKey = $privateKey->publicKey();
+$key = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
-$cipher = new BoundEncryptionCipher($publicKey);
+$cipher = new BoundEncryptionCipher($key);
 
 $encrypted = array();
 foreach ($data as $string) {
@@ -98,12 +103,12 @@ use Eloquent\Lockbox\Key\KeyFactory;
 $encrypted = '<some encrypted data>';
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
+$key = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
 $cipher = new DecryptionCipher;
 
 try {
-    $data = $cipher->decrypt($privateKey, $encrypted);
+    $data = $cipher->decrypt($key, $encrypted);
 } catch (DecryptionFailedException $e) {
     // decryption failed
 }
@@ -126,9 +131,9 @@ $encrypted = array(
 );
 
 $keyFactory = new KeyFactory;
-$privateKey = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
+$key = $keyFactory->createPrivateKeyFromFile('/path/to/key.pem', 'password');
 
-$cipher = new BoundDecryptionCipher($privateKey);
+$cipher = new BoundDecryptionCipher($key);
 
 foreach ($encrypted as $string) {
     try {
@@ -142,6 +147,9 @@ foreach ($encrypted as $string) {
 <!-- References -->
 
 [Lockbox website]: http://lqnt.co/lockbox
+[OpenSSL]: http://en.wikipedia.org/wiki/OpenSSL
+[PEM]: http://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail
+[RSA]: http://en.wikipedia.org/wiki/RSA_(algorithm)
 
 [API documentation]: http://lqnt.co/lockbox-php/artifacts/documentation/api/
 [Build Status]: https://api.travis-ci.org/eloquent/lockbox-php.png?branch=master

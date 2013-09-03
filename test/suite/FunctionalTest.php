@@ -119,11 +119,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $data = 'Super secret data.';
 
         $keyFactory = new KeyFactory;
-        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
-        $publicKey = $privateKey->publicKey();
+        $key = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
 
         $cipher = new EncryptionCipher;
-        $encrypted = $cipher->encrypt($publicKey, $data);
+        $encrypted = $cipher->encrypt($key, $data);
 
         $this->assertTrue(true);
     }
@@ -137,10 +136,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         );
 
         $keyFactory = new KeyFactory;
-        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
-        $publicKey = $privateKey->publicKey();
+        $key = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
 
-        $cipher = new BoundEncryptionCipher($publicKey);
+        $cipher = new BoundEncryptionCipher($key);
 
         $encrypted = array();
         foreach ($data as $string) {
@@ -155,12 +153,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $encrypted = '<some encrypted data>';
 
         $keyFactory = new KeyFactory;
-        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+        $key = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
 
         $cipher = new DecryptionCipher;
 
         try {
-            $data = $cipher->decrypt($privateKey, $encrypted);
+            $data = $cipher->decrypt($key, $encrypted);
         } catch (DecryptionFailedException $e) {
             // decryption failed
         }
@@ -177,9 +175,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         );
 
         $keyFactory = new KeyFactory;
-        $privateKey = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
+        $key = $keyFactory->createPrivateKeyFromFile($this->fixturePath . '/rsa-2048.private.pem', 'password');
 
-        $cipher = new BoundDecryptionCipher($privateKey);
+        $cipher = new BoundDecryptionCipher($key);
 
         foreach ($encrypted as $string) {
             try {

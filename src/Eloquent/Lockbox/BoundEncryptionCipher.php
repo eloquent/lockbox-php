@@ -19,11 +19,11 @@ class BoundEncryptionCipher implements BoundEncryptionCipherInterface
     /**
      * Construct a new bound encryption cipher.
      *
-     * @param Key\PublicKeyInterface         $key    The key to use.
+     * @param Key\KeyInterface               $key    The key to use.
      * @param EncryptionCipherInterface|null $cipher The cipher to use.
      */
     public function __construct(
-        Key\PublicKeyInterface $key,
+        Key\KeyInterface $key,
         EncryptionCipherInterface $cipher = null
     ) {
         if (null === $cipher) {
@@ -37,7 +37,7 @@ class BoundEncryptionCipher implements BoundEncryptionCipherInterface
     /**
      * Get the key.
      *
-     * @return Key\PublicKeyInterface The key.
+     * @return Key\KeyInterface The key.
      */
     public function key()
     {

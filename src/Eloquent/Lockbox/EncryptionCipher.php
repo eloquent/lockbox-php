@@ -41,12 +41,12 @@ class EncryptionCipher implements EncryptionCipherInterface
     /**
      * Encrypt a data packet.
      *
-     * @param Key\PublicKeyInterface $key  The key to encrypt with.
-     * @param string                 $data The data to encrypt.
+     * @param Key\KeyInterface $key  The key to encrypt with.
+     * @param string           $data The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\PublicKeyInterface $key, $data)
+    public function encrypt(Key\KeyInterface $key, $data)
     {
         $generatedKey = $this->generateKey();
         $iv = $this->generateIv();
@@ -54,7 +54,7 @@ class EncryptionCipher implements EncryptionCipherInterface
         openssl_public_encrypt(
             $generatedKey . $iv,
             $encryptedKeyAndIv,
-            $key->handle(),
+            $key->publicKey()->handle(),
             OPENSSL_PKCS1_OAEP_PADDING
         );
 
