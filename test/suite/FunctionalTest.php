@@ -161,6 +161,15 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame($data, $this->decryptionCipher->decrypt($this->privateKey, $encrypted));
     }
 
+    public function testEncryptDecryptWithGeneratedKey()
+    {
+        $this->privateKey = $this->keyFactory->generatePrivateKey();
+        $encrypted = $this->encryptionCipher->encrypt($this->privateKey, 'foobar');
+        $decrypted = $this->decryptionCipher->decrypt($this->privateKey, $encrypted);
+
+        $this->assertSame('foobar', $decrypted);
+    }
+
     public function testEncryptingData()
     {
         $data = 'Super secret data.';

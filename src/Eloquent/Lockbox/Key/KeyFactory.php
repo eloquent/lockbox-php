@@ -30,6 +30,24 @@ class KeyFactory implements KeyFactoryInterface
     }
 
     /**
+     * Generate a new private key.
+     *
+     * @param integer|null $size The size of the key in bits.
+     *
+     * @return PrivateKeyInterface
+     */
+    public function generatePrivateKey($size = null)
+    {
+        if (null === $size) {
+            $size = 2048;
+        }
+
+        return new PrivateKey(
+            openssl_pkey_new(array('private_key_bits' => $size))
+        );
+    }
+
+    /**
      * Create a new private key.
      *
      * @param string      $key      The PEM formatted private key.

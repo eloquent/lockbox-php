@@ -37,4 +37,14 @@ class PublicKey extends AbstractKey implements PublicKeyInterface
     {
         return $this->detail('key');
     }
+
+    /**
+     * Get the string representation of this key.
+     *
+     * @return string The string representation.
+     */
+    public function __toString()
+    {
+        return $this->string();
+    }
 }

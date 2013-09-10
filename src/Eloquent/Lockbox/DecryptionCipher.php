@@ -33,7 +33,7 @@ class DecryptionCipher implements DecryptionCipherInterface
             throw new Exception\DecryptionFailedException($e);
         }
 
-        $keyAndIv = substr($data, 0, $key->bits() / 8);
+        $keyAndIv = substr($data, 0, $key->size() / 8);
         if (
             !openssl_private_decrypt(
                 $keyAndIv,
@@ -58,7 +58,7 @@ class DecryptionCipher implements DecryptionCipherInterface
         $data = $this->decryptAes(
             $generatedKey,
             $iv,
-            substr($data, $key->bits() / 8)
+            substr($data, $key->size() / 8)
         );
 
         $hash = substr($data, -20);

@@ -58,6 +58,39 @@ MHgOFCXFKwkUDZH8pou/7Q4eYWwICCcaPp3QA0wv3FNwyBmgamw7quqbk7xiJuz7
 -----END RSA PRIVATE KEY-----
 
 EOD;
+        $this->privateKeyStringPkcs8 = <<<'EOD'
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+MIIE6TAbBgkqhkiG9w0BBQMwDgQIv2lN8R4qMeUCAggABIIEyPIkq+bUvclc9c9b
+6WCfySC2k+rSe/ZXUhY6+YdhquWKE4or/k3OFDGMA0JjGZFCUn7wgrxdg9RQ1mzV
+aUqatTaSsv8H7yGj90MoVNlDvhBUfh3yRv5kHXwsAQNBivEMBzF0uxKGgCzMdgee
++ieTc818psXtWsVWTvAreZOPGWhMuBRy8Ze+da+qtp7o3RWY/bMMBl6b9zRvzgJM
+PU7iyqYV9Rxvrfq9XIHeXkSBpsfokr044M8OOQQSbkCah68QZJz1VGxngaCfJWQ8
+9fW/XJOVjEgpaKYFP+CWLN9hQVSiz5th29/hQYCJuU5Xm66NdaYi1lv69zYnwiGU
+iDHgMHFfuVXYMcSy1RUKjIAnspqinloltm0BGgH9nC1ZN/04KSKWAOBHbqZTBcoz
+tI69GrNF/3x+Ss2vK08gMGuJbfxE5ECh/kUVjsWgD6H6aKxe+rluF5iCHSwETURg
+67j1eC7mzNAyHKygLnW1Fmnq07sEKGFq/ONUz5Cvlepf6WxwaAMX4NPjxfBHJkZG
+zmRiJiQdXnsjDTsBAgeFVZgM6X57RQyHJRnrDkikW/68b9pm8CDEMOo07wzJkgnw
+blwKeVfW4+bPwu6bjMzgWSNHaYD5OGLAOCtQ8FI4mS78WcL2edW6OhI3E6ZGM56i
+J5cCHzAAyn/uACgOpUS1O/ATUuzOs5ryFbGXA4GSeTiGPCGMO4cxnagTXD6BUFqC
+OYLa2+uR+SmLyuKjv9O9Osj7rqylad/mCpVXsh7crFVkF43gnvz3Fu7/nBV0j/uK
+BnKNkF3+gxz77wFWnH6o7oa4XxXlJ1S5ZgTXdj11hX9vricTeMWXoppKJS56RB0J
+WdQdD66pPl4w2S9j4aCIDwYk5H/QBL1QgTOO9SsxT0a7q0T9czJMWyQmo8Wo8vJx
+x6euGTpM7i3vKENtMjZLROa25XeC2n0RFGxLcfp8clSczG3iWMgicfwAnRqOvfIv
+5jp3yqFzH8RTshJXRvYDBgHKHPtal71ksCcf+SIxyjs6+uULTRLp7L/jR3/R4zHg
+KZDdVomizSWAjj+R2dmvvuq4IQtPzKd4XSlQA/5YVBjAGWSIGn/UcSsRyKWlIdcP
+QkeAMOWLEVa3/2js26DQlm5BLHNlrCO7uhNWH6yy8iFKSVzvCZWMjGaUCMWBUpz6
+5nTxLor2Oj3CoWNU0gvIJS/zolVwxBYGtvRIliRNijn/Qoh9rBxiufro3Ji4VRSW
+R69mrqB/4OlGveiAjH4iWPWsFQiz2tEqSiAuFgE6pCmZcxA5hLSoSpw+jbcEDrU3
+eYWbtKQqnfm28y6Ae74lvaWboVgK2/EEE4vTzk62iFnH2LPucXynlKNaSyG0goRC
+k82Z4PILJfha/pFjEocqEXfJ8noVzLZX30OxNjAQ0LhI779MyZA2shYoh0qc+86e
+ENU84OG21wHp4xwwxStbt/jbzCz67hjc/iqmvnjLdaooOVCDeUl0yYs81uvAIKvp
+j6LhbAFLemlaWVtkOqgQTs1dO1uTFCID21/pQUxnRxDRSEiyRq4a/XAD/FezeLQv
+OeQp2EYIQysr8XpbOaPYOW99uFIQCALmJ5a1JJfDDWvcR6crJkjI60B3NirZSR/p
+CdU3lo063CcRZy7m3A==
+-----END ENCRYPTED PRIVATE KEY-----
+
+
+EOD;
         $this->publicKeyString = <<<'EOD'
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwpFuTp1Y+b1JZ9k37aJO
@@ -100,6 +133,37 @@ J1iMrMTLGSX89+gW3Bg8hxS7klxZf7ZlVSzLpA2jkK3k5vdgWGVhtA==
 -----END RSA PRIVATE KEY-----
 
 EOD;
+        $this->privateKeyStringNoPasswordPkcs8 = <<<'EOD'
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDLyOyWN3HOyC9u
+gLK2aUfdDTe/fR89M18yqbPZifQZ22SpAfTX4f3LltZYJDJ4Y4BO8g+sQsZ4H2dG
+VB5pNvlWMKXVX09h4zpDfQ8rrjXV8l7GNgD9RtEb/0j8r4D1QF8m9SyMZVQzFlHy
+fyOaZLLwbZ6pcFs/p0RkWc7RXbvhNFMHdIsoPa19gFjAy1epP6tJsfU7KhLb0DTc
+VpSCRGTV6vaLeV3I0gby8wa/shqC6nr3IGu3zGjrUgWPvp2ShxujOnVjhIbPKORH
++6RFIt77R6NLh4zLOJofsnnZdfWsMWt6KdlkOgTnvVqZ67RuK4zppPw/WmTzlUio
+cuWpGb+9AgMBAAECggEACWpbJAWjyH4PUve3Sh5LJ7d4n+xUCSvadijJGn/5O0ib
+ugNRILhcVY++j4v8mPtf7kXY24iqStqIlwND9HCJzKWqw9UHgepRwtSAYvBFpIDy
+SA4utYUUHEsLQEGLn8k9nDsvt7zmywV4+89MAdItQlaOQh3i2WoNCuXrXFkMWTdQ
+drByi9l5SnhECpQt4sNcBBNAlhcTx6s+OFBjS5JY5F7VLUgJojZqpuOYgcVTM+XP
+jkqVqTMvCfi2ht6Ip41oes/D74kxc1VKU+SEbE+WJdtlq5qgMdr+nrDeEO+vZmM4
+tTtAMeB2JZngRRbkBBF/tqIq0TbI09MYlBvK/1AfMQKBgQD9RCW56wAGn5Qm+8PN
+sSYOSKmAJsS7l8fIZvwLQU9kRPXKzbC7QMghphHiGJh62u/mKcfNecxKS5BIzM9r
+5LIFeCIacH0nb6wFfQf1vKrdC4yuJNINA8Cm3FmVgBdMRdFSw1gbf9UKILvlWNu5
+8cjtCaw5K1OKPrDXmByFOsG35wKBgQDN/AtqaIaaBVuUnXGv7zPBky/31zbaPwr4
+Kbg+hSFDojpdyCofIOPyYPrlTFBTdoTxHaa9tftdbWOul+VtXChGglL3PwXvuubq
+3fzJLdYmrPqTKhDS7hbabwPyD9ZZE6N4YUOWOumLASuSbMIas2FKTg71hNes1QaQ
+PkxOlU8GuwKBgGWZ2BScjLcbf4CgEW3L+jtStQTfCJ9FBXWEsuoE+kd8TqpcF+EW
+3PJ6v8PXIBxxBjpsWmY4zVakt64s060x4qTFC9FVfS+74eOVxAK1/EmO35Hg3Y8x
+CTEnRpzt9Oq5O38bNJZbkuhsN1SLcCJJN9S3w6pvkiTsf18N+6sK5jnTAoGBAMML
+/B9JVNN5aUujfmhy35ZX8l8DuhwVACUXFDCXTXVGo2/0PvZ05YO4kzsW9STjIGVU
+h3QyYxAHqhFEIepZDoYdl8QpOEzVtR0HEPvK3HKI70j01zN0Yc16u8i1eGmmr+8o
+YqBZrpWCiSjAtVglLWX33jBcFwHAQdPKOeVbepZLAoGBANmjS4wxZ69EGuI9Po4J
+0RjCc5k4y+Hot1cbbDILbBgxj7xc4zMOtk/MPeLjBBgJ8mDunKFW1y0HPY1Dwnzv
+zGbYRfNSkZojGMshdvVRWDDhddwzsuSMVponWIysxMsZJfz36BbcGDyHFLuSXFl/
+tmVVLMukDaOQreTm92BYZWG0
+-----END PRIVATE KEY-----
+
+EOD;
         $this->publicKeyStringNoPassword = <<<'EOD'
 -----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy8jsljdxzsgvboCytmlH
@@ -114,6 +178,24 @@ vQIDAQAB
 EOD;
     }
 
+    public function testGeneratePrivateKey()
+    {
+        $key = $this->factory->generatePrivateKey();
+
+        $this->assertInstanceOf(__NAMESPACE__ . '\PrivateKey', $key);
+        $this->assertSame(2048, $key->size());
+        $this->assertSame('AQAB', base64_encode($key->publicExponent()));
+    }
+
+    public function testGeneratePrivateKeyLargeKey()
+    {
+        $key = $this->factory->generatePrivateKey(4096);
+
+        $this->assertInstanceOf(__NAMESPACE__ . '\PrivateKey', $key);
+        $this->assertSame(4096, $key->size());
+        $this->assertSame('AQAB', base64_encode($key->publicExponent()));
+    }
+
     public function testCreatePrivateKeyWithPassword()
     {
         $key = $this->factory->createPrivateKey($this->privateKeyString, 'password');
@@ -122,9 +204,25 @@ EOD;
         $this->assertSame($this->publicKeyString, $key->publicKey()->string());
     }
 
+    public function testCreatePrivateKeyWithPasswordPkcs8()
+    {
+        $key = $this->factory->createPrivateKey($this->privateKeyStringPkcs8, 'password');
+
+        $this->assertInstanceOf(__NAMESPACE__ . '\PrivateKey', $key);
+        $this->assertSame($this->publicKeyString, $key->publicKey()->string());
+    }
+
     public function testCreatePrivateKeyNoPassword()
     {
         $key = $this->factory->createPrivateKey($this->privateKeyStringNoPassword);
+
+        $this->assertInstanceOf(__NAMESPACE__ . '\PrivateKey', $key);
+        $this->assertSame($this->publicKeyStringNoPassword, $key->publicKey()->string());
+    }
+
+    public function testCreatePrivateKeyNoPasswordPkcs8()
+    {
+        $key = $this->factory->createPrivateKey($this->privateKeyStringNoPasswordPkcs8);
 
         $this->assertInstanceOf(__NAMESPACE__ . '\PrivateKey', $key);
         $this->assertSame($this->publicKeyStringNoPassword, $key->publicKey()->string());

@@ -17,6 +17,15 @@ namespace Eloquent\Lockbox\Key;
 interface KeyFactoryInterface
 {
     /**
+     * Generate a new private key.
+     *
+     * @param integer|null $size The size of the key in bits.
+     *
+     * @return PrivateKeyInterface
+     */
+    public function generatePrivateKey($size = null);
+
+    /**
      * Create a new private key.
      *
      * @param string      $key      The PEM formatted private key.

@@ -43,13 +43,33 @@ abstract class AbstractKey implements KeyInterface
     }
 
     /**
-     * Get the number of bits.
+     * Get the size of the key in bits.
      *
-     * @return integer The number of bits.
+     * @return integer The size of the key in bits.
      */
-    public function bits()
+    public function size()
     {
         return $this->detail('bits');
+    }
+
+    /**
+     * Get the modulus.
+     *
+     * @return string The modulus.
+     */
+    public function modulus()
+    {
+        return $this->rsaDetail('n');
+    }
+
+    /**
+     * Get the public exponent.
+     *
+     * @return string The public exponent.
+     */
+    public function publicExponent()
+    {
+        return $this->rsaDetail('e');
     }
 
     /**
@@ -67,6 +87,26 @@ abstract class AbstractKey implements KeyInterface
         }
 
         return $this->details[$name];
+    }
+
+    /**
+     * Get a specific detail from the RSA key details.
+     *
+     * @param string $name The name of the detail.
+     *
+     * @return mixed                            The value of the detail.
+     * @throws Exception\MissingDetailException If the detail is not present.
+     */
+    protected function rsaDetail($name)
+    {
+        $rsaDetails = $this->detail('rsa');
+        if (!array_key_exists($name, $rsaDetails)) {
+            throw new Exception\MissingDetailException(
+                sprintf('rsa.%s', $name)
+            );
+        }
+
+        return $rsaDetails[$name];
     }
 
     private $handle;
