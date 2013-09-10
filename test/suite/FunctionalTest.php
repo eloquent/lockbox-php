@@ -41,19 +41,19 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '',
                 '12345678901234567890123456789012',
                 '1234567890123456',
-                'FzFcxXm57XqDzsZm4vVUaspsK1-Hcw7fN' .
-                'jAqadl-WhwR_Kfwv4gM7v7OnDGWfpDOTl' .
-                'I_nlQvvwP3TP98tOhyrsJkpDDMZ0WSQVP' .
-                'cl23xTk6xbLvwl2qRVdZa8isKCXXcuKt5' .
-                'XIv1Mexp2Dzyn8w8TNYOdK0EiNj1v2PUk' .
-                '7X2QUPvK0poT_3fUlN13aK28KBqg-CGw0' .
-                'xzsGSG4k7CN8FEfGqbSBfuNxumH0eJyzZ' .
-                '1s4cYbcn3OWdlQln7asp21WZHj7SEMWIf' .
-                'dsrtoWL85uEAnLxYG_CXD1nteVXffAwFv' .
-                'ByMT1UmNQ0AWjm8KJiH8hLXPr09rbo5Vz' .
-                's6c5lSrjMmM9itNTFRhW3KMfhqusPDqWJ' .
-                '7K37AvEHDaLULPKBNj24c',
-                342
+                'QJyn73i2dlN_V9o2fVLLmh4U85AIEL5v' .
+                'Cch2sP5aw3CogMBn5qRpokg6OFjRxsYB' .
+                'xb_Oqe8n9GALxJsuuqyZgWXxSK0exA2P' .
+                'QnAECIcujG9EyM4GlQodJiJdMtDJh0Dd' .
+                'frp7s87w7YWgleaK_3JVqEpjRolj1AWr' .
+                'DjXeFDl_tGIZ1R95PD2mbq6OUgm1Q56M' .
+                'CRLZdZJOm3yixcGHQOV2wv73YIbOvOa8' .
+                'hEZ7ydX-VRHPMmJyFgUe9gv8G8sDm6xY' .
+                'UEz1rIu62XwMoMB4B3UZo_r0Q9xCr4sx' .
+                'BVPY7bOAp6AUjOuvsHwBGJQHZi3k665w' .
+                'mShg7pw8HFkr_Fea4nzimditNTFRhW3K' .
+                'MfhqusPDqWJ7K37AvEHDaLULPKBNj24c',
+                342,
             ),
 
             'Test vector 2' => array(
@@ -61,19 +61,19 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '1234',
                 '12345678901234567890123456789012',
                 '1234567890123456',
-                'wdPXCy5amuY7U8tGD0M-nnK5LGc4DC1h' .
-                'VwvNWVLCyqOMHgDF3fpsY-8MQkMUuI0T' .
-                'eNoutU-TpuGsm6D-KIXeAaWIYuUAaNZ-' .
-                'V_5WwmRFT5BEyhQwZ3PFybrs39o4sAlO' .
-                'd5IVvLNMMgwRD-FmQc8KU10d3KDd71wW' .
-                'r50y7R33xTnyJplx9uqcOrB6ooQLjFcF' .
-                'bFU87YPnhkxZK5JryTxAlaDJjfFs-3XM' .
-                'zgoJ35rpBgDVywPXbye1C8u5gw81awid' .
-                'Xgei_a27MZog1lUvETzMXqqZ4VlhckDV' .
-                'm71f4TLMKHTz-CmYinvzj7G_pYmvtHeh' .
-                'uxDzjdrT4lbetTuESm-YHKtq9JEj6E2S' .
-                'ER4TURlVKf14sPeDgRUo88-zvM7BWpMv',
-                342
+                'MFq4hhLJN8_F6ODUWX20tO4RIJURlMHA' .
+                'mdujFMTyqc2Y3zHIXzmaK4CcoThggqZX' .
+                '44-4kbhjwk9ihwuzS4GAQuSCCdoh5xzT' .
+                'WfeboPu6zE51BrZQdz67VavvmvpHVdGg' .
+                'oQcSsa_GiZcc7aBYh-AhfCyHrPb-r1hN' .
+                'y_AWXv8hcO8mIS1fJ3Mvtr3Xxfwlydrn' .
+                '23YUwuOG-tX4FctKqh2eFFkrht53ZwVv' .
+                '7q67U3x774KjbUpB4LbML6APxe4ucghl' .
+                'DpY_A_DFLH2GlvvouVaT3jCibkY_yIMC' .
+                '1lNSBIdgpKGoAoZWy4bIpqDUu0SiLvDO' .
+                'mclpPRARakRr15F21a_MQ9wL_JNwnG1u' .
+                'T1zKZNgUcr2GaWk31ahOBKB0lfr-E7W2',
+                342,
             ),
 
             'Test vector 3' => array(
@@ -81,20 +81,20 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '1234567890123456',
                 '12345678901234567890123456789012',
                 '1234567890123456',
-                'umvbDKEQtKldCN15bgyGyLm5K5LEDNGJ' .
-                'kXbyYask_sgSi9lkGa5ByDZKVs1SMgp0' .
-                'mif4GDfyg5xVadsPzoH9-jdSoTB7pNxz' .
-                'ns8CNP8KIWEcU6TATwjbW9bP5FBQKxRO' .
-                'OTHdLLJ7ADqvuT0QxH1Yy1xzlVGXUXxk' .
-                'coMBey_CxiboqjLm_cEl1dA0HyidgxTn' .
-                'rArsM7porZPj__gbWIEv58L0S2xv11YL' .
-                '0IQMGkQiupJhHKiyAIH4KchZ8whV_aAZ' .
-                '193U7toEJ7Ojd7uu6hzMiVDCIRPDa5Ek' .
-                'zyBFoNsr2hcTFcU4oxBkRbUottvH9Dji' .
-                'SxIPU4O8vomXpUqWzneJ4CBlVmSYgUJa' .
-                '4zsJUnll4lufFRTYTYjuCgQhunOAIVS2' .
-                'DxuQH8bSZZrHKNIghc0D3Q',
-                342
+                'oFqfBVNvWyUYThQiA54V_Lpx6Ka2zqEF' .
+                'QCQBxcYhnbG2uuShACbf3I31USwRCFDV' .
+                'mBLmfcO4ReMJFQzen-tRRuapOQ4Pjzdp' .
+                'IRw_T9wYjj0n3Sjs1NZnDbN3hbHCmXoq' .
+                'sl0byi0Lr5hwhmqOCj7Po5ey4EsPpuqb' .
+                'tPx38PPae-zOlnMrdYuKhV8jIMDSsslf' .
+                'VWMOgUlYnDOt9Pd1NEJkJE-GxYIYyzPB' .
+                '_NtxwQf5moDjsNzxtx5fzEejo8BGDQ5Q' .
+                'phjkQCBmMWd1fKN3Z3aBSNn_WS2HwxzU' .
+                'gl10lzaHityP9iZU2DY8qkQB_wSk7-pf' .
+                'h05CITq0DPIOHDQzVkcWlnuUZ55SZL-E' .
+                'BpxoZDMH74B7GmHK66rSGH0MoSGY1fZC' .
+                'hAWyjRKa0nWslBVkLoJRUg',
+                342,
             ),
 
             'Test vector 4' => array(
@@ -102,31 +102,31 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '1234567890123456',
                 '12345678901234567890123456789012',
                 '1234567890123456',
-                'XncYhc3C20kG5Zb8VPB0OGBik6N6a6JY' .
-                '333Hz6VN3lQ21xMoc16XW0873AzuyvDI' .
-                'YAjNzN0pAQo0CosedUptYLLwRtGrsfUr' .
-                'XIZxteHNZ7JiEXGZ8W_6bz9jlbnpfNdH' .
-                'GxaR-aePTZWSbyPyPdQysGJlqclXJb_K' .
-                'dKfqGHLYOf0LO93kvljQ4ccux18vm8PQ' .
-                'GIeAH-L5qMfzfOHzcCXbVU746pZf7mNR' .
-                'uIEgfp0AM-JEKItYTIZxr8kP7-WlVDf0' .
-                '7cjQkZuUEQ7d9FQLKOWviuQ-PQd2enwI' .
-                'MYo3btEiu2XHmUcZEcI2esz_vwBGxHNM' .
-                'HGrshgpuP_EvPPR_1EogS2EGHs0l_owU' .
-                'hHx4V8LvgMBnO3O2nO9p2WA7ZKH1zMZU' .
-                'gGaxMAlZrMweaGvEcke2nwnfLUBVytYd' .
-                'QNOBV7TmJ3XMXwgpavZ2eKvVXUpdKfcm' .
-                'fsGDxjkJRN8BqDTrSZZmSKZe9VZkGSNS' .
-                '99jF9BEa6dmy7RTLy3xSaWdPwbElX3pA' .
-                'pgQR5BKHz6DP5p86gaQITelAMMYaZQK3' .
-                'tNvW6ncRfJGlD3ax_TezCOtrEmlzVCRe' .
-                'OsbK51H_xfST_0PO-hXG35NIGC1vDV8r' .
-                'iDMr47HbRIFwm9NxT1VR0hDF0LbIIbkS' .
-                'YucMkD_Zv9JjoL4FX0rM0T0fvDJBeJXw' .
-                'Zt1ifDOvWxogZVZkmIFCWuM7CVJ5ZeJb' .
-                'nxUU2E2I7goEIbpzgCFUtg8bkB_G0mWa' .
-                'xyjSIIXNA90',
-                684
+                'rqA8g_yyA0eeLoun6rqnUxgy3JnIS9p8' .
+                'bAgZYf4774ZahHcFCOozwWbMU_0HVMS9' .
+                'sOlAmr-dQl6RqDaOLfAxrHq3mluFSlXf' .
+                'gcJXrvPtf27u_4NCHXuwm825ptpmprPx' .
+                'wl0z4tz6u-fqNBSfQuHApZ3MvAGsEa0v' .
+                'b0IftBX0q8tKL6sdCx6WpTGcynEdxLcZ' .
+                'Tx6cM4LRdcjL3SQZ5vk4VF69lS2r1WgJ' .
+                'h8eUa_VwgsqhTkoc7wJAECqxHBQSh6q-' .
+                'GOt6bpVnlaGkM_BfcrB5SJdtcEZd5BgG' .
+                'xG8QwQGwsT60jErxpd5rYLfBrG7kgVse' .
+                'yksfN-99-kUHQpkwCIS_zS5bpr3hLpBi' .
+                'UhSA4638Xgd2qyAZCgl3OBY56HSdncZq' .
+                '5o4xGycM69eN5hb-c852W-dP6S49BXSn' .
+                '3OpmEOkZoIeNw0EYHpLLpfaLwafIVdLC' .
+                'bQZX1g_szDcBDyyM-PN5-jnuaqySRywF' .
+                'rMj56U9vAvwtFMaHKY-ll4Qxf8PgoDWM' .
+                '7KogGgkztlZ0ZzaMwBLQeTDpjbNl5NXJ' .
+                'CxobJfGv8w6zQZmDz8J2K3DsQrDmZid_' .
+                'W6Gtsv7XsSnY-gl6TD4IkK1VEKnttqXa' .
+                'PfVdCNadtQ-Z1INiK2pa3F0NKs4POO-K' .
+                'PpW68kQ5l2qeUAVv6B-QdcwunyMh9XO_' .
+                'vGx8Wf8SrbZ7lGeeUmS_hAacaGQzB--A' .
+                'exphyuuq0hh9DKEhmNX2QoQFso0SmtJ1' .
+                'rJQVZC6CUVI',
+                684,
             ),
         );
     }

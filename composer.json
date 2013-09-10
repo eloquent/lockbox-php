@@ -20,7 +20,7 @@
     "require-dev": {
         "eloquent/asplode": "~1",
         "eloquent/liberator": "~1",
-        "icecave/archer": "1.0.0-alpha.2"
+        "icecave/archer": "~1"
     },
     "autoload": {
         "psr-0": {

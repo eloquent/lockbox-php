@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "a5c4d5eb4a51148e3f9f76349f8f0009",
+    "hash": "a964b04f877046987b1845b8508f6676",
     "packages": [
         {
             "name": "icecave/isolator",
@@ -260,16 +260,16 @@
         },
         {
             "name": "guzzle/guzzle",
-            "version": "v3.7.2",
+            "version": "v3.7.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "v3.7.2"
+                "reference": "0f16aad385528b5cf790392cb4a4d16cf600e944"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/v3.7.2",
-                "reference": "v3.7.2",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0f16aad385528b5cf790392cb4a4d16cf600e944",
+                "reference": "0f16aad385528b5cf790392cb4a4d16cf600e944",
                 "shasum": ""
             },
             "require": {
@@ -348,20 +348,20 @@
                 "rest",
                 "web service"
             ],
-            "time": "2013-08-02 18:31:05"
+            "time": "2013-09-08 21:09:18"
         },
         {
             "name": "icecave/archer",
-            "version": "1.0.0-alpha.2",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/IcecaveStudios/archer.git",
-                "reference": "f29395874eb668f559f04e98be11ed7e7ccd71dd"
+                "reference": "a88923a3d3fddb8eabff682d7a58457a9bf1fb5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/IcecaveStudios/archer/zipball/f29395874eb668f559f04e98be11ed7e7ccd71dd",
-                "reference": "f29395874eb668f559f04e98be11ed7e7ccd71dd",
+                "url": "https://api.github.com/repos/IcecaveStudios/archer/zipball/a88923a3d3fddb8eabff682d7a58457a9bf1fb5b",
+                "reference": "a88923a3d3fddb8eabff682d7a58457a9bf1fb5b",
                 "shasum": ""
             },
             "require": {
@@ -386,7 +386,7 @@
             "type": "library",
             "autoload": {
                 "psr-0": {
-                    "Icecave\\Archer": "lib"
+                    "Icecave\\Archer": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -420,7 +420,7 @@
                 "testing",
                 "unit"
             ],
-            "time": "2013-07-29 21:51:56"
+            "time": "2013-09-09 13:20:13"
         },
         {
             "name": "nikic/php-parser",
@@ -1163,9 +1163,9 @@
 
     ],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "icecave/archer": 15
-    },
+    "stability-flags": [
+
+    ],
     "platform": {
         "php": ">=5.3",
         "ext-mcrypt": "*",

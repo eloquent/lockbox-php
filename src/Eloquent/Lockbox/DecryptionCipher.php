@@ -61,11 +61,8 @@ class DecryptionCipher implements DecryptionCipherInterface
             substr($data, $key->bits() / 8)
         );
 
-        $hash = substr($data, 0, 20);
-        $data = substr($data, 20);
-        if (false === $data) {
-            $data = '';
-        }
+        $hash = substr($data, -20);
+        $data = substr($data, 0, -20);
 
         if (sha1($data, true) !== $hash) {
             throw new Exception\DecryptionFailedException;

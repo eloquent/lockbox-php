@@ -61,7 +61,7 @@ class EncryptionCipher implements EncryptionCipherInterface
 
         return $this->base64UriEncode(
             $encryptedKeyAndIv .
-            $this->encryptAes($generatedKey, $iv, sha1($data, true) . $data)
+            $this->encryptAes($generatedKey, $iv, $data . sha1($data, true))
         );
     }
 
