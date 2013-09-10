@@ -170,6 +170,20 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame('foobar', $decrypted);
     }
 
+    public function testGeneratingKey()
+    {
+        $keyFactory = new KeyFactory;
+
+        $privateKey = $keyFactory->generatePrivateKey();
+        /* echo */ $privateKey->string(); // outputs the key in PEM format
+        /* echo */ $privateKey->string('password'); // outputs the key in encrypted PEM format
+
+        $publicKey = $privateKey->publicKey();
+        /* echo */ $publicKey->string(); // outputs the key in PEM format
+
+        $this->assertTrue(true);
+    }
+
     public function testEncryptingData()
     {
         $data = 'Super secret data.';

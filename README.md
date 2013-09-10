@@ -20,12 +20,12 @@ information, see the [Lockbox website].
 
 ## Usage
 
-### Generating keys
+### Generating keys via OpenSSL
 
 *Lockbox* uses [RSA] keys in [PEM] format. This is a standard format understood
-by [OpenSSL]. Generating of keys is handled by the `openssl` command line tool
-(not part of *Lockbox*). Generating a 2048-bit private key can be achieved with
-this command:
+by [OpenSSL]. Generating of keys is normally handled by the `openssl` command
+line tool (although *Lockbox* can also generate keys programmatically).
+Generating a 2048-bit private key can be achieved with this command:
 
     openssl genrsa -out private.pem 2048
 
@@ -45,6 +45,21 @@ need to create matching public key files; but if for some reason a public key
 file is required, this command will create one:
 
     openssl rsa -pubout -in private.pem -out public.pem
+
+### Generating keys programmatically
+
+```php
+use Eloquent\Lockbox\Key\KeyFactory;
+
+$keyFactory = new KeyFactory;
+
+$privateKey = $keyFactory->generatePrivateKey();
+echo $privateKey->string(); // outputs the key in PEM format
+echo $privateKey->string('password'); // outputs the key in encrypted PEM format
+
+$publicKey = $privateKey->publicKey();
+echo $publicKey->string(); // outputs the key in PEM format
+```
 
 ### Encrypting data
 
