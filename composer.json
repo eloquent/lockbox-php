@@ -1,7 +1,7 @@
 {
     "name": "eloquent/lockbox",
     "description": "Simple, strong encryption.",
-    "keywords": ["encryption", "openssl", "aes", "two", "way", "security", "strong", "simple"],
+    "keywords": ["encryption", "openssl", "rsa", "aes", "two", "way", "security", "strong", "simple", "asymmetric", "key"],
     "homepage": "https://github.com/eloquent/lockbox-php",
     "license": "MIT",
     "authors": [
