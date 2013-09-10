@@ -75,6 +75,57 @@ class PrivateKeyTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    public function testConstructorFailureNotRsa()
+    {
+        $keyString = <<<'EOD'
+-----BEGIN DSA PRIVATE KEY-----
+MIIDVgIBAAKCAQEAwh+wZY0iayGjeIePlqHlDw4aPXSXrt14ZRFRkeCN47Rj/ZTY
+/M75BZiuJuymxzulMKsrM8R84CUKH+tYJIwUetIPIzH/KBea9v4LOWzs4bG2HyJQ
+ZWSamMYwL+hxa7MunFbFPNqacl3Uk8sub6gaiAvkjc83UeSGt7H8/OgMopS+IbzH
+MPRE6pOR/d5iJIDNCnqlp8WD4/70z4RTJiME6XdzjM7qiesB25DN4+JtXzJfL3FN
+yImgFTmUhKsfW69qJl/1mBQp6uVV3knR/BMbg5t4OtJNMp+onoCeEkE1H6KXCfkB
+39404Rn4mvLqEaiOwG64Bjt01Of5lBmVV9EJ+QIhAJWdJx+2cWH0ZP/Gm13rENb3
+RdZFJ/o1nRiZqmIs/6PXAoIBACkFMOe9d6AOWA14q7GrGYUHjSkP8p+/a32eAbvi
+rdAOlSIgvRsmsyH+n4TAIeARRVvkWLYe1XC2mKAe/k0nUb4CBE46KTy4c+w+HeFJ
+03in8YEDqiFOeV1jIzTIX/FwwwK8er8XeW9h3vxByHH5i6Mc0tleEHELBCxbhbwE
+I8tGcpgJDOnw4S7RKE6J55hCu9W8cW7l113IfQ6GANp/yxgC2bPr+JDCxLDIFUFU
+7iG0AFJ0WOJ2mlcZF0UZtbuuTEz38rq+GPfJBYXZGlwKW8vdtODDI4XSEDc8i/O4
+idsk8DQi5j/i9azHWgphbZYW82AXf4M05NHWXV03HnnBE7UCggEAJ7awS055qn5w
+JKHddJjZ20Vjwfcveatze7DtBejLJyFvABVSjJHbpc6mr71nBOaC6Oh3WeNkXCIK
+XD3d6sgz+iY8euByOny7QLLfPP9i5ZtTVL8iCUWakTuAD8BEbMLSDT8FXUYN88Za
+6pE1Gd2lr72nEU9vn9FQVZxAEBvTQP5WvMSDEeztSllXBjVb9tBi4wfA+pHB5/KG
+yPWfIXJU3YuvDDxZHLDIr0FyzupVC4v2nsK0OylNePv45upLqHsKH5p/2Xq9hbAc
+aX9Z2IrofMRVmABHUs1znHuPAQ3T+T2Ego8EJDCP/gFSfRkc4zriYQPd/kql3bZm
+5EsPCPrIkQIhAICi7eNNexHlXQ37PBDgHtjPUE9aACPBfOS5lP+lWalT
+-----END DSA PRIVATE KEY-----
+
+EOD;
+        $handle = openssl_pkey_get_private($keyString);
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\InvalidPrivateKeyException');
+        new PrivateKey($handle);
+    }
+
+    public function testConstructorFailureNotPrivate()
+    {
+        $keyString = <<<'EOD'
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy8jsljdxzsgvboCytmlH
+3Q03v30fPTNfMqmz2Yn0GdtkqQH01+H9y5bWWCQyeGOATvIPrELGeB9nRlQeaTb5
+VjCl1V9PYeM6Q30PK6411fJexjYA/UbRG/9I/K+A9UBfJvUsjGVUMxZR8n8jmmSy
+8G2eqXBbP6dEZFnO0V274TRTB3SLKD2tfYBYwMtXqT+rSbH1OyoS29A03FaUgkRk
+1er2i3ldyNIG8vMGv7Iagup69yBrt8xo61IFj76dkocbozp1Y4SGzyjkR/ukRSLe
++0ejS4eMyziaH7J52XX1rDFreinZZDoE571ameu0biuM6aT8P1pk85VIqHLlqRm/
+vQIDAQAB
+-----END PUBLIC KEY-----
+
+EOD;
+        $handle = openssl_pkey_get_public($keyString);
+
+        $this->setExpectedException(__NAMESPACE__ . '\Exception\InvalidPrivateKeyException');
+        new PrivateKey($handle);
+    }
+
     public function keyData()
     {
         //                                   name                           password    size  publicKey

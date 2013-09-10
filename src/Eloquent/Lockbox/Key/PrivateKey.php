@@ -17,6 +17,25 @@ namespace Eloquent\Lockbox\Key;
 class PrivateKey extends AbstractKey implements PrivateKeyInterface
 {
     /**
+     * Construct a new private key.
+     *
+     * @param resource $handle The key handle.
+     *
+     * @throws Exception\InvalidPrivateKeyException If the supplied handle does not represent an RSA private key.
+     */
+    public function __construct($handle)
+    {
+        parent::__construct($handle);
+
+        if (
+            OPENSSL_KEYTYPE_RSA !== $this->detail('type') ||
+            !$this->hasRsaDetail('d')
+        ) {
+            throw new Exception\InvalidPrivateKeyException($this->detail('key'));
+        }
+    }
+
+    /**
      * Get the private exponent.
      *
      * @return string The private exponent.
@@ -62,7 +81,9 @@ class PrivateKey extends AbstractKey implements PrivateKeyInterface
      * @return string The second prime exponent.
      */
     public function primeExponent2()
+    // @codeCoverageIgnoreStart
     {
+        // @codeCoverageIgnoreEnd
         return $this->rsaDetail('dmq1');
     }
 

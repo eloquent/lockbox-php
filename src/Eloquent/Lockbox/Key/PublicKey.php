@@ -17,6 +17,25 @@ namespace Eloquent\Lockbox\Key;
 class PublicKey extends AbstractKey implements PublicKeyInterface
 {
     /**
+     * Construct a new public key.
+     *
+     * @param resource $handle The key handle.
+     *
+     * @throws Exception\InvalidPublicKeyException If the supplied handle does not represent an RSA public key.
+     */
+    public function __construct($handle)
+    {
+        parent::__construct($handle);
+
+        if (
+            OPENSSL_KEYTYPE_RSA !== $this->detail('type') ||
+            $this->hasRsaDetail('d')
+        ) {
+            throw new Exception\InvalidPublicKeyException($this->detail('key'));
+        }
+    }
+
+    /**
      * Get the public key for this key.
      *
      * @param KeyFactoryInterface|null $factory The key factory to use.

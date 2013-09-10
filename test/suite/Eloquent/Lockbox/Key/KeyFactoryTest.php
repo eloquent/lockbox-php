@@ -89,7 +89,6 @@ OeQp2EYIQysr8XpbOaPYOW99uFIQCALmJ5a1JJfDDWvcR6crJkjI60B3NirZSR/p
 CdU3lo063CcRZy7m3A==
 -----END ENCRYPTED PRIVATE KEY-----
 
-
 EOD;
         $this->publicKeyString = <<<'EOD'
 -----BEGIN PUBLIC KEY-----

@@ -90,6 +90,21 @@ abstract class AbstractKey implements KeyInterface
     }
 
     /**
+     * Returns true if the requested detail exists in the RSA key details.
+     *
+     * @param string $name The name of the detail.
+     *
+     * @return mixed                            The value of the detail.
+     * @throws Exception\MissingDetailException If no RSA key details are present.
+     */
+    protected function hasRsaDetail($name)
+    {
+        $rsaDetails = $this->detail('rsa');
+
+        return array_key_exists($name, $rsaDetails);
+    }
+
+    /**
      * Get a specific detail from the RSA key details.
      *
      * @param string $name The name of the detail.
