@@ -21,7 +21,7 @@ interface KeyFactoryInterface
      *
      * @param integer|null $size The size of the key in bits.
      *
-     * @return PrivateKeyInterface
+     * @return PrivateKeyInterface The generated key.
      */
     public function generatePrivateKey($size = null);
 
@@ -31,7 +31,7 @@ interface KeyFactoryInterface
      * @param string      $key      The PEM formatted private key.
      * @param string|null $password The key password.
      *
-     * @return PrivateKeyInterface
+     * @return PrivateKeyInterface                  The private key.
      * @throws Exception\InvalidPrivateKeyException If the key is invalid.
      */
     public function createPrivateKey($key, $password = null);
@@ -41,7 +41,7 @@ interface KeyFactoryInterface
      *
      * @param string $key The PEM formatted public key.
      *
-     * @return PublicKeyInterface
+     * @return PublicKeyInterface                  The public key.
      * @throws Exception\InvalidPublicKeyException If the key is invalid.
      */
     public function createPublicKey($key);
@@ -52,7 +52,7 @@ interface KeyFactoryInterface
      * @param string      $path     The path to the PEM formatted private key.
      * @param string|null $password The key password.
      *
-     * @return PrivateKeyInterface
+     * @return PrivateKeyInterface                  The private key.
      * @throws Exception\ReadException              If the file cannot be read.
      * @throws Exception\InvalidPrivateKeyException If the key is invalid.
      */
@@ -63,7 +63,7 @@ interface KeyFactoryInterface
      *
      * @param string $path The path to the PEM formatted public key.
      *
-     * @return PublicKeyInterface
+     * @return PublicKeyInterface                  The public key.
      * @throws Exception\ReadException             If the file cannot be read.
      * @throws Exception\InvalidPublicKeyException If the key is invalid.
      */

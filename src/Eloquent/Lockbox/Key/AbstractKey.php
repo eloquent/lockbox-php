@@ -27,6 +27,9 @@ abstract class AbstractKey implements KeyInterface
         $this->details = openssl_pkey_get_details($handle);
     }
 
+    /**
+     * Handles freeing of internal resources.
+     */
     public function __destruct()
     {
         openssl_free_key($this->handle());

@@ -78,7 +78,8 @@ class DecryptionCipher implements DecryptionCipherInterface
      * @param string $iv   The initialization vector to use.
      * @param string $data The data to decrypt.
      *
-     * @return string The decrypted data.
+     * @return string                              The decrypted data.
+     * @throws Exception\DecryptionFailedException If the decryption failed.
      */
     protected function decryptAes($key, $iv, $data)
     {

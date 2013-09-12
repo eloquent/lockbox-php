@@ -31,7 +31,9 @@ class EncryptionCipher implements EncryptionCipherInterface
     }
 
     /**
-     * @return integer
+     * Get the random source.
+     *
+     * @return integer The random source.
      */
     public function randomSource()
     {

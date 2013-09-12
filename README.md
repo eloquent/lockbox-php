@@ -2,9 +2,9 @@
 
 *Simple, strong encryption.*
 
-[![Build Status]][Latest build]
-[![Test Coverage]][Test coverage report]
-[![Uses Semantic Versioning]][SemVer]
+[![Build status]][Latest build]
+[![Test coverage]][Test coverage report]
+[![Uses semantic versioning]][SemVer]
 
 ## Installation and documentation
 
@@ -167,11 +167,11 @@ foreach ($encrypted as $string) {
 [RSA]: http://en.wikipedia.org/wiki/RSA_(algorithm)
 
 [API documentation]: http://lqnt.co/lockbox-php/artifacts/documentation/api/
-[Build Status]: https://api.travis-ci.org/eloquent/lockbox-php.png?branch=master
+[Build status]: https://api.travis-ci.org/eloquent/lockbox-php.png?branch=master
 [Composer]: http://getcomposer.org/
 [eloquent/lockbox]: https://packagist.org/packages/eloquent/lockbox
 [Latest build]: https://travis-ci.org/eloquent/lockbox-php
 [SemVer]: http://semver.org/
 [Test coverage report]: https://coveralls.io/r/eloquent/lockbox-php
-[Test Coverage]: https://coveralls.io/repos/eloquent/lockbox-php/badge.png?branch=master
-[Uses Semantic Versioning]: http://b.repl.ca/v1/semver-yes-brightgreen.png
+[Test coverage]: https://coveralls.io/repos/eloquent/lockbox-php/badge.png?branch=master
+[Uses semantic versioning]: http://b.repl.ca/v1/semver-yes-brightgreen.png
