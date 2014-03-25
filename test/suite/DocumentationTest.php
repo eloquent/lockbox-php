@@ -17,6 +17,7 @@ use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Key\KeyWriter;
 
 class DocumentationTest extends PHPUnit_Framework_TestCase
 {
@@ -27,12 +28,22 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         $this->fixturePath = __DIR__ . '/../fixture/key';
     }
 
-    public function testGeneratingKey()
+    public function testGeneratingAndWritingKey()
     {
+        $keyPath = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->expectOutputString('');
 
         $keyGenerator = new KeyGenerator;
         $key = $keyGenerator->generateKey();
+
+        // $keyPath = '/path/to/lockbox.key';
+        $keyWriter = new KeyWriter;
+        $keyWriter->writeFile($key, $keyPath);
+
+        $this->assertRegExp(
+            '/{"type":"lockbox-key","version":1,"key":"[A-Za-z0-9_=-]{43}"}/',
+            file_get_contents($keyPath)
+        );
     }
 
     public function testEncryptingData()

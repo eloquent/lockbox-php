@@ -19,14 +19,22 @@ ensure the safety of data. For more information, see the [Lockbox website].
 
 ## Usage
 
-### Generating keys
+### Generating and writing keys
 
 ```php
 use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\Key\KeyWriter;
 
 $keyGenerator = new KeyGenerator;
 $key = $keyGenerator->generateKey();
+
+$keyPath = '/path/to/lockbox.key';
+$keyWriter = new KeyWriter;
+$keyWriter->writeFile($key, $keyPath);
 ```
+
+Currently there is no way to generate lockbox keys via the command line, but
+this feature is planned.
 
 ### Encrypting data
 
