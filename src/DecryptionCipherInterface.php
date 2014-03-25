@@ -19,11 +19,11 @@ interface DecryptionCipherInterface
     /**
      * Decrypt a data packet.
      *
-     * @param Key\PrivateKeyInterface $key  The key to decrypt with.
-     * @param string                  $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    public function decrypt(Key\PrivateKeyInterface $key, $data);
+    public function decrypt(Key\KeyInterface $key, $data);
 }

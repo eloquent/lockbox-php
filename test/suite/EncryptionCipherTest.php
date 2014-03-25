@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Liberator\Liberator;
 use PHPUnit_Framework_TestCase;
 
 class EncryptionCipherTest extends PHPUnit_Framework_TestCase
@@ -19,12 +21,14 @@ class EncryptionCipherTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->cipher = new EncryptionCipher(MCRYPT_DEV_RANDOM);
+        $this->base64UrlEncoder = new Base64Url;
+        $this->cipher = new EncryptionCipher(MCRYPT_DEV_RANDOM, $this->base64UrlEncoder);
     }
 
     public function testConstructor()
     {
         $this->assertSame(MCRYPT_DEV_RANDOM, $this->cipher->randomSource());
+        $this->assertSame($this->base64UrlEncoder, $this->cipher->base64UrlEncoder());
     }
 
     public function testConstructorDefaults()
@@ -32,5 +36,16 @@ class EncryptionCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher = new EncryptionCipher;
 
         $this->assertSame(MCRYPT_DEV_URANDOM, $this->cipher->randomSource());
+        $this->assertSame(Base64Url::instance(), $this->cipher->base64UrlEncoder());
+    }
+
+    public function testInstance()
+    {
+        $className = get_class($this->cipher);
+        Liberator::liberateClass($className)->instance = null;
+        $instance = $className::instance();
+
+        $this->assertInstanceOf($className, $instance);
+        $this->assertSame($instance, $className::instance());
     }
 }

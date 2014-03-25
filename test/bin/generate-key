@@ -1,0 +1,37 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the Lockbox package.
+ *
+ * Copyright © 2014 Erin Millard
+ *
+ * For the full copyright and license information, please view the LICENSE file
+ * that was distributed with this source code.
+ */
+
+use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\Key\KeyWriter;
+
+require __DIR__ . '/../../vendor/autoload.php';
+
+$size = null;
+if (isset($_SERVER['argv'][1])) {
+    $size = intval($_SERVER['argv'][1]);
+}
+
+$name = null;
+if (isset($_SERVER['argv'][2])) {
+    $name = $_SERVER['argv'][2];
+}
+
+$description = null;
+if (isset($_SERVER['argv'][3])) {
+    $description = $_SERVER['argv'][3];
+}
+
+KeyWriter::instance()->writeStream(
+    KeyGenerator::instance()->generateKey($size, $name, $description),
+    STDOUT
+);
+echo PHP_EOL;

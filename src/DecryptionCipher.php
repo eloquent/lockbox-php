@@ -11,61 +11,93 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\DecoderInterface;
+use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
+
 /**
  * The standard Lockbox decryption cipher.
  */
 class DecryptionCipher implements DecryptionCipherInterface
 {
     /**
+     * Get the static instance of this cipher.
+     *
+     * @return DecryptionCipherInterface The static cipher.
+     */
+    public static function instance()
+    {
+        if (null === self::$instance) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
+    }
+
+    /**
+     * Construct a new decryption cipher.
+     *
+     * @param DecoderInterface|null $base64UrlDecoder The base64url encoder to use.
+     */
+    public function __construct(DecoderInterface $base64UrlDecoder = null)
+    {
+        if (null === $base64UrlDecoder) {
+            $base64UrlDecoder = Base64Url::instance();
+        }
+
+        $this->base64UrlDecoder = $base64UrlDecoder;
+    }
+
+    /**
+     * Get the base64url encoder.
+     *
+     * @return DecoderInterface The base64url encoder.
+     */
+    public function base64UrlDecoder()
+    {
+        return $this->base64UrlDecoder;
+    }
+
+    /**
      * Decrypt a data packet.
      *
-     * @param Key\PrivateKeyInterface $key  The key to decrypt with.
-     * @param string                  $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    public function decrypt(Key\PrivateKeyInterface $key, $data)
+    public function decrypt(Key\KeyInterface $key, $data)
     {
         try {
-            $data = $this->base64UriDecode($data);
-        } catch (Exception\InvalidEncodingException $e) {
-            throw new Exception\DecryptionFailedException($e);
+            $data = $this->base64UrlDecoder()->decode($data);
+        } catch (TransformExceptionInterface $e) {
+            throw new Exception\DecryptionFailedException($key, $e);
         }
 
-        $keyAndIv = substr($data, 0, $key->size() / 8);
-        if (
-            !openssl_private_decrypt(
-                $keyAndIv,
-                $keyAndIv,
-                $key->handle(),
-                OPENSSL_PKCS1_OAEP_PADDING
-            )
-        ) {
-            throw new Exception\DecryptionFailedException;
+        $iv = substr($data, 0, 16);
+        if (!$iv) {
+            throw new Exception\DecryptionFailedException($key);
         }
 
-        $generatedKey = substr($keyAndIv, 0, 32);
-        if (false === $generatedKey) {
-            throw new Exception\DecryptionFailedException;
+        $data = substr($data, 16);
+        if (!$data) {
+            throw new Exception\DecryptionFailedException($key);
         }
 
-        $iv = substr($keyAndIv, 32);
-        if (false === $iv) {
-            throw new Exception\DecryptionFailedException;
-        }
-
-        $data = $this->decryptAes(
-            $generatedKey,
-            $iv,
-            substr($data, $key->size() / 8)
-        );
+        $data = $this->decryptAes($key, $iv, $data);
 
         $hash = substr($data, -20);
+        if (!$hash) {
+            throw new Exception\DecryptionFailedException($key);
+        }
         $data = substr($data, 0, -20);
+        if (!$data) {
+            $data = '';
+        }
 
         if (sha1($data, true) !== $hash) {
-            throw new Exception\DecryptionFailedException;
+            throw new Exception\DecryptionFailedException($key);
         }
 
         return $data;
@@ -74,18 +106,18 @@ class DecryptionCipher implements DecryptionCipherInterface
     /**
      * Decrypt some data with AES and PKCS #7 padding.
      *
-     * @param string $key  The key to use.
-     * @param string $iv   The initialization vector to use.
-     * @param string $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $iv   The initialization vector to use.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    protected function decryptAes($key, $iv, $data)
+    protected function decryptAes(Key\KeyInterface $key, $iv, $data)
     {
         $data = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_128,
-            $key,
+            $key->data(),
             $data,
             MCRYPT_MODE_CBC,
             $iv
@@ -94,7 +126,7 @@ class DecryptionCipher implements DecryptionCipherInterface
         try {
             $data = $this->unpad($data);
         } catch (Exception\InvalidPaddingException $e) {
-            throw new Exception\DecryptionFailedException($e);
+            throw new Exception\DecryptionFailedException($key, $e);
         }
 
         return $data;
@@ -121,32 +153,6 @@ class DecryptionCipher implements DecryptionCipherInterface
         return substr($data, 0, -$padSize);
     }
 
-    /**
-     * Decode a string encoded using Base 64 encoding with URI and filename safe
-     * alphabet.
-     *
-     * @link http://tools.ietf.org/html/rfc4648#section-5
-     *
-     * @param string $data The encoded data.
-     *
-     * @return string                             The decoded data.
-     * @throws Exception\InvalidEncodingException If the encoding is invalid.
-     */
-    protected function base64UriDecode($data)
-    {
-        $data = base64_decode(
-            str_pad(
-                strtr($data, '-_', '+/'),
-                strlen($data) % 4,
-                '=',
-                STR_PAD_RIGHT
-            ),
-            true
-        );
-        if (false === $data) {
-            throw new Exception\InvalidEncodingException;
-        }
-
-        return $data;
-    }
+    private static $instance;
+    private $base64UrlDecoder;
 }

@@ -11,23 +11,47 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\EncoderInterface;
+
 /**
  * The standard Lockbox encryption cipher.
  */
 class EncryptionCipher implements EncryptionCipherInterface
 {
     /**
+     * Get the static instance of this cipher.
+     *
+     * @return EncryptionCipherInterface The static cipher.
+     */
+    public static function instance()
+    {
+        if (null === self::$instance) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
+    }
+
+    /**
      * Construct a new encryption cipher.
      *
-     * @param integer|null $randomSource The random source to use.
+     * @param integer|null          $randomSource     The random source to use.
+     * @param EncoderInterface|null $base64UrlEncoder The base64url encoder to use.
      */
-    public function __construct($randomSource = null)
-    {
+    public function __construct(
+        $randomSource = null,
+        EncoderInterface $base64UrlEncoder = null
+    ) {
         if (null === $randomSource) {
             $randomSource = MCRYPT_DEV_URANDOM;
         }
+        if (null === $base64UrlEncoder) {
+            $base64UrlEncoder = Base64Url::instance();
+        }
 
         $this->randomSource = $randomSource;
+        $this->base64UrlEncoder = $base64UrlEncoder;
     }
 
     /**
@@ -41,6 +65,16 @@ class EncryptionCipher implements EncryptionCipherInterface
     }
 
     /**
+     * Get the base64url encoder.
+     *
+     * @return EncoderInterface The base64url encoder.
+     */
+    public function base64UrlEncoder()
+    {
+        return $this->base64UrlEncoder;
+    }
+
+    /**
      * Encrypt a data packet.
      *
      * @param Key\KeyInterface $key  The key to encrypt with.
@@ -50,31 +84,12 @@ class EncryptionCipher implements EncryptionCipherInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        $generatedKey = $this->generateKey();
         $iv = $this->generateIv();
-        $publicKey = $key->publicKey();
 
-        openssl_public_encrypt(
-            $generatedKey . $iv,
-            $encryptedKeyAndIv,
-            $publicKey->handle(),
-            OPENSSL_PKCS1_OAEP_PADDING
+        return $this->base64UrlEncoder()->encode(
+            $iv .
+            $this->encryptAes($key->data(), $iv, $data . sha1($data, true))
         );
-
-        return $this->base64UriEncode(
-            $encryptedKeyAndIv .
-            $this->encryptAes($generatedKey, $iv, $data . sha1($data, true))
-        );
-    }
-
-    /**
-     * Generate an encryption key.
-     *
-     * @return string The encryption key.
-     */
-    protected function generateKey()
-    {
-        return mcrypt_create_iv(32, $this->randomSource());
     }
 
     /**
@@ -123,20 +138,7 @@ class EncryptionCipher implements EncryptionCipherInterface
         return $data . str_repeat(chr($padSize), $padSize);
     }
 
-    /**
-     * Encode a string using Base 64 encoding with URI and filename safe
-     * alphabet.
-     *
-     * @link http://tools.ietf.org/html/rfc4648#section-5
-     *
-     * @param string $data The data to encode.
-     *
-     * @return string The encoded data.
-     */
-    protected function base64UriEncode($data)
-    {
-        return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
-    }
-
+    private static $instance;
     private $randomSource;
+    private $base64UrlEncoder;
 }

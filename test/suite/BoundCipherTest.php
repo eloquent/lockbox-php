@@ -19,28 +19,22 @@ class BoundCipherTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->keyFactory = new Key\KeyFactory;
-        $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
-            __DIR__ . '/../fixture/pem/rsa-2048-nopass.private.pem'
-        );
+        $this->key = new Key\Key('1234567890123456');
         $this->encryptionCipher = new EncryptionCipher;
         $this->decryptionCipher = new DecryptionCipher;
-        $this->cipher = new BoundCipher($this->privateKey, $this->encryptionCipher, $this->decryptionCipher);
-
-        $this->publicKey = $this->privateKey->publicKey();
+        $this->cipher = new BoundCipher($this->key, $this->encryptionCipher, $this->decryptionCipher);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->privateKey, $this->cipher->privateKey());
+        $this->assertSame($this->key, $this->cipher->key());
         $this->assertSame($this->encryptionCipher, $this->cipher->encryptionCipher());
         $this->assertSame($this->decryptionCipher, $this->cipher->decryptionCipher());
-        $this->assertSame($this->publicKey->string(), $this->cipher->publicKey()->string());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundCipher($this->privateKey);
+        $this->cipher = new BoundCipher($this->key);
 
         $this->assertEquals($this->encryptionCipher, $this->cipher->encryptionCipher());
         $this->assertEquals($this->decryptionCipher, $this->cipher->decryptionCipher());

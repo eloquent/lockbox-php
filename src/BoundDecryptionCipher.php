@@ -19,11 +19,11 @@ class BoundDecryptionCipher implements BoundDecryptionCipherInterface
     /**
      * Construct a new bound decryption cipher.
      *
-     * @param Key\PrivateKeyInterface        $key    The key to use.
+     * @param Key\KeyInterface               $key    The key to use.
      * @param DecryptionCipherInterface|null $cipher The cipher to use.
      */
     public function __construct(
-        Key\PrivateKeyInterface $key,
+        Key\KeyInterface $key,
         DecryptionCipherInterface $cipher = null
     ) {
         if (null === $cipher) {
@@ -37,7 +37,7 @@ class BoundDecryptionCipher implements BoundDecryptionCipherInterface
     /**
      * Get the key.
      *
-     * @return Key\PrivateKeyInterface The key.
+     * @return Key\KeyInterface The key.
      */
     public function key()
     {

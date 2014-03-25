@@ -13,33 +13,30 @@ namespace Eloquent\Lockbox;
 
 use PHPUnit_Framework_TestCase;
 
-class BoundDecryptionCipherTest extends PHPUnit_Framework_TestCase
+class BoundEncryptionCipherTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->keyFactory = new Key\KeyFactory;
-        $this->key = $this->keyFactory->createPrivateKeyFromFile(
-            __DIR__ . '/../fixture/pem/rsa-2048-nopass.private.pem'
-        );
-        $this->decryptionCipher = new DecryptionCipher;
-        $this->cipher = new BoundDecryptionCipher($this->key, $this->decryptionCipher);
+        $this->key = new Key\Key('1234567890123456');
+        $this->encryptionCipher = new EncryptionCipher;
+        $this->cipher = new BoundEncryptionCipher($this->key, $this->encryptionCipher);
 
-        $this->encryptionCipher = new BoundEncryptionCipher($this->key->publicKey());
+        $this->decryptionCipher = new BoundDecryptionCipher($this->key);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->key, $this->cipher->key());
-        $this->assertSame($this->decryptionCipher, $this->cipher->cipher());
+        $this->assertSame($this->encryptionCipher, $this->cipher->cipher());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundDecryptionCipher($this->key);
+        $this->cipher = new BoundEncryptionCipher($this->key);
 
-        $this->assertEquals($this->decryptionCipher, $this->cipher->cipher());
+        $this->assertEquals($this->encryptionCipher, $this->cipher->cipher());
     }
 
     public function encryptionData()
@@ -56,8 +53,8 @@ class BoundDecryptionCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($data)
     {
-        $encrypted = $this->encryptionCipher->encrypt($data);
-        $decrypted = $this->cipher->decrypt($encrypted);
+        $encrypted = $this->cipher->encrypt($data);
+        $decrypted = $this->decryptionCipher->decrypt($encrypted);
 
         $this->assertSame($data, $decrypted);
     }

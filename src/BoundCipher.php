@@ -19,12 +19,12 @@ class BoundCipher implements BoundCipherInterface
     /**
      * Construct a new bound bi-directional encryption cipher.
      *
-     * @param Key\PrivateKeyInterface        $privateKey       The key to use.
+     * @param Key\KeyInterface               $key              The key to use.
      * @param EncryptionCipherInterface|null $encryptionCipher The encryption cipher to use.
      * @param DecryptionCipherInterface|null $decryptionCipher The decryption cipher to use.
      */
     public function __construct(
-        Key\PrivateKeyInterface $privateKey,
+        Key\KeyInterface $key,
         EncryptionCipherInterface $encryptionCipher = null,
         DecryptionCipherInterface $decryptionCipher = null
     ) {
@@ -35,30 +35,19 @@ class BoundCipher implements BoundCipherInterface
             $decryptionCipher = new DecryptionCipher;
         }
 
-        $this->privateKey = $privateKey;
-        $this->publicKey = $privateKey->publicKey();
+        $this->key = $key;
         $this->encryptionCipher = $encryptionCipher;
         $this->decryptionCipher = $decryptionCipher;
     }
 
     /**
-     * Get the private key.
+     * Get the key.
      *
-     * @return Key\PrivateKeyInterface The private key.
+     * @return Key\KeyInterface The key.
      */
-    public function privateKey()
+    public function key()
     {
-        return $this->privateKey;
-    }
-
-    /**
-     * Get the public key.
-     *
-     * @return Key\PublicKeyInterface The public key.
-     */
-    public function publicKey()
-    {
-        return $this->publicKey;
+        return $this->key;
     }
 
     /**
@@ -90,7 +79,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->encryptionCipher()->encrypt($this->publicKey(), $data);
+        return $this->encryptionCipher()->encrypt($this->key(), $data);
     }
 
     /**
@@ -103,11 +92,10 @@ class BoundCipher implements BoundCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->decryptionCipher()->decrypt($this->privateKey(), $data);
+        return $this->decryptionCipher()->decrypt($this->key(), $data);
     }
 
-    private $privateKey;
-    private $publicKey;
+    private $key;
     private $encryptionCipher;
     private $decryptionCipher;
 }

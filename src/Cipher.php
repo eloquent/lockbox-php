@@ -17,6 +17,20 @@ namespace Eloquent\Lockbox;
 class Cipher implements CipherInterface
 {
     /**
+     * Get the static instance of this cipher.
+     *
+     * @return CipherInterface The static cipher.
+     */
+    public static function instance()
+    {
+        if (null === self::$instance) {
+            self::$instance = new self;
+        }
+
+        return self::$instance;
+    }
+
+    /**
      * Construct a new bi-directional encryption cipher.
      *
      * @param EncryptionCipherInterface|null $encryptionCipher The encryption cipher to use.
@@ -27,10 +41,10 @@ class Cipher implements CipherInterface
         DecryptionCipherInterface $decryptionCipher = null
     ) {
         if (null === $encryptionCipher) {
-            $encryptionCipher = new EncryptionCipher;
+            $encryptionCipher = EncryptionCipher::instance();
         }
         if (null === $decryptionCipher) {
-            $decryptionCipher = new DecryptionCipher;
+            $decryptionCipher = DecryptionCipher::instance();
         }
 
         $this->encryptionCipher = $encryptionCipher;
@@ -73,17 +87,18 @@ class Cipher implements CipherInterface
     /**
      * Decrypt a data packet.
      *
-     * @param Key\PrivateKeyInterface $key  The key to decrypt with.
-     * @param string                  $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    public function decrypt(Key\PrivateKeyInterface $key, $data)
+    public function decrypt(Key\KeyInterface $key, $data)
     {
         return $this->decryptionCipher()->decrypt($key, $data);
     }
 
+    private static $instance;
     private $encryptionCipher;
     private $decryptionCipher;
 }
