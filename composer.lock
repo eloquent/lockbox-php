@@ -3,26 +3,27 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "6923824c756f051b6c9d86c0fa8e50dd",
+    "hash": "d74c7e772940ee4daa72d625ba180f71",
     "packages": [
         {
             "name": "eloquent/endec",
-            "version": "0.1.0",
+            "version": "0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eloquent/endec.git",
-                "reference": "07c98a9e5c2697a6b191229a34e3536d7ec9ea8b"
+                "reference": "cd4399ba173ee27a535677d352117310153c4084"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eloquent/endec/zipball/07c98a9e5c2697a6b191229a34e3536d7ec9ea8b",
-                "reference": "07c98a9e5c2697a6b191229a34e3536d7ec9ea8b",
+                "url": "https://api.github.com/repos/eloquent/endec/zipball/cd4399ba173ee27a535677d352117310153c4084",
+                "reference": "cd4399ba173ee27a535677d352117310153c4084",
                 "shasum": ""
             },
             "require": {
+                "evenement/evenement": ">=1,<3",
                 "icecave/isolator": "~2",
-                "php": ">=5.4",
-                "react/stream": "~0.4.0"
+                "php": ">=5.3",
+                "react/stream": ">=0.3,<0.5"
             },
             "require-dev": {
                 "eloquent/liberator": "~2",
@@ -68,7 +69,7 @@
                 "stream",
                 "streaming"
             ],
-            "time": "2014-03-19 12:07:29"
+            "time": "2014-03-25 11:24:59"
         },
         {
             "name": "evenement/evenement",
@@ -584,13 +585,13 @@
             "version": "v1.0.3",
             "source": {
                 "type": "git",
-                "url": "git://github.com/mlively/Phake.git",
-                "reference": "v1.0.3"
+                "url": "https://github.com/mlively/Phake.git",
+                "reference": "4d822246b401f4dc609500d47e42dac8df645f4f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/mlively/Phake/zipball/v1.0.3",
-                "reference": "v1.0.3",
+                "url": "https://api.github.com/repos/mlively/Phake/zipball/4d822246b401f4dc609500d47e42dac8df645f4f",
+                "reference": "4d822246b401f4dc609500d47e42dac8df645f4f",
                 "shasum": ""
             },
             "require": {
@@ -621,7 +622,7 @@
                 "mock",
                 "testing"
             ],
-            "time": "2012-05-14 08:06:51"
+            "time": "2012-05-14 15:06:51"
         },
         {
             "name": "pimple/pimple",
@@ -658,7 +659,9 @@
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
                 }
             ],
             "description": "Pimple is a simple Dependency Injection Container for PHP 5.3",
@@ -674,13 +677,13 @@
             "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/php-fig/log",
-                "reference": "1.0.0"
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/php-fig/log/archive/1.0.0.zip",
-                "reference": "1.0.0",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/fe0936ee26643249e916849d48e3a51d5f5e278b",
+                "reference": "fe0936ee26643249e916849d48e3a51d5f5e278b",
                 "shasum": ""
             },
             "type": "library",
@@ -713,12 +716,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Sami.git",
-                "reference": "v1.1"
+                "reference": "46c58957ce4823c613e8535626b81e2fd80a9865"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Sami/zipball/v1.1",
-                "reference": "v1.1",
+                "url": "https://api.github.com/repos/fabpot/Sami/zipball/46c58957ce4823c613e8535626b81e2fd80a9865",
+                "reference": "46c58957ce4823c613e8535626b81e2fd80a9865",
                 "shasum": ""
             },
             "require": {
@@ -754,7 +757,9 @@
             "authors": [
                 {
                     "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
+                    "email": "fabien@symfony.com",
+                    "homepage": "http://fabien.potencier.org",
+                    "role": "Lead Developer"
                 }
             ],
             "description": "Sami, an API documentation generator",
