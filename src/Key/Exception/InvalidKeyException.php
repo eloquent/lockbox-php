@@ -14,15 +14,15 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 
 /**
- * The supplied key is not a valid PEM formatted private key.
+ * The supplied key is invalid.
  */
-final class InvalidPrivateKeyException extends Exception implements
+final class InvalidKeyException extends Exception implements
     InvalidKeyExceptionInterface
 {
     /**
-     * Construct a new invalid private key exception.
+     * Construct a new invalid key exception.
      *
-     * @param string         $key      The key.
+     * @param mixed          $key      The invalid key.
      * @param Exception|null $previous The cause, if available.
      */
     public function __construct($key, Exception $previous = null)
@@ -30,16 +30,16 @@ final class InvalidPrivateKeyException extends Exception implements
         $this->key = $key;
 
         parent::__construct(
-            'The supplied key is not a valid PEM formatted private key.',
+            sprintf('Invalid key %s.', var_export($key, true)),
             0,
             $previous
         );
     }
 
     /**
-     * Get the key.
+     * Get the invalid key.
      *
-     * @return string The key.
+     * @return mixed The key.
      */
     public function key()
     {

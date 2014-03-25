@@ -17,6 +17,27 @@ namespace Eloquent\Lockbox\Key;
 interface KeyInterface
 {
     /**
+     * Get the raw key data.
+     *
+     * @return string The raw key data.
+     */
+    public function data();
+
+    /**
+     * Get the name.
+     *
+     * @return string|null The name, or null if the key has no name.
+     */
+    public function name();
+
+    /**
+     * Get the description.
+     *
+     * @return string|null The description, or null if the key has no description.
+     */
+    public function description();
+
+    /**
      * Get the size of the key in bits.
      *
      * @return integer The size of the key in bits.
@@ -24,27 +45,11 @@ interface KeyInterface
     public function size();
 
     /**
-     * Get the modulus.
+     * Get the string representation of this key.
      *
-     * @return string The modulus.
+     * @return string The string representation.
      */
-    public function modulus();
-
-    /**
-     * Get the public exponent.
-     *
-     * @return string The public exponent.
-     */
-    public function publicExponent();
-
-    /**
-     * Get the public key for this key.
-     *
-     * @param KeyFactoryInterface|null $factory The key factory to use.
-     *
-     * @return PublicKeyInterface The public key.
-     */
-    public function publicKey(KeyFactoryInterface $factory = null);
+    public function string();
 
     /**
      * Get the string representation of this key.
