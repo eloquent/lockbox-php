@@ -29,22 +29,22 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
 
     public function testGeneratingKey()
     {
-        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{43}$/');
+        $this->expectOutputString('');
 
         $keyGenerator = new KeyGenerator;
-
         $key = $keyGenerator->generateKey();
-        echo $key->string(); // outputs the raw key in base64url format
     }
 
     public function testEncryptingData()
     {
+        $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{86}$/');
 
         $data = 'Super secret data.';
 
+        // $keyPath = '/path/to/lockbox.key';
         $keyReader = new KeyReader;
-        $key = $keyReader->readFile($this->fixturePath . '/key256.lockbox.key');
+        $key = $keyReader->readFile($keyPath);
 
         $cipher = new EncryptionCipher;
         echo $cipher->encrypt($key, $data);
@@ -52,6 +52,7 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
 
     public function testEncryptingMultipleData()
     {
+        $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{258}$/');
 
         $data = array(
@@ -60,8 +61,9 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
             'Mega secret data.',
         );
 
+        // $keyPath = '/path/to/lockbox.key';
         $keyReader = new KeyReader;
-        $key = $keyReader->readFile($this->fixturePath . '/key256.lockbox.key');
+        $key = $keyReader->readFile($keyPath);
 
         $cipher = new BoundEncryptionCipher($key);
 
@@ -73,6 +75,7 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptingData()
     {
+        $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputString('Super secret data.');
 
         $encrypted =
@@ -80,15 +83,16 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
             'f8q8wp_4wC65kYnCk1FHakcxxFgMgDeK' .
             'cNpn1J6DfIPh_hjqmDw5UA';
 
+        // $keyPath = '/path/to/lockbox.key';
         $keyReader = new KeyReader;
-        $key = $keyReader->readFile($this->fixturePath . '/key256.lockbox.key');
+        $key = $keyReader->readFile($keyPath);
 
         $cipher = new DecryptionCipher;
 
         try {
             $data = $cipher->decrypt($key, $encrypted);
         } catch (DecryptionFailedException $e) {
-            // decryption failed
+            echo 'Decryption failed.';
         }
 
         echo $data;
@@ -96,6 +100,7 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptingMultipleData()
     {
+        $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputString('');
 
         $encrypted = array(
@@ -110,8 +115,9 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
             'a-Y9SjtPlF4_OA4qeZV_uA',
         );
 
+        // $keyPath = '/path/to/lockbox.key';
         $keyReader = new KeyReader;
-        $key = $keyReader->readFile($this->fixturePath . '/key256.lockbox.key');
+        $key = $keyReader->readFile($keyPath);
 
         $cipher = new BoundDecryptionCipher($key);
 
@@ -119,10 +125,8 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
             try {
                 $data = $cipher->decrypt($string);
             } catch (DecryptionFailedException $e) {
-                // decryption failed
+            echo 'Decryption failed.';
             }
         }
-
-        $this->assertTrue(true);
     }
 }
