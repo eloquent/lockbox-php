@@ -38,9 +38,6 @@ this feature is planned.
 
 ### Encrypting data
 
-**Note:** Encryption only requires a public key, but *Lockbox* will also accept
-private keys, as in this example.
-
 ```php
 use Eloquent\Lockbox\EncryptionCipher;
 use Eloquent\Lockbox\Key\KeyReader;
@@ -59,9 +56,6 @@ echo $cipher->encrypt($key, $data);
 
 *Lockbox* includes 'bound' ciphers that are locked to a particular key. These
 type of ciphers are convenient for encrypting multiple data packets.
-
-**Note:** Encryption only requires a public key, but *Lockbox* will also accept
-private keys, as in this example.
 
 ```php
 use Eloquent\Lockbox\BoundEncryptionCipher;
