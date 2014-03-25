@@ -30,7 +30,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
         $this->keyFactory = new Key\KeyFactory;
         $this->privateKey = $this->keyFactory->createPrivateKeyFromFile(
-            __DIR__ . '/../../../fixture/pem/rsa-2048-nopass.private.pem'
+            __DIR__ . '/../fixture/pem/rsa-2048-nopass.private.pem'
         );
         $this->publicKey = $this->privateKey->publicKey();
     }

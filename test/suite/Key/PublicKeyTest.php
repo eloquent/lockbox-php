@@ -25,7 +25,7 @@ class PublicKeyTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->factory = new KeyFactory;
-        $this->fixturePath = __DIR__ . '/../../../../fixture/pem';
+        $this->fixturePath = __DIR__ . '/../../fixture/pem';
 
         $this->key = $this->factory->createPublicKeyFromFile($this->fixturePath . '/rsa-2048-nopass.public.pem');
     }

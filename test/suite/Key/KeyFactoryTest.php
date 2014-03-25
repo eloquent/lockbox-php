@@ -24,7 +24,7 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
         $this->isolator = Phake::partialMock(Isolator::className());
         $this->factory = new KeyFactory($this->isolator);
 
-        $this->fixturePath = __DIR__ . '/../../../../fixture/pem';
+        $this->fixturePath = __DIR__ . '/../../fixture/pem';
         $this->privateKeyString = <<<'EOD'
 -----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED

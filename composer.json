@@ -1,7 +1,7 @@
 {
     "name": "eloquent/lockbox",
     "description": "Simple, strong encryption.",
-    "keywords": ["encryption", "openssl", "rsa", "aes", "two", "way", "security", "strong", "simple", "asymmetric", "key"],
+    "keywords": ["encryption", "mcrypt", "aes", "two", "way", "security", "strong", "simple", "symmetric", "key"],
     "homepage": "https://github.com/eloquent/lockbox-php",
     "license": "MIT",
     "authors": [
@@ -18,13 +18,13 @@
         "icecave/isolator": "~2"
     },
     "require-dev": {
-        "eloquent/asplode": "~1",
-        "eloquent/liberator": "~1",
+        "eloquent/asplode": "~2",
+        "eloquent/liberator": "~2",
         "icecave/archer": "~1"
     },
     "autoload": {
-        "psr-0": {
-            "Eloquent\\Lockbox": "src"
+        "psr-4": {
+            "Eloquent\\Lockbox\\": "src"
         }
     }
 }
