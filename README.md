@@ -108,7 +108,7 @@ $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
-$descrypter = new BoundDecrypter($key);
+$decrypter = new BoundDecrypter($key);
 
 $encrypted = array(
     '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
@@ -121,7 +121,7 @@ $encrypted = array(
 
 foreach ($encrypted as $string) {
     try {
-        echo $descrypter->decrypt($string);
+        echo $decrypter->decrypt($string);
     } catch (DecryptionFailedException $e) {
         echo 'Decryption failed.';
     }
