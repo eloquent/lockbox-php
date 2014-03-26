@@ -13,30 +13,30 @@ namespace Eloquent\Lockbox;
 
 use PHPUnit_Framework_TestCase;
 
-class BoundDecryptionCipherTest extends PHPUnit_Framework_TestCase
+class BoundDecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
         $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
-        $this->decryptionCipher = new DecryptionCipher;
-        $this->cipher = new BoundDecryptionCipher($this->key, $this->decryptionCipher);
+        $this->innerDecrypter = new Decrypter;
+        $this->decrypter = new BoundDecrypter($this->key, $this->innerDecrypter);
 
-        $this->encryptionCipher = new BoundEncryptionCipher($this->key);
+        $this->encrypter = new BoundEncrypter($this->key);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->cipher->key());
-        $this->assertSame($this->decryptionCipher, $this->cipher->cipher());
+        $this->assertSame($this->key, $this->decrypter->key());
+        $this->assertSame($this->innerDecrypter, $this->decrypter->decrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundDecryptionCipher($this->key);
+        $this->decrypter = new BoundDecrypter($this->key);
 
-        $this->assertEquals($this->decryptionCipher, $this->cipher->cipher());
+        $this->assertSame(Decrypter::instance(), $this->decrypter->decrypter());
     }
 
     public function encryptionData()
@@ -53,8 +53,8 @@ class BoundDecryptionCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($data)
     {
-        $encrypted = $this->encryptionCipher->encrypt($data);
-        $decrypted = $this->cipher->decrypt($encrypted);
+        $encrypted = $this->encrypter->encrypt($data);
+        $decrypted = $this->decrypter->decrypt($encrypted);
 
         $this->assertSame($data, $decrypted);
     }

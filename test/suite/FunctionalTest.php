@@ -9,8 +9,8 @@
  * that was distributed with this source code.
  */
 
-use Eloquent\Lockbox\DecryptionCipher;
-use Eloquent\Lockbox\EncryptionCipher;
+use Eloquent\Lockbox\Decrypter;
+use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyGenerator;
 
@@ -21,8 +21,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encryptionCipher = new EncryptionCipher($this->randomSource);
-        $this->decryptionCipher = new DecryptionCipher;
+        $this->encrypter = new Encrypter($this->randomSource);
+        $this->decrypter = new Decrypter;
         $this->keyGenerator = new KeyGenerator;
     }
 
@@ -83,7 +83,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     public function testSpecVectorsEncryption($bits, $data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $actual = $this->encryptionCipher->encrypt(new Key($encryptionSecret, $authenticationSecret), $data);
+        $actual = $this->encrypter->encrypt(new Key($encryptionSecret, $authenticationSecret), $data);
 
         $this->assertSame($encrypted, $actual);
     }
@@ -95,7 +95,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame(
             $data,
-            $this->decryptionCipher->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted)
+            $this->decrypter->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted)
         );
     }
 
@@ -103,8 +103,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         $key = $this->keyGenerator->generateKey();
-        $encrypted = $this->encryptionCipher->encrypt($key, 'foobar');
-        $decrypted = $this->decryptionCipher->decrypt($key, $encrypted);
+        $encrypted = $this->encrypter->encrypt($key, 'foobar');
+        $decrypted = $this->decrypter->decrypt($key, $encrypted);
 
         $this->assertSame('foobar', $decrypted);
     }

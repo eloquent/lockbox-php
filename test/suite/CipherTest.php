@@ -17,8 +17,8 @@ use PHPUnit_Framework_TestCase;
 
 /**
  * @covers \Eloquent\Lockbox\Cipher
- * @covers \Eloquent\Lockbox\EncryptionCipher
- * @covers \Eloquent\Lockbox\DecryptionCipher
+ * @covers \Eloquent\Lockbox\Encrypter
+ * @covers \Eloquent\Lockbox\Decrypter
  */
 class CipherTest extends PHPUnit_Framework_TestCase
 {
@@ -26,9 +26,9 @@ class CipherTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->encryptionCipher = new EncryptionCipher;
-        $this->decryptionCipher = new DecryptionCipher;
-        $this->cipher = new Cipher($this->encryptionCipher, $this->decryptionCipher);
+        $this->encrypter = new Encrypter;
+        $this->decrypter = new Decrypter;
+        $this->cipher = new Cipher($this->encrypter, $this->decrypter);
 
         $this->key128 = new Key\Key('1234567890123456', '12345678901234567890123456789013', 'key128');
         $this->key192 = new Key\Key('123456789012345678901234', '12345678901234567890123456789013', 'key192');
@@ -39,16 +39,16 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->encryptionCipher, $this->cipher->encryptionCipher());
-        $this->assertSame($this->decryptionCipher, $this->cipher->decryptionCipher());
+        $this->assertSame($this->encrypter, $this->cipher->encrypter());
+        $this->assertSame($this->decrypter, $this->cipher->decrypter());
     }
 
     public function testConstructorDefaults()
     {
         $this->cipher = new Cipher;
 
-        $this->assertSame(EncryptionCipher::instance(), $this->cipher->encryptionCipher());
-        $this->assertSame(DecryptionCipher::instance(), $this->cipher->decryptionCipher());
+        $this->assertSame(Encrypter::instance(), $this->cipher->encrypter());
+        $this->assertSame(Decrypter::instance(), $this->cipher->decrypter());
     }
 
     public function encryptionData()

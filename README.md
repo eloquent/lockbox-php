@@ -39,41 +39,41 @@ this feature is planned.
 ### Encrypting data
 
 ```php
-use Eloquent\Lockbox\EncryptionCipher;
+use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
-$cipher = new EncryptionCipher;
-echo $cipher->encrypt($key, 'Super secret data.');
+$encrypter = new Encrypter;
+echo $encrypter->encrypt($key, 'Super secret data.');
 ```
 
 ### Encrypting multiple data packets with the same key
 
-*Lockbox* includes 'bound' ciphers that are locked to a particular key. These
-type of ciphers are convenient for encrypting multiple data packets.
+*Lockbox* includes 'bound' encrypters that are locked to a particular key, which
+are convenient for encrypting multiple data packets.
 
 ```php
-use Eloquent\Lockbox\BoundEncryptionCipher;
+use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Key\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
-$cipher = new BoundEncryptionCipher($key);
+$encrypter = new BoundEncrypter($key);
 
-echo $cipher->encrypt('Super secret data.');
-echo $cipher->encrypt('Extra secret data.');
-echo $cipher->encrypt('Mega secret data.');
+echo $encrypter->encrypt('Super secret data.');
+echo $encrypter->encrypt('Extra secret data.');
+echo $encrypter->encrypt('Mega secret data.');
 ```
 
 ### Decrypting data
 
 ```php
-use Eloquent\Lockbox\DecryptionCipher;
+use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyReader;
 
@@ -81,14 +81,14 @@ $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
-$cipher = new DecryptionCipher;
+$decrypter = new Decrypter;
 
 $encrypted =
     '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
     'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc';
 
 try {
-    echo $cipher->decrypt($key, $encrypted);
+    echo $decrypter->decrypt($key, $encrypted);
 } catch (DecryptionFailedException $e) {
     echo 'Decryption failed.';
 }
@@ -96,11 +96,11 @@ try {
 
 ### Decrypting multiple data packets with the same key
 
-*Lockbox* includes 'bound' ciphers that are locked to a particular key. These
-type of ciphers are convenient for decrypting multiple data packets.
+*Lockbox* includes 'bound' decrypters that are locked to a particular key, which
+are convenient for decrypting multiple data packets.
 
 ```php
-use Eloquent\Lockbox\BoundDecryptionCipher;
+use Eloquent\Lockbox\BoundDecrypter;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyReader;
 
@@ -108,7 +108,7 @@ $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
-$cipher = new BoundDecryptionCipher($key);
+$descrypter = new BoundDecrypter($key);
 
 $encrypted = array(
     '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
@@ -121,7 +121,7 @@ $encrypted = array(
 
 foreach ($encrypted as $string) {
     try {
-        echo $cipher->decrypt($string);
+        echo $descrypter->decrypt($string);
     } catch (DecryptionFailedException $e) {
         echo 'Decryption failed.';
     }

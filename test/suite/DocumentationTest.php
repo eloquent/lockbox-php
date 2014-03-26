@@ -9,10 +9,10 @@
  * that was distributed with this source code.
  */
 
-use Eloquent\Lockbox\BoundDecryptionCipher;
-use Eloquent\Lockbox\BoundEncryptionCipher;
-use Eloquent\Lockbox\DecryptionCipher;
-use Eloquent\Lockbox\EncryptionCipher;
+use Eloquent\Lockbox\BoundDecrypter;
+use Eloquent\Lockbox\BoundEncrypter;
+use Eloquent\Lockbox\Decrypter;
+use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyGenerator;
@@ -28,17 +28,19 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         $this->fixturePath = __DIR__ . '/../fixture/key';
     }
 
+    // =========================================================================
+
     public function testGeneratingAndWritingKey()
     {
         $keyPath = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->expectOutputString('');
 
-        $keyGenerator = new KeyGenerator;
-        $key = $keyGenerator->generateKey();
+$keyGenerator = new KeyGenerator;
+$key = $keyGenerator->generateKey();
 
-        // $keyPath = '/path/to/lockbox.key';
-        $keyWriter = new KeyWriter;
-        $keyWriter->writeFile($key, $keyPath);
+// $keyPath = '/path/to/lockbox.key';
+$keyWriter = new KeyWriter;
+$keyWriter->writeFile($key, $keyPath);
 
         $this->assertRegExp(
             '/{"type":"lockbox-key","version":1,' .
@@ -48,83 +50,91 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    // =========================================================================
+
     public function testEncryptingData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{107}$/');
 
-        // $keyPath = '/path/to/lockbox.key';
-        $keyReader = new KeyReader;
-        $key = $keyReader->readFile($keyPath);
+// $keyPath = '/path/to/lockbox.key';
+$keyReader = new KeyReader;
+$key = $keyReader->readFile($keyPath);
 
-        $cipher = new EncryptionCipher;
-        echo $cipher->encrypt($key, 'Super secret data.');
+$encrypter = new Encrypter;
+echo $encrypter->encrypt($key, 'Super secret data.');
     }
+
+    // =========================================================================
 
     public function testEncryptingMultipleData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{321}$/');
 
-        // $keyPath = '/path/to/lockbox.key';
-        $keyReader = new KeyReader;
-        $key = $keyReader->readFile($keyPath);
+// $keyPath = '/path/to/lockbox.key';
+$keyReader = new KeyReader;
+$key = $keyReader->readFile($keyPath);
 
-        $cipher = new BoundEncryptionCipher($key);
+$encrypter = new BoundEncrypter($key);
 
-        echo $cipher->encrypt('Super secret data.');
-        echo $cipher->encrypt('Extra secret data.');
-        echo $cipher->encrypt('Mega secret data.');
+echo $encrypter->encrypt('Super secret data.');
+echo $encrypter->encrypt('Extra secret data.');
+echo $encrypter->encrypt('Mega secret data.');
     }
+
+    // =========================================================================
 
     public function testDecryptingData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputString('Super secret data.');
 
-        // $keyPath = '/path/to/lockbox.key';
-        $keyReader = new KeyReader;
-        $key = $keyReader->readFile($keyPath);
+// $keyPath = '/path/to/lockbox.key';
+$keyReader = new KeyReader;
+$key = $keyReader->readFile($keyPath);
 
-        $cipher = new DecryptionCipher;
+$decrypter = new Decrypter;
 
-        $encrypted =
-            '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
-            'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc';
+$encrypted =
+    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
+    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc';
 
-        try {
-            echo $cipher->decrypt($key, $encrypted);
-        } catch (DecryptionFailedException $e) {
-            echo 'Decryption failed.';
-        }
+try {
+    echo $decrypter->decrypt($key, $encrypted);
+} catch (DecryptionFailedException $e) {
+    echo 'Decryption failed.';
+}
     }
+
+    // =========================================================================
 
     public function testDecryptingMultipleData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
         $this->expectOutputString('Super secret data.Extra secret data.Mega secret data.');
 
-        // $keyPath = '/path/to/lockbox.key';
-        $keyReader = new KeyReader;
-        $key = $keyReader->readFile($keyPath);
+// $keyPath = '/path/to/lockbox.key';
+$keyReader = new KeyReader;
+$key = $keyReader->readFile($keyPath);
 
-        $cipher = new BoundDecryptionCipher($key);
+$descrypter = new BoundDecrypter($key);
 
-        $encrypted = array(
-            '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
-            'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc',
-            'a-6y2yEe-yVPM5om7BIQK3nJHgvNJbazvR0gQj3xPgBoR_mDEdFSU9Xt7Ea1EpZB' .
-            'eopzBRnP5OdiTZQ76RVV7xZ4-Ym1qRzSJ-JPtdMI7Zo',
-            'sxLpTbj1ilbw48M721J-Mb492lShhbDLlRQcp54UTzGRUdHd_8OlKFkIea51b1sq' .
-            'k16JtnZqaXxHQCThmdE1pBTWvhQNOCK2XPizrdSTLf0',
-        );
+$encrypted = array(
+    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
+    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc',
+    'a-6y2yEe-yVPM5om7BIQK3nJHgvNJbazvR0gQj3xPgBoR_mDEdFSU9Xt7Ea1EpZB' .
+    'eopzBRnP5OdiTZQ76RVV7xZ4-Ym1qRzSJ-JPtdMI7Zo',
+    'sxLpTbj1ilbw48M721J-Mb492lShhbDLlRQcp54UTzGRUdHd_8OlKFkIea51b1sq' .
+    'k16JtnZqaXxHQCThmdE1pBTWvhQNOCK2XPizrdSTLf0',
+);
 
-        foreach ($encrypted as $string) {
-            try {
-                echo $cipher->decrypt($string);
-            } catch (DecryptionFailedException $e) {
-                echo 'Decryption failed.';
-            }
-        }
+foreach ($encrypted as $string) {
+    try {
+        echo $descrypter->decrypt($string);
+    } catch (DecryptionFailedException $e) {
+        echo 'Decryption failed.';
+    }
+}
     }
 }

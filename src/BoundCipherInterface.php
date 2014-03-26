@@ -12,10 +12,10 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by bi-directional ciphers that use a bound key.
+ * The interface implemented by ciphers that use a bound key.
  */
 interface BoundCipherInterface extends
-    BoundEncryptionCipherInterface,
-    BoundDecryptionCipherInterface
+    BoundEncrypterInterface,
+    BoundDecrypterInterface
 {
 }

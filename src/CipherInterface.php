@@ -12,10 +12,8 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by bi-directional ciphers.
+ * The interface implemented by ciphers.
  */
-interface CipherInterface extends
-    EncryptionCipherInterface,
-    DecryptionCipherInterface
+interface CipherInterface extends EncrypterInterface, DecrypterInterface
 {
 }

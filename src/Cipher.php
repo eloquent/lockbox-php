@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox bi-directional cipher.
+ * The standard Lockbox cipher.
  */
 class Cipher implements CipherInterface
 {
@@ -31,44 +31,44 @@ class Cipher implements CipherInterface
     }
 
     /**
-     * Construct a new bi-directional encryption cipher.
+     * Construct a new cipher.
      *
-     * @param EncryptionCipherInterface|null $encryptionCipher The encryption cipher to use.
-     * @param DecryptionCipherInterface|null $decryptionCipher The decryption cipher to use.
+     * @param EncrypterInterface|null $encrypter The encrypter to use.
+     * @param DecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
-        EncryptionCipherInterface $encryptionCipher = null,
-        DecryptionCipherInterface $decryptionCipher = null
+        EncrypterInterface $encrypter = null,
+        DecrypterInterface $decrypter = null
     ) {
-        if (null === $encryptionCipher) {
-            $encryptionCipher = EncryptionCipher::instance();
+        if (null === $encrypter) {
+            $encrypter = Encrypter::instance();
         }
-        if (null === $decryptionCipher) {
-            $decryptionCipher = DecryptionCipher::instance();
+        if (null === $decrypter) {
+            $decrypter = Decrypter::instance();
         }
 
-        $this->encryptionCipher = $encryptionCipher;
-        $this->decryptionCipher = $decryptionCipher;
+        $this->encrypter = $encrypter;
+        $this->decrypter = $decrypter;
     }
 
     /**
-     * Get the encryption cipher.
+     * Get the encrypter.
      *
-     * @return EncryptionCipherInterface The encryption cipher.
+     * @return EncrypterInterface The encrypter.
      */
-    public function encryptionCipher()
+    public function encrypter()
     {
-        return $this->encryptionCipher;
+        return $this->encrypter;
     }
 
     /**
-     * Get the decryption cipher.
+     * Get the decrypter.
      *
-     * @return DecryptionCipherInterface The decryption cipher.
+     * @return DecrypterInterface The decrypter.
      */
-    public function decryptionCipher()
+    public function decrypter()
     {
-        return $this->decryptionCipher;
+        return $this->decrypter;
     }
 
     /**
@@ -81,7 +81,7 @@ class Cipher implements CipherInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        return $this->encryptionCipher()->encrypt($key, $data);
+        return $this->encrypter()->encrypt($key, $data);
     }
 
     /**
@@ -95,10 +95,10 @@ class Cipher implements CipherInterface
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
-        return $this->decryptionCipher()->decrypt($key, $data);
+        return $this->decrypter()->decrypt($key, $data);
     }
 
     private static $instance;
-    private $encryptionCipher;
-    private $decryptionCipher;
+    private $encrypter;
+    private $decrypter;
 }

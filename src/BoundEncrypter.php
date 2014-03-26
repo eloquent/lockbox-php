@@ -12,26 +12,26 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox encryption cipher, with a bound key.
+ * The standard Lockbox encrypter, with a bound key.
  */
-class BoundEncryptionCipher implements BoundEncryptionCipherInterface
+class BoundEncrypter implements BoundEncrypterInterface
 {
     /**
-     * Construct a new bound encryption cipher.
+     * Construct a new bound encrypter.
      *
-     * @param Key\KeyInterface               $key    The key to use.
-     * @param EncryptionCipherInterface|null $cipher The cipher to use.
+     * @param Key\KeyInterface        $key       The key to use.
+     * @param EncrypterInterface|null $encrypter The encrypter to use.
      */
     public function __construct(
         Key\KeyInterface $key,
-        EncryptionCipherInterface $cipher = null
+        EncrypterInterface $encrypter = null
     ) {
-        if (null === $cipher) {
-            $cipher = new EncryptionCipher;
+        if (null === $encrypter) {
+            $encrypter = Encrypter::instance();
         }
 
         $this->key = $key;
-        $this->cipher = $cipher;
+        $this->encrypter = $encrypter;
     }
 
     /**
@@ -45,13 +45,13 @@ class BoundEncryptionCipher implements BoundEncryptionCipherInterface
     }
 
     /**
-     * Get the cipher.
+     * Get the encrypter.
      *
-     * @return EncryptionCipherInterface The cipher;
+     * @return EncrypterInterface The encrypter;
      */
-    public function cipher()
+    public function encrypter()
     {
-        return $this->cipher;
+        return $this->encrypter;
     }
 
     /**
@@ -63,9 +63,9 @@ class BoundEncryptionCipher implements BoundEncryptionCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->cipher()->encrypt($this->key(), $data);
+        return $this->encrypter()->encrypt($this->key(), $data);
     }
 
     private $key;
-    private $cipher;
+    private $encrypter;
 }

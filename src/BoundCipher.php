@@ -12,32 +12,32 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox bi-directional cipher, with a bound key.
+ * The standard Lockbox cipher, with a bound key.
  */
 class BoundCipher implements BoundCipherInterface
 {
     /**
-     * Construct a new bound bi-directional encryption cipher.
+     * Construct a new bound cipher.
      *
-     * @param Key\KeyInterface               $key              The key to use.
-     * @param EncryptionCipherInterface|null $encryptionCipher The encryption cipher to use.
-     * @param DecryptionCipherInterface|null $decryptionCipher The decryption cipher to use.
+     * @param Key\KeyInterface        $key       The key to use.
+     * @param EncrypterInterface|null $encrypter The encrypter to use.
+     * @param DecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
         Key\KeyInterface $key,
-        EncryptionCipherInterface $encryptionCipher = null,
-        DecryptionCipherInterface $decryptionCipher = null
+        EncrypterInterface $encrypter = null,
+        DecrypterInterface $decrypter = null
     ) {
-        if (null === $encryptionCipher) {
-            $encryptionCipher = new EncryptionCipher;
+        if (null === $encrypter) {
+            $encrypter = new encrypter;
         }
-        if (null === $decryptionCipher) {
-            $decryptionCipher = new DecryptionCipher;
+        if (null === $decrypter) {
+            $decrypter = new decrypter;
         }
 
         $this->key = $key;
-        $this->encryptionCipher = $encryptionCipher;
-        $this->decryptionCipher = $decryptionCipher;
+        $this->encrypter = $encrypter;
+        $this->decrypter = $decrypter;
     }
 
     /**
@@ -51,23 +51,23 @@ class BoundCipher implements BoundCipherInterface
     }
 
     /**
-     * Get the encryption cipher.
+     * Get the encrypter.
      *
-     * @return EncryptionCipherInterface The encryption cipher.
+     * @return EncrypterInterface The encrypter.
      */
-    public function encryptionCipher()
+    public function encrypter()
     {
-        return $this->encryptionCipher;
+        return $this->encrypter;
     }
 
     /**
-     * Get the decryption cipher.
+     * Get the decrypter.
      *
-     * @return DecryptionCipherInterface The decryption cipher.
+     * @return DecrypterInterface The decrypter.
      */
-    public function decryptionCipher()
+    public function decrypter()
     {
-        return $this->decryptionCipher;
+        return $this->decrypter;
     }
 
     /**
@@ -79,7 +79,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->encryptionCipher()->encrypt($this->key(), $data);
+        return $this->encrypter()->encrypt($this->key(), $data);
     }
 
     /**
@@ -92,10 +92,10 @@ class BoundCipher implements BoundCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->decryptionCipher()->decrypt($this->key(), $data);
+        return $this->decrypter()->decrypt($this->key(), $data);
     }
 
     private $key;
-    private $encryptionCipher;
-    private $decryptionCipher;
+    private $encrypter;
+    private $decrypter;
 }

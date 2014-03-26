@@ -13,38 +13,33 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Phake;
 use PHPUnit_Framework_TestCase;
 
-class EncryptionCipherTest extends PHPUnit_Framework_TestCase
+class DecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->base64UrlEncoder = new Base64Url;
-        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->cipher = new EncryptionCipher($this->randomSource, $this->base64UrlEncoder);
+        $this->base64UrlDecoder = new Base64Url;
+        $this->decrypter = new Decrypter($this->base64UrlDecoder);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->randomSource, $this->cipher->randomSource());
-        $this->assertSame($this->base64UrlEncoder, $this->cipher->base64UrlEncoder());
+        $this->assertSame($this->base64UrlDecoder, $this->decrypter->base64UrlDecoder());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new EncryptionCipher;
+        $this->decrypter = new Decrypter;
 
-        $this->assertSame(DevUrandom::instance(), $this->cipher->randomSource());
-        $this->assertSame(Base64Url::instance(), $this->cipher->base64UrlEncoder());
+        $this->assertSame(Base64Url::instance(), $this->decrypter->base64UrlDecoder());
     }
 
     public function testInstance()
     {
-        $className = get_class($this->cipher);
+        $className = get_class($this->decrypter);
         Liberator::liberateClass($className)->instance = null;
         $instance = $className::instance();
 

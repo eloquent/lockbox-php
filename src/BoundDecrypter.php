@@ -12,26 +12,26 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox decryption cipher, with a bound key.
+ * The standard Lockbox decrypter, with a bound key.
  */
-class BoundDecryptionCipher implements BoundDecryptionCipherInterface
+class BoundDecrypter implements BoundDecrypterInterface
 {
     /**
-     * Construct a new bound decryption cipher.
+     * Construct a new bound decrypter.
      *
-     * @param Key\KeyInterface               $key    The key to use.
-     * @param DecryptionCipherInterface|null $cipher The cipher to use.
+     * @param Key\KeyInterface        $key       The key to use.
+     * @param DecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
         Key\KeyInterface $key,
-        DecryptionCipherInterface $cipher = null
+        DecrypterInterface $decrypter = null
     ) {
-        if (null === $cipher) {
-            $cipher = new DecryptionCipher;
+        if (null === $decrypter) {
+            $decrypter = Decrypter::instance();
         }
 
         $this->key = $key;
-        $this->cipher = $cipher;
+        $this->decrypter = $decrypter;
     }
 
     /**
@@ -45,13 +45,13 @@ class BoundDecryptionCipher implements BoundDecryptionCipherInterface
     }
 
     /**
-     * Get the cipher.
+     * Get the decrypter.
      *
-     * @return DecryptionCipherInterface The cipher;
+     * @return DecrypterInterface The decrypter;
      */
-    public function cipher()
+    public function decrypter()
     {
-        return $this->cipher;
+        return $this->decrypter;
     }
 
     /**
@@ -64,9 +64,9 @@ class BoundDecryptionCipher implements BoundDecryptionCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->cipher()->decrypt($this->key(), $data);
+        return $this->decrypter()->decrypt($this->key(), $data);
     }
 
     private $key;
-    private $cipher;
+    private $decrypter;
 }

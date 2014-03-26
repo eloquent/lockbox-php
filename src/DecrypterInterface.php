@@ -12,17 +12,18 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by ciphers that decrypt data and use a bound key.
+ * The interface implemented by decrypters.
  */
-interface BoundDecryptionCipherInterface
+interface DecrypterInterface
 {
     /**
      * Decrypt a data packet.
      *
-     * @param string $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    public function decrypt($data);
+    public function decrypt(Key\KeyInterface $key, $data);
 }

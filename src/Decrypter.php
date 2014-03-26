@@ -16,14 +16,14 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
 
 /**
- * The standard Lockbox decryption cipher.
+ * The standard Lockbox decrypter.
  */
-class DecryptionCipher implements DecryptionCipherInterface
+class Decrypter implements DecrypterInterface
 {
     /**
-     * Get the static instance of this cipher.
+     * Get the static instance of this decrypter.
      *
-     * @return DecryptionCipherInterface The static cipher.
+     * @return DecrypterInterface The static decrypter.
      */
     public static function instance()
     {
@@ -35,7 +35,7 @@ class DecryptionCipher implements DecryptionCipherInterface
     }
 
     /**
-     * Construct a new decryption cipher.
+     * Construct a new decrypter.
      *
      * @param DecoderInterface|null $base64UrlDecoder The base64url encoder to use.
      */

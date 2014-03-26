@@ -12,9 +12,9 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by ciphers that encrypt data.
+ * The interface implemented by encrypters.
  */
-interface EncryptionCipherInterface
+interface EncrypterInterface
 {
     /**
      * Encrypt a data packet.

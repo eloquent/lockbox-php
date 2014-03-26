@@ -17,14 +17,14 @@ use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
- * The standard Lockbox encryption cipher.
+ * The standard Lockbox encrypter.
  */
-class EncryptionCipher implements EncryptionCipherInterface
+class Encrypter implements EncrypterInterface
 {
     /**
-     * Get the static instance of this cipher.
+     * Get the static instance of this encrypter.
      *
-     * @return EncryptionCipherInterface The static cipher.
+     * @return EncrypterInterface The static encrypter.
      */
     public static function instance()
     {
@@ -36,7 +36,7 @@ class EncryptionCipher implements EncryptionCipherInterface
     }
 
     /**
-     * Construct a new encryption cipher.
+     * Construct a new encrypter.
      *
      * @param RandomSourceInterface|null $randomSource     The random source to use.
      * @param EncoderInterface|null      $base64UrlEncoder The base64url encoder to use.
