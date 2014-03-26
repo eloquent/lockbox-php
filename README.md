@@ -84,8 +84,8 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new Decrypter;
 
 $encrypted =
-    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
-    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc';
+    'AAGhgZ6H4oKO7IYyN1pyUPk2p10a2ZfuJMzJCLMArb5vwVXwU5ltR5P4r_1F_Xh7' .
+    'ZNek5S2C1lIQH2kFRaFrKslDcvJD5AIp2HF5Ags_9rrijQ';
 
 try {
     echo $decrypter->decrypt($key, $encrypted);
@@ -111,12 +111,12 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new BoundDecrypter($key);
 
 $encrypted = array(
-    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
-    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc',
-    'a-6y2yEe-yVPM5om7BIQK3nJHgvNJbazvR0gQj3xPgBoR_mDEdFSU9Xt7Ea1EpZB' .
-    'eopzBRnP5OdiTZQ76RVV7xZ4-Ym1qRzSJ-JPtdMI7Zo',
-    'sxLpTbj1ilbw48M721J-Mb492lShhbDLlRQcp54UTzGRUdHd_8OlKFkIea51b1sq' .
-    'k16JtnZqaXxHQCThmdE1pBTWvhQNOCK2XPizrdSTLf0',
+    'AAGhgZ6H4oKO7IYyN1pyUPk2p10a2ZfuJMzJCLMArb5vwVXwU5ltR5P4r_1F_Xh7' .
+    'ZNek5S2C1lIQH2kFRaFrKslDcvJD5AIp2HF5Ags_9rrijQ',
+    'AAFeEek-uUfD4JLKTsDmSwdEYtmDWYl3adZIdBcInK7Lm3_gzEVwAQgkuv0DqqoG' .
+    '8pzr2sOnqgQrkKJM4gyzaBgpK_zwUkG6Ns_Nq5Dh6FHkAQ',
+    'AAGYXO1xUbc1AREg2jDN8MG36UzI9J43o32PSiVu4t-ZCtENV0vWVdIrFr5lhjTQ' .
+    '5yOq6EyP9HIYMTji5GwcD9zuTRf4-2jq2gRFKg1D2-6ixw',
 );
 
 foreach ($encrypted as $string) {

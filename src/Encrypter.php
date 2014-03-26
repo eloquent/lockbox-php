@@ -54,6 +54,7 @@ class Encrypter implements EncrypterInterface
 
         $this->randomSource = $randomSource;
         $this->base64UrlEncoder = $base64UrlEncoder;
+        $this->version = pack('n', 1);
     }
 
     /**
@@ -90,9 +91,10 @@ class Encrypter implements EncrypterInterface
         $ciphertext = $this->encryptAes($key, $iv, $data);
 
         return $this->base64UrlEncoder()->encode(
+            $this->version .
             $iv .
             $ciphertext .
-            $this->authenticationCode($key, $iv . $ciphertext)
+            $this->authenticationCode($key, $this->version . $iv . $ciphertext)
         );
     }
 

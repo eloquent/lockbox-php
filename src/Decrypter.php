@@ -78,21 +78,31 @@ class Decrypter implements DecrypterInterface
         $length = strlen($data);
         $authenticationCodeSize = strlen($key->authenticationSecret());
 
-        if ($length < 16 + $authenticationCodeSize) {
+        if ($length < 18 + $authenticationCodeSize) {
             throw new Exception\DecryptionFailedException($key);
         }
 
-        $iv = substr($data, 0, 16);
-        $authenticationCode = substr($data, $length - $authenticationCodeSize);
-        $data = substr($data, 16, $length - 16 - $authenticationCodeSize);
+        $versionData = substr($data, 0, 2);
+        $version = unpack('n', $versionData);
+        $version = array_shift($version);
+        if (1 !== $version) {
+            throw new Exception\DecryptionFailedException(
+                $key,
+                new Exception\UnsupportedVersionException($version)
+            );
+        }
 
+        $iv = substr($data, 2, 16);
+        $authenticationCode = substr($data, $length - $authenticationCodeSize);
+
+        $data = substr($data, 18, $length - 18 - $authenticationCodeSize);
         if (!$data) {
             throw new Exception\DecryptionFailedException($key);
         }
 
         if (
-            $this->authenticationCode($key, $iv . $data) !==
-            $authenticationCode
+            $this->authenticationCode($key, $versionData . $iv . $data) !==
+                $authenticationCode
         ) {
             throw new Exception\DecryptionFailedException($key);
         }

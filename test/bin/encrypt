@@ -10,7 +10,7 @@
  * that was distributed with this source code.
  */
 
-use Eloquent\Lockbox\EncryptionCipher;
+use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\KeyReader;
 
 require __DIR__ . '/../../vendor/autoload.php';
@@ -20,6 +20,6 @@ if (isset($_SERVER['argv'][1])) {
     $key = KeyReader::instance()->readFile($_SERVER['argv'][1]);
 }
 
-echo EncryptionCipher::instance()
+echo Encrypter::instance()
     ->encrypt($key, trim(stream_get_contents(STDIN))) .
     PHP_EOL;
