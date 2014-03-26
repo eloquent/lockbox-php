@@ -53,10 +53,17 @@ class Key implements KeyInterface
         }
 
         $authenticationSecretSize = strlen($authenticationSecret);
-        if (32 !== $authenticationSecretSize) {
-            throw new Exception\InvalidAuthenticationSecretSizeException(
-                $authenticationSecretSize * 8
-            );
+        switch ($authenticationSecretSize) {
+            case 64:
+            case 48:
+            case 32:
+            case 28:
+                break;
+
+            default:
+                throw new Exception\InvalidAuthenticationSecretSizeException(
+                    $authenticationSecretSize * 8
+                );
         }
 
         $this->encryptionSecret = $encryptionSecret;
