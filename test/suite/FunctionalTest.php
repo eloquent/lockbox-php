@@ -20,7 +20,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->encryptionCipher = Phake::partialMock('Eloquent\Lockbox\EncryptionCipher');
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->encryptionCipher = new EncryptionCipher($this->randomSource);
         $this->decryptionCipher = new DecryptionCipher;
         $this->keyGenerator = new KeyGenerator;
     }
@@ -73,7 +74,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testSpecVectorsEncryption($bits, $data, $key, $iv, $encrypted)
     {
-        Phake::when($this->encryptionCipher)->generateIv()->thenReturn($iv);
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         $actual = $this->encryptionCipher->encrypt(new Key($key), $data);
 
         $this->assertSame($encrypted, $actual);
@@ -89,6 +90,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     public function testEncryptDecryptWithGeneratedKey()
     {
+        Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         $key = $this->keyGenerator->generateKey();
         $encrypted = $this->encryptionCipher->encrypt($key, 'foobar');
         $decrypted = $this->decryptionCipher->decrypt($key, $encrypted);

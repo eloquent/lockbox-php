@@ -12,9 +12,9 @@
 namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Liberator\Liberator;
-use Icecave\Isolator\Isolator;
-use Phake;
+use Eloquent\Lockbox\Random\DevUrandom;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class KeyGeneratorTest extends PHPUnit_Framework_TestCase
 {
@@ -23,14 +23,14 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->factory = new KeyFactory;
-        $this->isolator = Phake::mock(Isolator::className());
-        $this->generator = new KeyGenerator($this->factory, MCRYPT_DEV_RANDOM, $this->isolator);
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->generator = new KeyGenerator($this->factory, $this->randomSource);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->factory, $this->generator->factory());
-        $this->assertSame(MCRYPT_DEV_RANDOM, $this->generator->randomSource());
+        $this->assertSame($this->randomSource, $this->generator->randomSource());
     }
 
     public function testConstructorDefaults()
@@ -38,12 +38,12 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
         $this->generator = new KeyGenerator;
 
         $this->assertSame(KeyFactory::instance(), $this->generator->factory());
-        $this->assertSame(MCRYPT_DEV_URANDOM, $this->generator->randomSource());
+        $this->assertSame(DevUrandom::instance(), $this->generator->randomSource());
     }
 
     public function testGenerateKey()
     {
-        Phake::when($this->isolator)->mcrypt_create_iv(16, MCRYPT_DEV_RANDOM)->thenReturn('1234567890123456');
+        Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
         $key = $this->generator->generateKey(128, 'name', 'description');
 
         $this->assertSame('1234567890123456', $key->data());
@@ -53,7 +53,7 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
 
     public function testGenerateKeyDefaults()
     {
-        Phake::when($this->isolator)->mcrypt_create_iv(32, MCRYPT_DEV_RANDOM)->thenReturn('12345678901234567890123456789012');
+        Phake::when($this->randomSource)->generate(32)->thenReturn('12345678901234567890123456789012');
         $key = $this->generator->generateKey();
 
         $this->assertSame('12345678901234567890123456789012', $key->data());

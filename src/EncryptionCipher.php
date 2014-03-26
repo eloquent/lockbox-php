@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
  * The standard Lockbox encryption cipher.
@@ -36,15 +38,15 @@ class EncryptionCipher implements EncryptionCipherInterface
     /**
      * Construct a new encryption cipher.
      *
-     * @param integer|null          $randomSource     The random source to use.
-     * @param EncoderInterface|null $base64UrlEncoder The base64url encoder to use.
+     * @param RandomSourceInterface|null $randomSource     The random source to use.
+     * @param EncoderInterface|null      $base64UrlEncoder The base64url encoder to use.
      */
     public function __construct(
-        $randomSource = null,
+        RandomSourceInterface $randomSource = null,
         EncoderInterface $base64UrlEncoder = null
     ) {
         if (null === $randomSource) {
-            $randomSource = MCRYPT_DEV_URANDOM;
+            $randomSource = DevUrandom::instance();
         }
         if (null === $base64UrlEncoder) {
             $base64UrlEncoder = Base64Url::instance();
@@ -57,7 +59,7 @@ class EncryptionCipher implements EncryptionCipherInterface
     /**
      * Get the random source.
      *
-     * @return integer The random source.
+     * @return RandomSourceInterface The random source.
      */
     public function randomSource()
     {
@@ -84,22 +86,12 @@ class EncryptionCipher implements EncryptionCipherInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        $iv = $this->generateIv();
+        $iv = $this->randomSource()->generate(16);
 
         return $this->base64UrlEncoder()->encode(
             $iv .
             $this->encryptAes($key->data(), $iv, $data . sha1($data, true))
         );
-    }
-
-    /**
-     * Generate an initialization vector.
-     *
-     * @return string The initialization vector.
-     */
-    protected function generateIv()
-    {
-        return mcrypt_create_iv(16, $this->randomSource());
     }
 
     /**

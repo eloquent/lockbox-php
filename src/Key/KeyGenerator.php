@@ -11,7 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
-use Icecave\Isolator\Isolator;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
  * Generates encryption keys.
@@ -35,25 +36,22 @@ class KeyGenerator implements KeyGeneratorInterface
     /**
      * Construct a new key generator.
      *
-     * @param KeyFactoryInterface|null $factory      The factory to use.
-     * @param integer|null             $randomSource The random source to use.
-     * @param Isolator|null            $isolator     The isolator to use.
+     * @param KeyFactoryInterface|null   $factory      The factory to use.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
      */
     public function __construct(
         KeyFactoryInterface $factory = null,
-        $randomSource = null,
-        Isolator $isolator = null
+        RandomSourceInterface $randomSource = null
     ) {
         if (null === $factory) {
             $factory = KeyFactory::instance();
         }
         if (null === $randomSource) {
-            $randomSource = MCRYPT_DEV_URANDOM;
+            $randomSource = DevUrandom::instance();
         }
 
         $this->factory = $factory;
         $this->randomSource = $randomSource;
-        $this->isolator = Isolator::get($isolator);
     }
 
     /**
@@ -69,7 +67,7 @@ class KeyGenerator implements KeyGeneratorInterface
     /**
      * Get the random source.
      *
-     * @return integer The random source.
+     * @return RandomSourceInterface The random source.
      */
     public function randomSource()
     {
@@ -103,25 +101,13 @@ class KeyGenerator implements KeyGeneratorInterface
         }
 
         return $this->factory()->createKey(
-            $this->isolator()
-                ->mcrypt_create_iv($size / 8, $this->randomSource()),
+            $this->randomSource()->generate($size / 8),
             $name,
             $description
         );
     }
 
-    /**
-     * Get the isolator.
-     *
-     * @return Isolator The isolator.
-     */
-    protected function isolator()
-    {
-        return $this->isolator;
-    }
-
     private static $instance;
     private $factory;
     private $randomSource;
-    private $isolator;
 }

@@ -30,7 +30,8 @@ class DevUrandom extends AbstractMcryptRandomSource
         }
 
         return self::$instance;
-    }
+    } // @codeCoverageIgnoreStart
+    // @codeCoverageIgnoreEnd
 
     /**
      * Construct a new /dev/urandom random source.
