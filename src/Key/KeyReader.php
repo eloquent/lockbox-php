@@ -148,15 +148,29 @@ class KeyReader implements KeyReaderInterface
             throw new Exception\KeyReadException($path);
         }
 
-        $rawKey = null;
-        if (isset($data->key)) {
+        $encryptionSecret = null;
+        if (isset($data->encryptionSecret)) {
             try {
-                $rawKey = $this->base64UrlDecoder()->decode($data->key);
+                $encryptionSecret = $this->base64UrlDecoder()
+                    ->decode($data->encryptionSecret);
             } catch (TransformExceptionInterface $e) {
                 throw new Exception\KeyReadException($path, $e);
             }
         }
-        if (!$rawKey) {
+        if (!$encryptionSecret) {
+            throw new Exception\KeyReadException($path);
+        }
+
+        $authenticationSecret = null;
+        if (isset($data->authenticationSecret)) {
+            try {
+                $authenticationSecret = $this->base64UrlDecoder()
+                    ->decode($data->authenticationSecret);
+            } catch (TransformExceptionInterface $e) {
+                throw new Exception\KeyReadException($path, $e);
+            }
+        }
+        if (!$authenticationSecret) {
             throw new Exception\KeyReadException($path);
         }
 
@@ -171,7 +185,12 @@ class KeyReader implements KeyReaderInterface
         }
 
         try {
-            $key = new Key($rawKey, $name, $description);
+            $key = new Key(
+                $encryptionSecret,
+                $authenticationSecret,
+                $name,
+                $description
+            );
         } catch (Exception\InvalidKeyExceptionInterface $e) {
             throw new Exception\KeyReadException($path, $e);
         }

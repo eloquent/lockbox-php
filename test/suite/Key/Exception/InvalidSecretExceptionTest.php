@@ -14,15 +14,15 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 use PHPUnit_Framework_TestCase;
 
-class InvalidKeySizeExceptionTest extends PHPUnit_Framework_TestCase
+class InvalidSecretExceptionTest extends PHPUnit_Framework_TestCase
 {
     public function testException()
     {
         $cause = new Exception;
-        $exception = new InvalidKeySizeException(111, $cause);
+        $exception = new InvalidSecretException('secret', $cause);
 
-        $this->assertSame(111, $exception->size());
-        $this->assertSame("Invalid key size 111. Keys must be 128, 192, or 256 bits.", $exception->getMessage());
+        $this->assertSame('secret', $exception->secret());
+        $this->assertSame("Invalid secret 'secret'.", $exception->getMessage());
         $this->assertSame(0, $exception->getCode());
         $this->assertSame($cause, $exception->getPrevious());
     }

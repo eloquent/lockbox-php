@@ -19,7 +19,7 @@ class BoundEncryptionCipherTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->key = new Key\Key('1234567890123456');
+        $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
         $this->encryptionCipher = new EncryptionCipher;
         $this->cipher = new BoundEncryptionCipher($this->key, $this->encryptionCipher);
 

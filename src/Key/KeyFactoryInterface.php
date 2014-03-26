@@ -19,12 +19,18 @@ interface KeyFactoryInterface
     /**
      * Create a new key from existing key data.
      *
-     * @param string      $key         The raw key data.
-     * @param string|null $name        The name.
-     * @param string|null $description The description.
+     * @param string      $encryptionSecret     The encryption secret.
+     * @param string      $authenticationSecret The authentication secret.
+     * @param string|null $name                 The name.
+     * @param string|null $description          The description.
      *
      * @return KeyInterface                           The key.
      * @throws Exception\InvalidKeyExceptionInterface If the key is invalid.
      */
-    public function createKey($key, $name = null, $description = null);
+    public function createKey(
+        $encryptionSecret,
+        $authenticationSecret,
+        $name = null,
+        $description = null
+    );
 }

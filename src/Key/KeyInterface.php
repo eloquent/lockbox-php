@@ -17,11 +17,18 @@ namespace Eloquent\Lockbox\Key;
 interface KeyInterface
 {
     /**
-     * Get the raw key data.
+     * Get the encryption secret.
      *
-     * @return string The raw key data.
+     * @return string The encryption secret.
      */
-    public function data();
+    public function encryptionSecret();
+
+    /**
+     * Get the authentication secret.
+     *
+     * @return string The authentication secret.
+     */
+    public function authenticationSecret();
 
     /**
      * Get the name.
@@ -38,23 +45,16 @@ interface KeyInterface
     public function description();
 
     /**
-     * Get the size of the key in bits.
+     * Get the size of the encryption secret in bits.
      *
-     * @return integer The size of the key in bits.
+     * @return integer The size of the encryption secret in bits.
      */
-    public function size();
+    public function encryptionSecretSize();
 
     /**
-     * Get the string representation of this key.
+     * Get the size of the authentication secret in bits.
      *
-     * @return string The string representation.
+     * @return integer The size of the authentication secret in bits.
      */
-    public function string();
-
-    /**
-     * Get the string representation of this key.
-     *
-     * @return string The string representation.
-     */
-    public function __toString();
+    public function authenticationSecretSize();
 }

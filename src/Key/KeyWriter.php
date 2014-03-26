@@ -130,7 +130,10 @@ class KeyWriter implements KeyWriterInterface
             $data->description = $key->description();
         }
 
-        $data->key = $this->base64UrlEncoder()->encode($key->data());
+        $data->encryptionSecret = $this->base64UrlEncoder()
+            ->encode($key->encryptionSecret());
+        $data->authenticationSecret = $this->base64UrlEncoder()
+            ->encode($key->authenticationSecret());
 
         return $data;
     }

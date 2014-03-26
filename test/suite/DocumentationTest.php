@@ -41,7 +41,9 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         $keyWriter->writeFile($key, $keyPath);
 
         $this->assertRegExp(
-            '/{"type":"lockbox-key","version":1,"key":"[A-Za-z0-9_=-]{43}"}/',
+            '/{"type":"lockbox-key","version":1,' .
+            '"encryptionSecret":"[A-Za-z0-9_=-]{43}",' .
+            '"authenticationSecret":"[A-Za-z0-9_=-]{43}"}/',
             file_get_contents($keyPath)
         );
     }

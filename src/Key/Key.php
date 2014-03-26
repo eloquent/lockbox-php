@@ -11,8 +11,6 @@
 
 namespace Eloquent\Lockbox\Key;
 
-use Eloquent\Endec\Base64\Base64Url;
-
 /**
  * Represents an encryption key.
  */
@@ -21,42 +19,70 @@ class Key implements KeyInterface
     /**
      * Construct a new key.
      *
-     * @param string      $data        The raw key data.
-     * @param string|null $name        The name.
-     * @param string|null $description The description.
+     * @param string      $encryptionSecret     The encryption secret.
+     * @param string      $authenticationSecret The authentication secret.
+     * @param string|null $name                 The name.
+     * @param string|null $description          The description.
      *
      * @throws Exception\InvalidKeyExceptionInterface If the key is invalid.
      */
-    public function __construct($data, $name = null, $description = null)
-    {
-        if (!is_string($data)) {
-            throw new Exception\InvalidKeyException($data);
+    public function __construct(
+        $encryptionSecret,
+        $authenticationSecret,
+        $name = null,
+        $description = null
+    ) {
+        if (!is_string($encryptionSecret)) {
+            throw new Exception\InvalidSecretException($encryptionSecret);
+        }
+        if (!is_string($authenticationSecret)) {
+            throw new Exception\InvalidSecretException($authenticationSecret);
         }
 
-        $size = strlen($data);
-        switch ($size) {
+        $encryptionSecretSize = strlen($encryptionSecret);
+        switch ($encryptionSecretSize) {
             case 32:
             case 24:
             case 16:
                 break;
 
             default:
-                throw new Exception\InvalidKeySizeException($size * 8);
+                throw new Exception\InvalidEncryptionSecretSizeException(
+                    $encryptionSecretSize * 8
+                );
         }
 
-        $this->data = $data;
+        $authenticationSecretSize = strlen($authenticationSecret);
+        if (32 !== $authenticationSecretSize) {
+            throw new Exception\InvalidAuthenticationSecretSizeException(
+                $authenticationSecretSize * 8
+            );
+        }
+
+        $this->encryptionSecret = $encryptionSecret;
+        $this->authenticationSecret = $authenticationSecret;
         $this->name = $name;
         $this->description = $description;
     }
 
     /**
-     * Get the raw key data.
+     * Get the encryption secret.
      *
-     * @return string The raw key data.
+     * @return string The encryption secret.
      */
-    public function data()
+    public function encryptionSecret()
     {
-        return $this->data;
+        return $this->encryptionSecret;
+    }
+
+    /**
+     * Get the authentication secret.
+     *
+     * @return string The authentication secret.
+     */
+    public function authenticationSecret()
+    {
+        return $this->authenticationSecret;
     }
 
     /**
@@ -80,36 +106,27 @@ class Key implements KeyInterface
     }
 
     /**
-     * Get the size of the key in bits.
+     * Get the size of the encryption secret in bits.
      *
-     * @return integer The size of the key in bits.
+     * @return integer The size of the encryption secret in bits.
      */
-    public function size()
+    public function encryptionSecretSize()
     {
-        return strlen($this->data()) * 8;
+        return strlen($this->encryptionSecret()) * 8;
     }
 
     /**
-     * Get the string representation of this key.
+     * Get the size of the authentication secret in bits.
      *
-     * @return string The string representation.
+     * @return integer The size of the authentication secret in bits.
      */
-    public function string()
+    public function authenticationSecretSize()
     {
-        return Base64Url::instance()->encode($this->data());
+        return strlen($this->authenticationSecret()) * 8;
     }
 
-    /**
-     * Get the string representation of this key.
-     *
-     * @return string The string representation.
-     */
-    public function __toString()
-    {
-        return $this->string();
-    }
-
-    private $data;
+    private $encryptionSecret;
+    private $authenticationSecret;
     private $name;
     private $description;
 }

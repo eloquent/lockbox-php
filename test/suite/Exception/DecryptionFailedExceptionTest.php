@@ -19,7 +19,7 @@ class DecryptionFailedExceptionTest extends PHPUnit_Framework_TestCase
 {
     public function testException()
     {
-        $key = new Key('1234567890123456', 'name');
+        $key = new Key('1234567890123456', '12345678901234567890123456789012', 'name');
         $previous = new Exception;
         $exception = new DecryptionFailedException($key, $previous);
 
@@ -31,7 +31,7 @@ class DecryptionFailedExceptionTest extends PHPUnit_Framework_TestCase
 
     public function testExceptionNoKeyName()
     {
-        $key = new Key('1234567890123456');
+        $key = new Key('1234567890123456', '12345678901234567890123456789012');
         $previous = new Exception;
         $exception = new DecryptionFailedException($key, $previous);
 

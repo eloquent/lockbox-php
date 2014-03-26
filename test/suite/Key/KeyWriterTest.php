@@ -27,8 +27,13 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->isolator = Phake::mock(Isolator::className());
         $this->writer = new KeyWriter($this->base64UrlEncoder, $this->isolator);
 
-        $this->keyFull = new Key('12345678901234567890123456789012', 'name', 'description');
-        $this->keyMinimal = new Key('1234567890123456');
+        $this->keyFull = new Key(
+            '12345678901234567890123456789012',
+            '12345678901234567890123456789013',
+            'name',
+            'description'
+        );
+        $this->keyMinimal = new Key('1234567890123456', '12345678901234567890123456789013');
     }
 
     protected function tearDown()
@@ -64,7 +69,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
             '"version":1,' .
             '"name":"name",' .
             '"description":"description",' .
-            '"key":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"}',
+            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",' .
+            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
             file_get_contents($path)
         );
         Phake::verify($this->isolator)->fclose($this->stream);
@@ -80,7 +86,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->assertSame(
             '{"type":"lockbox-key",' .
             '"version":1,' .
-            '"key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}',
+            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng",' .
+            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
             file_get_contents($path)
         );
         Phake::verify($this->isolator)->fclose($this->stream);
@@ -123,7 +130,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
             '"version":1,' .
             '"name":"name",' .
             '"description":"description",' .
-            '"key":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"}',
+            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",' .
+            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
             file_get_contents($path)
         );
     }
@@ -137,7 +145,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->assertSame(
             '{"type":"lockbox-key",' .
             '"version":1,' .
-            '"key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}',
+            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng",' .
+            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
             file_get_contents($path)
         );
     }

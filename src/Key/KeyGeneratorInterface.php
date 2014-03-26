@@ -19,15 +19,15 @@ interface KeyGeneratorInterface
     /**
      * Generate a new key.
      *
-     * @param integer|null $size        The size of the key in bits.
-     * @param string|null  $name        The name.
-     * @param string|null  $description The description.
+     * @param integer|null $encryptionSecretSize The size of the encryption secret in bits.
+     * @param string|null  $name                 The name.
+     * @param string|null  $description          The description.
      *
      * @return KeyInterface                      The generated key.
      * @throws Exception\InvalidKeySizeException If the requested key size is invalid.
      */
     public function generateKey(
-        $size = null,
+        $encryptionSecretSize = null,
         $name = null,
         $description = null
     );

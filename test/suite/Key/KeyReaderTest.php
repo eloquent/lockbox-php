@@ -34,10 +34,11 @@ class KeyReaderTest extends PHPUnit_Framework_TestCase
     "version": 1,
     "name": "name",
     "description": "description",
-    "key": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI"
+    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
+    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
 EOD;
-        $this->jsonDataMinimal = '{"type":"lockbox-key","version":1,"key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}';
+        $this->jsonDataMinimal = '{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}';
     }
 
     public function testConstructor()
@@ -60,7 +61,8 @@ EOD;
         Phake::when($this->isolator)->fopen('/path/to/file', 'rb')->thenReturn($stream);
         $key = $this->reader->readFile('/path/to/file');
 
-        $this->assertSame('12345678901234567890123456789012', $key->data());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
         Phake::verify($this->isolator)->fclose($stream);
@@ -72,7 +74,8 @@ EOD;
         Phake::when($this->isolator)->fopen('/path/to/file', 'rb')->thenReturn($stream);
         $key = $this->reader->readFile('/path/to/file');
 
-        $this->assertSame('1234567890123456', $key->data());
+        $this->assertSame('1234567890123456', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
         Phake::verify($this->isolator)->fclose($stream);
@@ -109,7 +112,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataFull), 'rb');
         $key = $this->reader->readStream($stream);
 
-        $this->assertSame('12345678901234567890123456789012', $key->data());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -119,7 +123,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataMinimal), 'rb');
         $key = $this->reader->readStream($stream);
 
-        $this->assertSame('1234567890123456', $key->data());
+        $this->assertSame('1234567890123456', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -145,14 +150,17 @@ EOD;
     public function invalidDataData()
     {
         return array(
-            'Invalid JSON'        => array('{'),
-            'Missing type'        => array('{"version":1,"key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
-            'Invalid type'        => array('{"type":"lockbox-foo","version":1,"key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
-            'Missing version'     => array('{"type":"lockbox-key","key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
-            'Invalid version'     => array('{"type":"lockbox-key","version":"1","key":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
-            'Missing data'        => array('{"type":"lockbox-key","version":1}'),
-            'Invalid base64 data' => array('{"type":"lockbox-key","version":1,"key":"MTIzNDU2Nzg5MDEyMzQ1N"}'),
-            'Invalid key data'    => array('{"type":"lockbox-key","version":1,"key":"MTIzNDU2"}'),
+            'Invalid JSON'                         => array('{'),
+            'Missing type'                         => array('{"version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid type'                         => array('{"type":"lockbox-foo","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing version'                      => array('{"type":"lockbox-key","encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid version'                      => array('{"type":"lockbox-key","version":"1","encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing encryption secret'            => array('{"type":"lockbox-key","version":1,"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid base64 encryption secret'     => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1N","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid encryption secret data'       => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing authentication secret'        => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
+            'Invalid base64 authentication secret' => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1N"}'),
+            'Invalid authentication secret data'   => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz"}'),
         );
     }
 

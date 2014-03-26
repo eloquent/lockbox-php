@@ -14,37 +14,37 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 
 /**
- * The supplied key is invalid.
+ * The supplied secret is invalid.
  */
-final class InvalidKeyException extends Exception implements
+final class InvalidSecretException extends Exception implements
     InvalidKeyExceptionInterface
 {
     /**
-     * Construct a new invalid key exception.
+     * Construct a new invalid secret exception.
      *
-     * @param mixed          $key      The invalid key.
+     * @param mixed          $secret   The invalid secret.
      * @param Exception|null $previous The cause, if available.
      */
-    public function __construct($key, Exception $previous = null)
+    public function __construct($secret, Exception $previous = null)
     {
-        $this->key = $key;
+        $this->secret = $secret;
 
         parent::__construct(
-            sprintf('Invalid key %s.', var_export($key, true)),
+            sprintf('Invalid secret %s.', var_export($secret, true)),
             0,
             $previous
         );
     }
 
     /**
-     * Get the invalid key.
+     * Get the invalid secret.
      *
-     * @return mixed The key.
+     * @return mixed The secret.
      */
-    public function key()
+    public function secret()
     {
-        return $this->key;
+        return $this->secret;
     }
 
-    private $key;
+    private $secret;
 }

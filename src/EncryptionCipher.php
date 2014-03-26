@@ -90,7 +90,11 @@ class EncryptionCipher implements EncryptionCipherInterface
 
         return $this->base64UrlEncoder()->encode(
             $iv .
-            $this->encryptAes($key->data(), $iv, $data . sha1($data, true))
+            $this->encryptAes(
+                $key->encryptionSecret(),
+                $iv,
+                $data . sha1($data, true)
+            )
         );
     }
 

@@ -117,7 +117,7 @@ class DecryptionCipher implements DecryptionCipherInterface
     {
         $data = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_128,
-            $key->data(),
+            $key->encryptionSecret(),
             $data,
             MCRYPT_MODE_CBC,
             $iv

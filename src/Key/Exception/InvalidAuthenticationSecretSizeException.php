@@ -14,15 +14,15 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 
 /**
- * The key size is invalid.
+ * The authentication secret size is invalid.
  */
-final class InvalidKeySizeException extends Exception implements
+final class InvalidAuthenticationSecretSizeException extends Exception implements
     InvalidKeyExceptionInterface
 {
     /**
-     * Construct a new invalid key size exception.
+     * Construct a new invalid authentication secret size exception.
      *
-     * @param integer        $size     The invalid key size.
+     * @param integer        $size     The invalid secret size.
      * @param Exception|null $previous The cause, if available.
      */
     public function __construct($size, Exception $previous = null)
@@ -31,7 +31,8 @@ final class InvalidKeySizeException extends Exception implements
 
         parent::__construct(
             sprintf(
-                'Invalid key size %d. Keys must be 128, 192, or 256 bits.',
+                'Invalid authentication secret size %d. ' .
+                'Authentication secret must be 256 bits.',
                 $size
             ),
             0,
@@ -40,7 +41,7 @@ final class InvalidKeySizeException extends Exception implements
     }
 
     /**
-     * Get the invalid key size.
+     * Get the invalid secret size.
      *
      * @return string The size.
      */

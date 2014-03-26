@@ -23,45 +23,51 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
         $this->factory = new KeyFactory;
     }
 
-    public function testCreateKey256BitKey()
+    public function validEncryptionSecretData()
     {
-        $this->key = $this->factory->createKey('12345678901234567890123456789012', 'name', 'description');
-
-        $this->assertSame('12345678901234567890123456789012', $this->key->data());
-        $this->assertSame('name', $this->key->name());
-        $this->assertSame('description', $this->key->description());
+        return array(
+            '256 bit' => array('12345678901234567890123456789012'),
+            '192 bit' => array('123456789012345678901234'),
+            '128 bit' => array('1234567890123456'),
+        );
     }
 
-    public function testCreateKey192BitKey()
+    /**
+     * @dataProvider validEncryptionSecretData
+     */
+    public function testCreateKey($encryptionSecret)
     {
-        $this->key = $this->factory->createKey('123456789012345678901234', 'name', 'description');
+        $this->key = $this->factory->createKey(
+            $encryptionSecret,
+            '12345678901234567890123456789012',
+            'name',
+            'description'
+        );
 
-        $this->assertSame('123456789012345678901234', $this->key->data());
-        $this->assertSame('name', $this->key->name());
-        $this->assertSame('description', $this->key->description());
-    }
-
-    public function testCreateKey128BitKey()
-    {
-        $this->key = $this->factory->createKey('1234567890123456', 'name', 'description');
-
-        $this->assertSame('1234567890123456', $this->key->data());
+        $this->assertSame($encryptionSecret, $this->key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789012', $this->key->authenticationSecret());
         $this->assertSame('name', $this->key->name());
         $this->assertSame('description', $this->key->description());
     }
 
     public function testCreateKeyNoNameAndDescription()
     {
-        $this->key = $this->factory->createKey('1234567890123456');
+        $this->key = $this->factory->createKey('1234567890123456', '12345678901234567890123456789012');
 
         $this->assertNull($this->key->name());
         $this->assertNull($this->key->description());
     }
 
-    public function testCreateKeyInvalidKeySize()
+    public function testCreateKeyInvalidEncryptionSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidKeySizeException');
-        $this->factory->createKey('123456789012345678901234567890123');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
+        $this->factory->createKey('123456789012345678901234567890123', '12345678901234567890123456789012');
+    }
+
+    public function testCreateKeyInvalidAuthenticationSecretSize()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
+        $this->factory->createKey('12345678901234567890123456789012', '123456789012345678901234567890123');
     }
 
     public function testInstance()

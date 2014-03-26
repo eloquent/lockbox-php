@@ -30,9 +30,9 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->decryptionCipher = new DecryptionCipher;
         $this->cipher = new Cipher($this->encryptionCipher, $this->decryptionCipher);
 
-        $this->key128 = new Key\Key('1234567890123456', 'key128');
-        $this->key192 = new Key\Key('123456789012345678901234', 'key192');
-        $this->key256 = new Key\Key('12345678901234567890123456789012', 'key256');
+        $this->key128 = new Key\Key('1234567890123456', '12345678901234567890123456789013', 'key128');
+        $this->key192 = new Key\Key('123456789012345678901234', '12345678901234567890123456789013', 'key192');
+        $this->key256 = new Key\Key('12345678901234567890123456789012', '12345678901234567890123456789013', 'key256');
 
         $this->base64UrlEncoder = Base64Url::instance();
     }
@@ -139,7 +139,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
             '1234567890123456' .
             mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_128,
-                $this->key128->data(),
+                $this->key128->encryptionSecret(),
                 'foobar' . sha1('barfoo', true),
                 MCRYPT_MODE_CBC,
                 '1234567890123456'
@@ -159,7 +159,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
             '1234567890123456' .
             mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_128,
-                $this->key128->data(),
+                $this->key128->encryptionSecret(),
                 $this->pad(''),
                 MCRYPT_MODE_CBC,
                 '1234567890123456'
@@ -179,7 +179,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
             '1234567890123456' .
             mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_128,
-                $this->key128->data(),
+                $this->key128->encryptionSecret(),
                 $this->pad('foobar' . sha1('barfoo', true)),
                 MCRYPT_MODE_CBC,
                 '1234567890123456'

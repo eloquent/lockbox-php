@@ -33,6 +33,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 256,
                 '',
                 '12345678901234567890123456789012',
+                '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NtitNTFRhW3K' .
                 'MfhqusPDqWJ7K37AvEHDaLULPKBNj24c',
@@ -42,6 +43,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 256,
                 '1234',
                 '12345678901234567890123456789012',
+                '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NtwL_JNwnG1u' .
                 'T1zKZNgUcr2GaWk31ahOBKB0lfr-E7W2',
@@ -51,6 +53,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 256,
                 '1234567890123456',
                 '12345678901234567890123456789012',
+                '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
                 'BpxoZDMH74B7GmHK66rSGH0MoSGY1fZC' .
@@ -61,6 +64,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 128,
                 '1234567890123456',
                 '1234567890123456',
+                '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1Nti1mEjHZwyU' .
                 'sptU0jeeLnruuN6ZozqGFrUL9qKQprBQ' .
@@ -72,10 +76,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsEncryption($bits, $data, $key, $iv, $encrypted)
+    public function testSpecVectorsEncryption($bits, $data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $actual = $this->encryptionCipher->encrypt(new Key($key), $data);
+        $actual = $this->encryptionCipher->encrypt(new Key($encryptionSecret, $authenticationSecret), $data);
 
         $this->assertSame($encrypted, $actual);
     }
@@ -83,9 +87,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsDecryption($bits, $data, $key, $iv, $encrypted)
+    public function testSpecVectorsDecryption($bits, $data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
-        $this->assertSame($data, $this->decryptionCipher->decrypt(new Key($key), $encrypted));
+        $this->assertSame(
+            $data,
+            $this->decryptionCipher->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted)
+        );
     }
 
     public function testEncryptDecryptWithGeneratedKey()

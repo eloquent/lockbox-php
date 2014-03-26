@@ -15,59 +15,65 @@ use PHPUnit_Framework_TestCase;
 
 class KeyTest extends PHPUnit_Framework_TestCase
 {
-    public function test256BitKey()
-    {
-        $this->key = new Key('12345678901234567890123456789012', 'name', 'description');
 
-        $this->assertSame('12345678901234567890123456789012', $this->key->data());
-        $this->assertSame('name', $this->key->name());
-        $this->assertSame('description', $this->key->description());
-        $this->assertSame(256, $this->key->size());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI', $this->key->string());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI', strval($this->key));
+    public function validEncryptionSecretData()
+    {
+        return array(
+            '256 bit' => array('12345678901234567890123456789012', 256),
+            '192 bit' => array('123456789012345678901234',         192),
+            '128 bit' => array('1234567890123456',                 128),
+        );
     }
 
-    public function test192BitKey()
+    /**
+     * @dataProvider validEncryptionSecretData
+     */
+    public function testConstructor($encryptionSecret, $encryptionSecretSize)
     {
-        $this->key = new Key('123456789012345678901234', 'name', 'description');
+        $this->key = new Key(
+            $encryptionSecret,
+            '12345678901234567890123456789012',
+            'name',
+            'description'
+        );
 
-        $this->assertSame('123456789012345678901234', $this->key->data());
+        $this->assertSame($encryptionSecret, $this->key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789012', $this->key->authenticationSecret());
         $this->assertSame('name', $this->key->name());
         $this->assertSame('description', $this->key->description());
-        $this->assertSame(192, $this->key->size());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0', $this->key->string());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0', strval($this->key));
-    }
-
-    public function test128BitKey()
-    {
-        $this->key = new Key('1234567890123456', 'name', 'description');
-
-        $this->assertSame('1234567890123456', $this->key->data());
-        $this->assertSame('name', $this->key->name());
-        $this->assertSame('description', $this->key->description());
-        $this->assertSame(128, $this->key->size());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Ng', $this->key->string());
-        $this->assertSame('MTIzNDU2Nzg5MDEyMzQ1Ng', strval($this->key));
+        $this->assertSame($encryptionSecretSize, $this->key->encryptionSecretSize());
+        $this->assertSame(256, $this->key->authenticationSecretSize());
     }
 
     public function testNoNameAndDescription()
     {
-        $this->key = new Key('1234567890123456');
+        $this->key = new Key('1234567890123456', '12345678901234567890123456789012');
 
         $this->assertNull($this->key->name());
         $this->assertNull($this->key->description());
     }
 
-    public function testInvalidKeyData()
+    public function testInvalidEncryptionSecret()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidKeyException');
-        new Key(null);
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSecretException');
+        new Key(null, '12345678901234567890123456789012');
     }
 
-    public function testInvalidKeySize()
+    public function testInvalidAuthenticationSecret()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidKeySizeException');
-        new Key('123456789012345678901234567890123');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSecretException');
+        new Key('12345678901234567890123456789012', null);
+    }
+
+    public function testInvalidEncryptionSecretSize()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
+        new Key('123456789012345678901234567890123', '12345678901234567890123456789012');
+    }
+
+    public function testInvalidAuthenticationSecretSize()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
+        new Key('12345678901234567890123456789012', '123456789012345678901234567890123');
     }
 }

@@ -77,31 +77,37 @@ class KeyGenerator implements KeyGeneratorInterface
     /**
      * Generate a new key.
      *
-     * @param integer|null $size        The size of the key in bits.
-     * @param string|null  $name        The name.
-     * @param string|null  $description The description.
+     * @param integer|null $encryptionSecretSize The size of the encryption secret in bits.
+     * @param string|null  $name                 The name.
+     * @param string|null  $description          The description.
      *
      * @return KeyInterface                      The generated key.
      * @throws Exception\InvalidKeySizeException If the requested key size is invalid.
      */
-    public function generateKey($size = null, $name = null, $description = null)
-    {
-        if (null === $size) {
-            $size = 256;
+    public function generateKey(
+        $encryptionSecretSize = null,
+        $name = null,
+        $description = null
+    ) {
+        if (null === $encryptionSecretSize) {
+            $encryptionSecretSize = 256;
         }
 
-        switch ($size) {
+        switch ($encryptionSecretSize) {
             case 256:
             case 192:
             case 128:
                 break;
 
             default:
-                throw new Exception\InvalidKeySizeException($size);
+                throw new Exception\InvalidEncryptionSecretSizeException(
+                    $encryptionSecretSize
+                );
         }
 
         return $this->factory()->createKey(
-            $this->randomSource()->generate($size / 8),
+            $this->randomSource()->generate($encryptionSecretSize / 8),
+            $this->randomSource()->generate(32),
             $name,
             $description
         );
