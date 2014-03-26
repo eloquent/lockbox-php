@@ -51,7 +51,7 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
     public function testEncryptingData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
-        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{86}$/');
+        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{107}$/');
 
         $data = 'Super secret data.';
 
@@ -66,7 +66,7 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
     public function testEncryptingMultipleData()
     {
         $keyPath = $this->fixturePath . '/key256.lockbox.key';
-        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{258}$/');
+        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{321}$/');
 
         $data = array(
             'Super secret data.',
@@ -92,9 +92,10 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         $this->expectOutputString('Super secret data.');
 
         $encrypted =
-            'U9dlhCQHGZR0j79SIu31m9GeNDnvpR-R' .
-            'f8q8wp_4wC65kYnCk1FHakcxxFgMgDeK' .
-            'cNpn1J6DfIPh_hjqmDw5UA';
+            '2TkRH_mVR3eID5heNErkHJhJ5kiGyKNG' .
+            'UOd41GS5LCzAVvJUVeDi_Rbs0pVbUus2' .
+            'i8CTI0Sr0tt5cdPKvuxF9k2gJETEk6KE' .
+            't1T63Cl4pxo';
 
         // $keyPath = '/path/to/lockbox.key';
         $keyReader = new KeyReader;
@@ -117,15 +118,18 @@ class DocumentationTest extends PHPUnit_Framework_TestCase
         $this->expectOutputString('');
 
         $encrypted = array(
-            'U9dlhCQHGZR0j79SIu31m9GeNDnvpR-R' .
-            'f8q8wp_4wC65kYnCk1FHakcxxFgMgDeK' .
-            'cNpn1J6DfIPh_hjqmDw5UA',
-            'NitEEnhKfkEPLWLQXfulnhe2mjN8bmaY' .
-            'sMpNVyPNW9ICHxjV5KHWkomOxQNcxppN' .
-            '1JRz4F_xoHLNVcfAhRJD8Q',
-            'doIBCztIqSVI8twuMPVPE1CIl-Ql0Ebf' .
-            '6dVIsTtDeu-USk5LWAmW7-wlB5kjNNr4' .
-            'a-Y9SjtPlF4_OA4qeZV_uA',
+            '2TkRH_mVR3eID5heNErkHJhJ5kiGyKNG' .
+            'UOd41GS5LCzAVvJUVeDi_Rbs0pVbUus2' .
+            'i8CTI0Sr0tt5cdPKvuxF9k2gJETEk6KE' .
+            't1T63Cl4pxo',
+            'aNkLcTqavI9aXJ6sCzgIdki9FtgxWu22' .
+            'mRmRcw3MMY6wKA1hzunGX1o9KzwerYQp' .
+            'iX-RQb62Bwl9xjxUnl_nRdOepB9zatNc' .
+            'k2E_m2jvWXI',
+            'V0wpEJUP6ZSvgqiz0hw27j-6FqH74b2l' .
+            'Ss48ohbR8kQ3LpNa-Gi5PBW1ZR_p8RN9' .
+            '3YFtRQYcguxQl7bFAJhb6Y_5jz_8zRUM' .
+            'tOZ0rNZlDpI',
         );
 
         // $keyPath = '/path/to/lockbox.key';

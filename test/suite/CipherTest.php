@@ -34,7 +34,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->key192 = new Key\Key('123456789012345678901234', '12345678901234567890123456789013', 'key192');
         $this->key256 = new Key\Key('12345678901234567890123456789012', '12345678901234567890123456789013', 'key256');
 
-        $this->base64UrlEncoder = Base64Url::instance();
+        $this->base64Url = Base64Url::instance();
     }
 
     public function testConstructor()
@@ -99,7 +99,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
             "Decryption failed for key 'key128'."
         );
-        $this->cipher->decrypt($this->key128, 'foo:bar');
+        $this->cipher->decrypt($this->key128, str_repeat('!', 100));
     }
 
     public function testDecryptFailureEmptyIv()
@@ -111,9 +111,31 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->decrypt($this->key128, '');
     }
 
+    public function testDecryptFailureShortMac()
+    {
+        $data = $this->base64Url->encode('12345678901234567890123456789012345678901234567');
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\DecryptionFailedException',
+            "Decryption failed for key 'key128'."
+        );
+        $this->cipher->decrypt($this->key128, $data);
+    }
+
     public function testDecryptFailureEmptyCiphertext()
     {
-        $data = $this->base64UrlEncoder->encode('1234567890123456');
+        $data = $this->base64Url->encode('123456789012345678901234567890123456789012345678');
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\DecryptionFailedException',
+            "Decryption failed for key 'key128'."
+        );
+        $this->cipher->decrypt($this->key128, $data);
+    }
+
+    public function testDecryptFailureBadMac()
+    {
+        $data = $this->base64Url->encode('1234567890123456foobar12345678901234567890123456789012');
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -124,7 +146,9 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadAesData()
     {
-        $data = $this->base64UrlEncoder->encode('1234567890123456foobar');
+        $data = $this->base64Url->encode(
+            '1234567890123456foobar' . $this->base64Url->decode('PrnEUEDRLByiD0B68n14EIC7cA8uor8x20S1HoXFOok')
+        );
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -135,55 +159,17 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadPadding()
     {
-        $data = $this->base64UrlEncoder->encode(
+        $ciphertext = mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_128,
+            $this->key128->encryptionSecret(),
+            'foobar',
+            MCRYPT_MODE_CBC,
+            '1234567890123456'
+        );
+        $data = $this->base64Url->encode(
             '1234567890123456' .
-            mcrypt_encrypt(
-                MCRYPT_RIJNDAEL_128,
-                $this->key128->encryptionSecret(),
-                'foobar' . sha1('barfoo', true),
-                MCRYPT_MODE_CBC,
-                '1234567890123456'
-            )
-        );
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key128'."
-        );
-        $this->cipher->decrypt($this->key128, $data);
-    }
-
-    public function testDecryptFailureEmptyHash()
-    {
-        $data = $this->base64UrlEncoder->encode(
-            '1234567890123456' .
-            mcrypt_encrypt(
-                MCRYPT_RIJNDAEL_128,
-                $this->key128->encryptionSecret(),
-                $this->pad(''),
-                MCRYPT_MODE_CBC,
-                '1234567890123456'
-            )
-        );
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key128'."
-        );
-        $this->cipher->decrypt($this->key128, $data);
-    }
-
-    public function testDecryptFailureBadHash()
-    {
-        $data = $this->base64UrlEncoder->encode(
-            '1234567890123456' .
-            mcrypt_encrypt(
-                MCRYPT_RIJNDAEL_128,
-                $this->key128->encryptionSecret(),
-                $this->pad('foobar' . sha1('barfoo', true)),
-                MCRYPT_MODE_CBC,
-                '1234567890123456'
-            )
+            $ciphertext .
+            $this->base64Url->decode('tjHGRSTgecookg0NvcIhqyiUUEOvPXFWIajiCYkhndo')
         );
 
         $this->setExpectedException(

@@ -35,8 +35,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789012',
                 '12345678901234567890123456789013',
                 '1234567890123456',
-                'MTIzNDU2Nzg5MDEyMzQ1NtitNTFRhW3K' .
-                'MfhqusPDqWJ7K37AvEHDaLULPKBNj24c',
+                'MTIzNDU2Nzg5MDEyMzQ1NrVSLNU_PVpy' .
+                'jFxTFHTvwVD3oNnoY53lf7Wyt3lRQoq3' .
+                'JVgEO4qxrXOoI3hLK-ajPg',
             ),
 
             'Test vector 2' => array(
@@ -45,8 +46,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789012',
                 '12345678901234567890123456789013',
                 '1234567890123456',
-                'MTIzNDU2Nzg5MDEyMzQ1NtwL_JNwnG1u' .
-                'T1zKZNgUcr2GaWk31ahOBKB0lfr-E7W2',
+                'MTIzNDU2Nzg5MDEyMzQ1NvctUcuEnAm_' .
+                'KSDWlxnABun-GuM_rdojg1LZx1WtxtMz' .
+                'K6L8bG94x0FBmM_tx7Hkkw',
             ),
 
             'Test vector 3' => array(
@@ -56,8 +58,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
-                'BpxoZDMH74B7GmHK66rSGH0MoSGY1fZC' .
-                'hAWyjRKa0nWslBVkLoJRUg',
+                'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
+                'ZBbO9U3cEGRu4i9RIGfl0_vL_edhjnsY' .
+                '31M9GGEnUdE',
             ),
 
             'Test vector 4' => array(
@@ -67,8 +70,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1Nti1mEjHZwyU' .
-                'sptU0jeeLnruuN6ZozqGFrUL9qKQprBQ' .
-                'wcd0wdNXzvXMY6wYqDwQ4w',
+                'sptU0jeeLnrF68nrne5TjwrZaVldenQM' .
+                'v7muNqqphAyGko4inI02Omug4lVgv7PR' .
+                'S2wFZNQP7vI',
             ),
         );
     }

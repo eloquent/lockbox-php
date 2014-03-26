@@ -75,32 +75,45 @@ class DecryptionCipher implements DecryptionCipherInterface
             throw new Exception\DecryptionFailedException($key, $e);
         }
 
+        $length = strlen($data);
+        if ($length < 48) {
+            throw new Exception\DecryptionFailedException($key);
+        }
+
         $iv = substr($data, 0, 16);
-        if (!$iv) {
-            throw new Exception\DecryptionFailedException($key);
-        }
+        $authenticationCode = substr($data, $length - 32);
+        $data = substr($data, 16, $length - 48);
 
-        $data = substr($data, 16);
         if (!$data) {
             throw new Exception\DecryptionFailedException($key);
         }
 
-        $data = $this->decryptAes($key, $iv, $data);
-
-        $hash = substr($data, -20);
-        if (!$hash) {
-            throw new Exception\DecryptionFailedException($key);
-        }
-        $data = substr($data, 0, -20);
-        if (!$data) {
-            $data = '';
-        }
-
-        if (sha1($data, true) !== $hash) {
+        if ($this->authenticationCode($key, $data) !== $authenticationCode) {
             throw new Exception\DecryptionFailedException($key);
         }
 
-        return $data;
+        return $this->decryptAes($key, $iv, $data);
+    }
+
+    /**
+     * Create a message authentication code for the supplied ciphertext using
+     * HMAC-SHA-256.
+     *
+     * @link https://tools.ietf.org/html/rfc6234
+     *
+     * @param KeyInterface $key        The key to authenticate with.
+     * @param string       $ciphertext The ciphertext.
+     *
+     * @return string The message authentication code.
+     */
+    protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
+    {
+        return hash_hmac(
+            'sha256',
+            $ciphertext,
+            $key->authenticationSecret(),
+            true
+        );
     }
 
     /**

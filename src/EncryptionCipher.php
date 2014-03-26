@@ -87,31 +87,29 @@ class EncryptionCipher implements EncryptionCipherInterface
     public function encrypt(Key\KeyInterface $key, $data)
     {
         $iv = $this->randomSource()->generate(16);
+        $ciphertext = $this->encryptAes($key, $iv, $data);
 
         return $this->base64UrlEncoder()->encode(
             $iv .
-            $this->encryptAes(
-                $key->encryptionSecret(),
-                $iv,
-                $data . sha1($data, true)
-            )
+            $ciphertext .
+            $this->authenticationCode($key, $ciphertext)
         );
     }
 
     /**
      * Encrypt some data with AES and PKCS #7 padding.
      *
-     * @param string $key  The key to use.
-     * @param string $iv   The initialization vector to use.
-     * @param string $data The data to encrypt.
+     * @param Key\KeyInterface $key  The key to encrypt with.
+     * @param string           $iv   The initialization vector to use.
+     * @param string           $data The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    protected function encryptAes($key, $iv, $data)
+    protected function encryptAes(Key\KeyInterface $key, $iv, $data)
     {
         return mcrypt_encrypt(
             MCRYPT_RIJNDAEL_128,
-            $key,
+            $key->encryptionSecret(),
             $this->pad($data),
             MCRYPT_MODE_CBC,
             $iv
@@ -132,6 +130,27 @@ class EncryptionCipher implements EncryptionCipherInterface
         $padSize = intval(16 - (strlen($data) % 16));
 
         return $data . str_repeat(chr($padSize), $padSize);
+    }
+
+    /**
+     * Create a message authentication code for the supplied ciphertext using
+     * HMAC-SHA-256.
+     *
+     * @link https://tools.ietf.org/html/rfc6234
+     *
+     * @param KeyInterface $key        The key to authenticate with.
+     * @param string       $ciphertext The ciphertext.
+     *
+     * @return string The message authentication code.
+     */
+    protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
+    {
+        return hash_hmac(
+            'sha256',
+            $ciphertext,
+            $key->authenticationSecret(),
+            true
+        );
     }
 
     private static $instance;
