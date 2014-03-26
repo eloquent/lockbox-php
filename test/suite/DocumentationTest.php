@@ -54,7 +54,7 @@ $keyWriter->writeFile($key, $keyPath);
 
     public function testEncryptingData()
     {
-        $keyPath = $this->fixturePath . '/key256.lockbox.key';
+        $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{107}$/');
 
 // $keyPath = '/path/to/lockbox.key';
@@ -69,7 +69,7 @@ echo $encrypter->encrypt($key, 'Super secret data.');
 
     public function testEncryptingMultipleData()
     {
-        $keyPath = $this->fixturePath . '/key256.lockbox.key';
+        $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
         $this->expectOutputRegex('/^[A-Za-z0-9_=-]{321}$/');
 
 // $keyPath = '/path/to/lockbox.key';
@@ -87,7 +87,7 @@ echo $encrypter->encrypt('Mega secret data.');
 
     public function testDecryptingData()
     {
-        $keyPath = $this->fixturePath . '/key256.lockbox.key';
+        $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
         $this->expectOutputString('Super secret data.');
 
 // $keyPath = '/path/to/lockbox.key';
@@ -111,7 +111,7 @@ try {
 
     public function testDecryptingMultipleData()
     {
-        $keyPath = $this->fixturePath . '/key256.lockbox.key';
+        $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
         $this->expectOutputString('Super secret data.Extra secret data.Mega secret data.');
 
 // $keyPath = '/path/to/lockbox.key';

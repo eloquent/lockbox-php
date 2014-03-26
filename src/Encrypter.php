@@ -146,7 +146,7 @@ class Encrypter implements EncrypterInterface
     protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
     {
         return hash_hmac(
-            'sha256',
+            'sha' . $key->authenticationSecretSize(),
             $ciphertext,
             $key->authenticationSecret(),
             true

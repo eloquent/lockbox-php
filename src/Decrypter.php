@@ -76,13 +76,15 @@ class Decrypter implements DecrypterInterface
         }
 
         $length = strlen($data);
-        if ($length < 48) {
+        $authenticationCodeSize = strlen($key->authenticationSecret());
+
+        if ($length < 16 + $authenticationCodeSize) {
             throw new Exception\DecryptionFailedException($key);
         }
 
         $iv = substr($data, 0, 16);
-        $authenticationCode = substr($data, $length - 32);
-        $data = substr($data, 16, $length - 48);
+        $authenticationCode = substr($data, $length - $authenticationCodeSize);
+        $data = substr($data, 16, $length - 16 - $authenticationCodeSize);
 
         if (!$data) {
             throw new Exception\DecryptionFailedException($key);
@@ -112,7 +114,7 @@ class Decrypter implements DecrypterInterface
     protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
     {
         return hash_hmac(
-            'sha256',
+            'sha' . $key->authenticationSecretSize(),
             $ciphertext,
             $key->authenticationSecret(),
             true

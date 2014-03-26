@@ -30,7 +30,6 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         return array(
             'Test vector 1' => array(
-                256,
                 '',
                 '12345678901234567890123456789012',
                 '12345678901234567890123456789013',
@@ -41,7 +40,6 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
             ),
 
             'Test vector 2' => array(
-                256,
                 '1234',
                 '12345678901234567890123456789012',
                 '12345678901234567890123456789013',
@@ -52,11 +50,11 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
             ),
 
             'Test vector 3' => array(
-                256,
                 '1234567890123456',
                 '12345678901234567890123456789012',
                 '12345678901234567890123456789013',
                 '1234567890123456',
+
                 'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
                 'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
                 'FYF8FIAdi9LUw8iV23vcddM94ZViMoYc' .
@@ -64,15 +62,66 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
             ),
 
             'Test vector 4' => array(
-                128,
+                '1234567890123456',
+                '123456789012345678901234',
+                '12345678901234567890123456789013',
+                '1234567890123456',
+
+                'MTIzNDU2Nzg5MDEyMzQ1NkhKO5bmI23-' .
+                'YRx1wr6-8J-30oxXaA2yZ_-Egiht-SKV' .
+                '0CtvXa04MwkOxkDjlA4Oop-50tb9l_Wh' .
+                '1ntB1Zx-4gk',
+            ),
+
+            'Test vector 5' => array(
                 '1234567890123456',
                 '1234567890123456',
                 '12345678901234567890123456789013',
                 '1234567890123456',
+
                 'MTIzNDU2Nzg5MDEyMzQ1Nti1mEjHZwyU' .
                 'sptU0jeeLnrF68nrne5TjwrZaVldenQM' .
                 'mRuB7XdmN9iFFGFi_hL0l95OadeyfZ6P' .
                 'LuVkgPPo13Q',
+            ),
+
+            'Test vector 6' => array(
+                '1234567890123456',
+                '12345678901234567890123456789012',
+                    '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+                '1234567890123456',
+
+                'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
+                'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
+                'gUc25HiivS3hpIWbLzCvuFdkI-4sgBZS' .
+                'p-3HZt0nFhzGFfz4-70bsyeWZN2gR4RM' .
+                'z23HAP9Q_ka1KDRoMtLQ5w',
+            ),
+
+            'Test vector 7' => array(
+                '1234567890123456',
+                '12345678901234567890123456789012',
+                '12345678901234567890123456789012' .
+                    '3456789012345678',
+                '1234567890123456',
+
+                'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
+                'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
+                'ElWEyH4a6MlRryABUmm7uS_bhk8a-_j8' .
+                'yX1uUexmwFl1RxBWzLG1vU7zRGcV0AIX',
+            ),
+
+            'Test vector 8' => array(
+                '1234567890123456',
+                '12345678901234567890123456789012',
+                '1234567890123456789012345678',
+                '1234567890123456',
+
+                'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
+                'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
+                'Gi15pKq0CYglpHxptwC5qyuqmfjxu179' .
+                'GwA9kQ',
             ),
         );
     }
@@ -80,7 +129,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsEncryption($bits, $data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsEncryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         $actual = $this->encrypter->encrypt(new Key($encryptionSecret, $authenticationSecret), $data);
@@ -91,7 +140,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsDecryption($bits, $data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsDecryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
         $this->assertSame(
             $data,

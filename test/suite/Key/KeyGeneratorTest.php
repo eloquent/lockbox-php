@@ -45,7 +45,7 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
         Phake::when($this->randomSource)->generate(28)->thenReturn('1234567890123456789012345678');
-        $key = $this->generator->generateKey(128, 224, 'name', 'description');
+        $key = $this->generator->generateKey('name', 'description', 128, 224);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
         $this->assertSame('1234567890123456789012345678', $key->authenticationSecret());
@@ -69,13 +69,13 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
     public function testGenerateKeyFailureInvalidEncryptionSecretSize()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
-        $this->generator->generateKey(257);
+        $this->generator->generateKey(null, null, 257);
     }
 
     public function testGenerateKeyFailureInvalidAuthenticationSecretSize()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
-        $this->generator->generateKey(null, 513);
+        $this->generator->generateKey(null, null, null, 513);
     }
 
     public function testInstance()

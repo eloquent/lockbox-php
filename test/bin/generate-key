@@ -15,23 +15,33 @@ use Eloquent\Lockbox\Key\KeyWriter;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$size = null;
-if (isset($_SERVER['argv'][1])) {
-    $size = intval($_SERVER['argv'][1]);
-}
-
 $name = null;
-if (isset($_SERVER['argv'][2])) {
-    $name = $_SERVER['argv'][2];
+if (isset($_SERVER['argv'][1])) {
+    $name = $_SERVER['argv'][1] ?: null;
 }
 
 $description = null;
+if (isset($_SERVER['argv'][2])) {
+    $description = $_SERVER['argv'][2] ?: null;
+}
+
+$encryptionSecretSize = null;
 if (isset($_SERVER['argv'][3])) {
-    $description = $_SERVER['argv'][3];
+    $encryptionSecretSize = intval($_SERVER['argv'][3]) ?: null;
+}
+
+$authenticationSecretSize = null;
+if (isset($_SERVER['argv'][4])) {
+    $authenticationSecretSize = intval($_SERVER['argv'][4]) ?: null;
 }
 
 KeyWriter::instance()->writeStream(
-    KeyGenerator::instance()->generateKey($size, $name, $description),
+    KeyGenerator::instance()->generateKey(
+        $name,
+        $description,
+        $encryptionSecretSize,
+        $authenticationSecretSize
+    ),
     STDOUT
 );
 echo PHP_EOL;
