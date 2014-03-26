@@ -42,14 +42,12 @@ this feature is planned.
 use Eloquent\Lockbox\EncryptionCipher;
 use Eloquent\Lockbox\Key\KeyReader;
 
-$data = 'Super secret data.';
-
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
 $cipher = new EncryptionCipher;
-echo $cipher->encrypt($key, $data);
+echo $cipher->encrypt($key, 'Super secret data.');
 ```
 
 ### Encrypting multiple data packets with the same key
@@ -61,22 +59,15 @@ type of ciphers are convenient for encrypting multiple data packets.
 use Eloquent\Lockbox\BoundEncryptionCipher;
 use Eloquent\Lockbox\Key\KeyReader;
 
-$data = array(
-    'Super secret data.',
-    'Extra secret data.',
-    'Mega secret data.',
-);
-
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
 $cipher = new BoundEncryptionCipher($key);
 
-$encrypted = array();
-foreach ($data as $string) {
-    echo $cipher->encrypt($string);
-}
+echo $cipher->encrypt('Super secret data.');
+echo $cipher->encrypt('Extra secret data.');
+echo $cipher->encrypt('Mega secret data.');
 ```
 
 ### Decrypting data
@@ -86,25 +77,21 @@ use Eloquent\Lockbox\DecryptionCipher;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyReader;
 
-$encrypted =
-    '2TkRH_mVR3eID5heNErkHJhJ5kiGyKNG' .
-    'UOd41GS5LCzAVvJUVeDi_Rbs0pVbUus2' .
-    'i8CTI0Sr0tt5cdPKvuxF9k2gJETEk6KE' .
-    't1T63Cl4pxo';
-
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
 $cipher = new DecryptionCipher;
 
+$encrypted =
+    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
+    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc';
+
 try {
-    $data = $cipher->decrypt($key, $encrypted);
+    echo $cipher->decrypt($key, $encrypted);
 } catch (DecryptionFailedException $e) {
     echo 'Decryption failed.';
 }
-
-echo $data;
 ```
 
 ### Decrypting multiple data packets with the same key
@@ -117,32 +104,26 @@ use Eloquent\Lockbox\BoundDecryptionCipher;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyReader;
 
-$encrypted = array(
-    '2TkRH_mVR3eID5heNErkHJhJ5kiGyKNG' .
-    'UOd41GS5LCzAVvJUVeDi_Rbs0pVbUus2' .
-    'i8CTI0Sr0tt5cdPKvuxF9k2gJETEk6KE' .
-    't1T63Cl4pxo',
-    'aNkLcTqavI9aXJ6sCzgIdki9FtgxWu22' .
-    'mRmRcw3MMY6wKA1hzunGX1o9KzwerYQp' .
-    'iX-RQb62Bwl9xjxUnl_nRdOepB9zatNc' .
-    'k2E_m2jvWXI',
-    'V0wpEJUP6ZSvgqiz0hw27j-6FqH74b2l' .
-    'Ss48ohbR8kQ3LpNa-Gi5PBW1ZR_p8RN9' .
-    '3YFtRQYcguxQl7bFAJhb6Y_5jz_8zRUM' .
-    'tOZ0rNZlDpI',
-);
-
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
 $key = $keyReader->readFile($keyPath);
 
 $cipher = new BoundDecryptionCipher($key);
 
+$encrypted = array(
+    '37ms0z6MyzvE49o2-cfAJ6sqs3FhqV9uyCOmMOV6qGbM_kVym0R5akGTdCCqUPh7' .
+    'la2HrFDcN8Sce7G_5JEgZndnYezCi8ORi-jB-zS9KIc',
+    'a-6y2yEe-yVPM5om7BIQK3nJHgvNJbazvR0gQj3xPgBoR_mDEdFSU9Xt7Ea1EpZB' .
+    'eopzBRnP5OdiTZQ76RVV7xZ4-Ym1qRzSJ-JPtdMI7Zo',
+    'sxLpTbj1ilbw48M721J-Mb492lShhbDLlRQcp54UTzGRUdHd_8OlKFkIea51b1sq' .
+    'k16JtnZqaXxHQCThmdE1pBTWvhQNOCK2XPizrdSTLf0',
+);
+
 foreach ($encrypted as $string) {
     try {
-        $data = $cipher->decrypt($string);
+        echo $cipher->decrypt($string);
     } catch (DecryptionFailedException $e) {
-    echo 'Decryption failed.';
+        echo 'Decryption failed.';
     }
 }
 ```

@@ -11,13 +11,13 @@
  */
 
 use Eloquent\Lockbox\EncryptionCipher;
-use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Key\KeyReader;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
 $key = null;
-if (isset($_SERVER['argv'][1]) && isset($_SERVER['argv'][2])) {
-    $key = new Key($_SERVER['argv'][1], $_SERVER['argv'][2]);
+if (isset($_SERVER['argv'][1])) {
+    $key = KeyReader::instance()->readFile($_SERVER['argv'][1]);
 }
 
 echo EncryptionCipher::instance()

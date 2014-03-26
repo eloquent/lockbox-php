@@ -147,7 +147,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureBadAesData()
     {
         $data = $this->base64Url->encode(
-            '1234567890123456foobar' . $this->base64Url->decode('PrnEUEDRLByiD0B68n14EIC7cA8uor8x20S1HoXFOok')
+            '1234567890123456foobar' . $this->base64Url->decode('UCtdY9Ovlbogf5scpas-KZpP3jDJfea-WM9VxOlOzd8')
         );
 
         $this->setExpectedException(
@@ -169,7 +169,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $data = $this->base64Url->encode(
             '1234567890123456' .
             $ciphertext .
-            $this->base64Url->decode('tjHGRSTgecookg0NvcIhqyiUUEOvPXFWIajiCYkhndo')
+            $this->base64Url->decode('gpMQqll4TfpxjviJ2T2YWO8fnizBln9Ncj3TXRjsvGw')
         );
 
         $this->setExpectedException(

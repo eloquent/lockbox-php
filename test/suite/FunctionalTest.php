@@ -36,8 +36,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NrVSLNU_PVpy' .
-                'jFxTFHTvwVD3oNnoY53lf7Wyt3lRQoq3' .
-                'JVgEO4qxrXOoI3hLK-ajPg',
+                'jFxTFHTvwVCZ2VlzIBLFCPuEG6E-WkhZ' .
+                'VowAdHa17ztnCh0MAw7q6Q',
             ),
 
             'Test vector 2' => array(
@@ -47,8 +47,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '12345678901234567890123456789013',
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NvctUcuEnAm_' .
-                'KSDWlxnABun-GuM_rdojg1LZx1WtxtMz' .
-                'K6L8bG94x0FBmM_tx7Hkkw',
+                'KSDWlxnABunIIK4h2MSoyG7nPL-Qc-ks' .
+                'SABFkpUIJI0ERlWRpjERSg',
             ),
 
             'Test vector 3' => array(
@@ -59,8 +59,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1NnuUZ55SZL-E' .
                 'BpxoZDMH74AKnhleKIxCll6JkhUAQlcB' .
-                'ZBbO9U3cEGRu4i9RIGfl0_vL_edhjnsY' .
-                '31M9GGEnUdE',
+                'FYF8FIAdi9LUw8iV23vcddM94ZViMoYc' .
+                'W3Dle8fXTfo',
             ),
 
             'Test vector 4' => array(
@@ -71,8 +71,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 '1234567890123456',
                 'MTIzNDU2Nzg5MDEyMzQ1Nti1mEjHZwyU' .
                 'sptU0jeeLnrF68nrne5TjwrZaVldenQM' .
-                'v7muNqqphAyGko4inI02Omug4lVgv7PR' .
-                'S2wFZNQP7vI',
+                'mRuB7XdmN9iFFGFi_hL0l95OadeyfZ6P' .
+                'LuVkgPPo13Q',
             ),
         );
     }

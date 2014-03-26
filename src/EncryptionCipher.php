@@ -92,7 +92,7 @@ class EncryptionCipher implements EncryptionCipherInterface
         return $this->base64UrlEncoder()->encode(
             $iv .
             $ciphertext .
-            $this->authenticationCode($key, $ciphertext)
+            $this->authenticationCode($key, $iv . $ciphertext)
         );
     }
 

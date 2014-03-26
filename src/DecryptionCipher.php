@@ -88,7 +88,10 @@ class DecryptionCipher implements DecryptionCipherInterface
             throw new Exception\DecryptionFailedException($key);
         }
 
-        if ($this->authenticationCode($key, $data) !== $authenticationCode) {
+        if (
+            $this->authenticationCode($key, $iv . $data) !==
+            $authenticationCode
+        ) {
             throw new Exception\DecryptionFailedException($key);
         }
 
