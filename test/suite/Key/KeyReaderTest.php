@@ -24,9 +24,9 @@ class KeyReaderTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->factory = new KeyFactory;
-        $this->base64UrlDecoder = new Base64Url;
+        $this->decoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());
-        $this->reader = new KeyReader($this->factory, $this->base64UrlDecoder, $this->isolator);
+        $this->reader = new KeyReader($this->factory, $this->decoder, $this->isolator);
 
         $this->jsonDataFull = <<<'EOD'
 {
@@ -44,7 +44,7 @@ EOD;
     public function testConstructor()
     {
         $this->assertSame($this->factory, $this->reader->factory());
-        $this->assertSame($this->base64UrlDecoder, $this->reader->base64UrlDecoder());
+        $this->assertSame($this->decoder, $this->reader->decoder());
     }
 
     public function testConstructorDefaults()
@@ -52,7 +52,7 @@ EOD;
         $this->reader = new KeyReader;
 
         $this->assertSame(KeyFactory::instance(), $this->reader->factory());
-        $this->assertSame(Base64Url::instance(), $this->reader->base64UrlDecoder());
+        $this->assertSame(Base64Url::instance(), $this->reader->decoder());
     }
 
     public function testReadFileFull()

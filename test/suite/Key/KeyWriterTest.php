@@ -23,9 +23,9 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->base64UrlEncoder = new Base64Url;
+        $this->encoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());
-        $this->writer = new KeyWriter($this->base64UrlEncoder, $this->isolator);
+        $this->writer = new KeyWriter($this->encoder, $this->isolator);
 
         $this->keyFull = new Key(
             '12345678901234567890123456789012',
@@ -47,14 +47,14 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->base64UrlEncoder, $this->writer->base64UrlEncoder());
+        $this->assertSame($this->encoder, $this->writer->encoder());
     }
 
     public function testConstructorDefaults()
     {
         $this->writer = new KeyWriter;
 
-        $this->assertSame(Base64Url::instance(), $this->writer->base64UrlEncoder());
+        $this->assertSame(Base64Url::instance(), $this->writer->encoder());
     }
 
     public function testWriteFileFull()

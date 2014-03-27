@@ -39,29 +39,29 @@ class KeyWriter implements KeyWriterInterface
     /**
      * Construct a new key reader.
      *
-     * @param EncoderInterface|null $base64UrlEncoder The base64url encoder to use.
-     * @param Isolator|null         $isolator         The isolator to use.
+     * @param EncoderInterface|null $encoder  The encoder to use.
+     * @param Isolator|null         $isolator The isolator to use.
      */
     public function __construct(
-        EncoderInterface $base64UrlEncoder = null,
+        EncoderInterface $encoder = null,
         Isolator $isolator = null
     ) {
-        if (null === $base64UrlEncoder) {
-            $base64UrlEncoder = Base64Url::instance();
+        if (null === $encoder) {
+            $encoder = Base64Url::instance();
         }
 
-        $this->base64UrlEncoder = $base64UrlEncoder;
+        $this->encoder = $encoder;
         $this->isolator = Isolator::get($isolator);
     }
 
     /**
-     * Get the base64url encoder.
+     * Get the encoder.
      *
-     * @return EncoderInterface The base64url encoder.
+     * @return EncoderInterface The encoder.
      */
-    public function base64UrlEncoder()
+    public function encoder()
     {
-        return $this->base64UrlEncoder;
+        return $this->encoder;
     }
 
     /**
@@ -130,9 +130,9 @@ class KeyWriter implements KeyWriterInterface
             $data->description = $key->description();
         }
 
-        $data->encryptionSecret = $this->base64UrlEncoder()
+        $data->encryptionSecret = $this->encoder()
             ->encode($key->encryptionSecret());
-        $data->authenticationSecret = $this->base64UrlEncoder()
+        $data->authenticationSecret = $this->encoder()
             ->encode($key->authenticationSecret());
 
         return $data;
@@ -149,6 +149,6 @@ class KeyWriter implements KeyWriterInterface
     }
 
     private static $instance;
-    private $base64UrlEncoder;
+    private $encoder;
     private $isolator;
 }

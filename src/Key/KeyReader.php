@@ -39,24 +39,24 @@ class KeyReader implements KeyReaderInterface
     /**
      * Construct a new key reader.
      *
-     * @param KeyFactoryInterface|null $factory          The factory to use.
-     * @param DecoderInterface|null    $base64UrlDecoder The base64url decoder to use.
-     * @param Isolator|null            $isolator         The isolator to use.
+     * @param KeyFactoryInterface|null $factory  The factory to use.
+     * @param DecoderInterface|null    $decoder  The decoder to use.
+     * @param Isolator|null            $isolator The isolator to use.
      */
     public function __construct(
         KeyFactoryInterface $factory = null,
-        DecoderInterface $base64UrlDecoder = null,
+        DecoderInterface $decoder = null,
         Isolator $isolator = null
     ) {
         if (null === $factory) {
             $factory = KeyFactory::instance();
         }
-        if (null === $base64UrlDecoder) {
-            $base64UrlDecoder = Base64Url::instance();
+        if (null === $decoder) {
+            $decoder = Base64Url::instance();
         }
 
         $this->factory = $factory;
-        $this->base64UrlDecoder = $base64UrlDecoder;
+        $this->decoder = $decoder;
         $this->isolator = Isolator::get($isolator);
     }
 
@@ -71,13 +71,13 @@ class KeyReader implements KeyReaderInterface
     }
 
     /**
-     * Get the base64url decoder.
+     * Get the decoder.
      *
-     * @return DecoderInterface The base64url decoder.
+     * @return DecoderInterface The decoder.
      */
-    public function base64UrlDecoder()
+    public function decoder()
     {
-        return $this->base64UrlDecoder;
+        return $this->decoder;
     }
 
     /**
@@ -151,7 +151,7 @@ class KeyReader implements KeyReaderInterface
         $encryptionSecret = null;
         if (isset($data->encryptionSecret)) {
             try {
-                $encryptionSecret = $this->base64UrlDecoder()
+                $encryptionSecret = $this->decoder()
                     ->decode($data->encryptionSecret);
             } catch (TransformExceptionInterface $e) {
                 throw new Exception\KeyReadException($path, $e);
@@ -164,7 +164,7 @@ class KeyReader implements KeyReaderInterface
         $authenticationSecret = null;
         if (isset($data->authenticationSecret)) {
             try {
-                $authenticationSecret = $this->base64UrlDecoder()
+                $authenticationSecret = $this->decoder()
                     ->decode($data->authenticationSecret);
             } catch (TransformExceptionInterface $e) {
                 throw new Exception\KeyReadException($path, $e);
@@ -210,6 +210,6 @@ class KeyReader implements KeyReaderInterface
 
     private static $instance;
     private $factory;
-    private $base64UrlDecoder;
+    private $decoder;
     private $isolator;
 }
