@@ -12,9 +12,9 @@
 namespace Eloquent\Lockbox;
 
 /**
- * Encrypts and decrypts encoded data.
+ * Encrypts and decrypts unencoded data.
  */
-class Cipher extends AbstractCipher
+class RawCipher extends AbstractCipher
 {
     /**
      * Get the static instance of this cipher.
@@ -41,10 +41,10 @@ class Cipher extends AbstractCipher
         DecrypterInterface $decrypter = null
     ) {
         if (null === $encrypter) {
-            $encrypter = Encrypter::instance();
+            $encrypter = RawEncrypter::instance();
         }
         if (null === $decrypter) {
-            $decrypter = Decrypter::instance();
+            $decrypter = RawDecrypter::instance();
         }
 
         parent::__construct($encrypter, $decrypter);

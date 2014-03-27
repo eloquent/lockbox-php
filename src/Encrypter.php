@@ -13,11 +13,9 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
- * The standard Lockbox encrypter.
+ * Encrypts data and produces encoded output.
  */
 class Encrypter implements EncrypterInterface
 {
@@ -38,43 +36,42 @@ class Encrypter implements EncrypterInterface
     /**
      * Construct a new encrypter.
      *
-     * @param RandomSourceInterface|null $randomSource     The random source to use.
-     * @param EncoderInterface|null      $base64UrlEncoder The base64url encoder to use.
+     * @param EncrypterInterface|null $rawEncrypter The raw encrypter to use.
+     * @param EncoderInterface|null   $encoder      The encoder to use.
      */
     public function __construct(
-        RandomSourceInterface $randomSource = null,
-        EncoderInterface $base64UrlEncoder = null
+        EncrypterInterface $rawEncrypter = null,
+        EncoderInterface $encoder = null
     ) {
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
+        if (null === $rawEncrypter) {
+            $rawEncrypter = RawEncrypter::instance();
         }
-        if (null === $base64UrlEncoder) {
-            $base64UrlEncoder = Base64Url::instance();
+        if (null === $encoder) {
+            $encoder = Base64Url::instance();
         }
 
-        $this->randomSource = $randomSource;
-        $this->base64UrlEncoder = $base64UrlEncoder;
-        $this->version = pack('n', 1);
+        $this->rawEncrypter = $rawEncrypter;
+        $this->encoder = $encoder;
     }
 
     /**
-     * Get the random source.
+     * Get the raw encrypter.
      *
-     * @return RandomSourceInterface The random source.
+     * @return EncrypterInterface The raw encrypter.
      */
-    public function randomSource()
+    public function rawEncrypter()
     {
-        return $this->randomSource;
+        return $this->rawEncrypter;
     }
 
     /**
-     * Get the base64url encoder.
+     * Get the encoder.
      *
-     * @return EncoderInterface The base64url encoder.
+     * @return EncoderInterface The encoder.
      */
-    public function base64UrlEncoder()
+    public function encoder()
     {
-        return $this->base64UrlEncoder;
+        return $this->encoder;
     }
 
     /**
@@ -87,75 +84,11 @@ class Encrypter implements EncrypterInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        $iv = $this->randomSource()->generate(16);
-        $ciphertext = $this->encryptAes($key, $iv, $data);
-
-        return $this->base64UrlEncoder()->encode(
-            $this->version .
-            $iv .
-            $ciphertext .
-            $this->authenticationCode($key, $this->version . $iv . $ciphertext)
-        );
-    }
-
-    /**
-     * Encrypt some data with AES and PKCS #7 padding.
-     *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $iv   The initialization vector to use.
-     * @param string           $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    protected function encryptAes(Key\KeyInterface $key, $iv, $data)
-    {
-        return mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key->encryptionSecret(),
-            $this->pad($data),
-            MCRYPT_MODE_CBC,
-            $iv
-        );
-    }
-
-    /**
-     * Pad a string using PKCS #7 (RFC 2315) padding.
-     *
-     * @link http://tools.ietf.org/html/rfc2315
-     *
-     * @param string $data The data to pad.
-     *
-     * @return string The padded data.
-     */
-    protected function pad($data)
-    {
-        $padSize = intval(16 - (strlen($data) % 16));
-
-        return $data . str_repeat(chr($padSize), $padSize);
-    }
-
-    /**
-     * Create a message authentication code for the supplied ciphertext using
-     * HMAC-SHA-256.
-     *
-     * @link https://tools.ietf.org/html/rfc6234
-     *
-     * @param KeyInterface $key        The key to authenticate with.
-     * @param string       $ciphertext The ciphertext.
-     *
-     * @return string The message authentication code.
-     */
-    protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
-    {
-        return hash_hmac(
-            'sha' . $key->authenticationSecretSize(),
-            $ciphertext,
-            $key->authenticationSecret(),
-            true
-        );
+        return $this->encoder()
+            ->encode($this->rawEncrypter()->encrypt($key, $data));
     }
 
     private static $instance;
-    private $randomSource;
-    private $base64UrlEncoder;
+    private $rawEncrypter;
+    private $encoder;
 }

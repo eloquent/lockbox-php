@@ -13,6 +13,7 @@ use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\RawEncrypter;
 
 class FunctionalTest extends PHPUnit_Framework_TestCase
 {
@@ -21,7 +22,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encrypter = new Encrypter($this->randomSource);
+        $this->encrypter = new Encrypter(new RawEncrypter($this->randomSource));
         $this->decrypter = new Decrypter;
         $this->keyGenerator = new KeyGenerator;
     }

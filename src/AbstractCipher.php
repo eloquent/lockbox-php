@@ -12,42 +12,22 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox cipher, with a bound key.
+ * An abstract base class for implementing ciphers.
  */
-class BoundCipher implements BoundCipherInterface
+abstract class AbstractCipher implements CipherInterface
 {
     /**
-     * Construct a new bound cipher.
+     * Construct a new cipher.
      *
-     * @param Key\KeyInterface        $key       The key to use.
-     * @param EncrypterInterface|null $encrypter The encrypter to use.
-     * @param DecrypterInterface|null $decrypter The decrypter to use.
+     * @param EncrypterInterface $encrypter The encrypter to use.
+     * @param DecrypterInterface $decrypter The decrypter to use.
      */
     public function __construct(
-        Key\KeyInterface $key,
-        EncrypterInterface $encrypter = null,
-        DecrypterInterface $decrypter = null
+        EncrypterInterface $encrypter,
+        DecrypterInterface $decrypter
     ) {
-        if (null === $encrypter) {
-            $encrypter = Encrypter::instance();
-        }
-        if (null === $decrypter) {
-            $decrypter = Decrypter::instance();
-        }
-
-        $this->key = $key;
         $this->encrypter = $encrypter;
         $this->decrypter = $decrypter;
-    }
-
-    /**
-     * Get the key.
-     *
-     * @return Key\KeyInterface The key.
-     */
-    public function key()
-    {
-        return $this->key;
     }
 
     /**
@@ -73,29 +53,30 @@ class BoundCipher implements BoundCipherInterface
     /**
      * Encrypt a data packet.
      *
-     * @param string $data The data to encrypt.
+     * @param Key\KeyInterface $key  The key to encrypt with.
+     * @param string           $data The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt($data)
+    public function encrypt(Key\KeyInterface $key, $data)
     {
-        return $this->encrypter()->encrypt($this->key(), $data);
+        return $this->encrypter()->encrypt($key, $data);
     }
 
     /**
      * Decrypt a data packet.
      *
-     * @param string $data The data to decrypt.
+     * @param Key\KeyInterface $key  The key to decrypt with.
+     * @param string           $data The data to decrypt.
      *
      * @return string                              The decrypted data.
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
-    public function decrypt($data)
+    public function decrypt(Key\KeyInterface $key, $data)
     {
-        return $this->decrypter()->decrypt($this->key(), $data);
+        return $this->decrypter()->decrypt($key, $data);
     }
 
-    private $key;
     private $encrypter;
     private $decrypter;
 }

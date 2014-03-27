@@ -17,6 +17,7 @@ use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\RawEncrypter;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -31,7 +32,7 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->encodingTransform = new Base64UrlEncodeTransform;
         $this->transform = new EncryptTransform($this->key, $this->randomSource, $this->encodingTransform);
 
-        $this->encrypter = new BoundEncrypter($this->key, new Encrypter($this->randomSource));
+        $this->encrypter = new BoundEncrypter($this->key, new Encrypter(new RawEncrypter($this->randomSource)));
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');

@@ -17,6 +17,7 @@ use PHPUnit_Framework_TestCase;
 
 /**
  * @covers \Eloquent\Lockbox\Cipher
+ * @covers \Eloquent\Lockbox\AbstractCipher
  * @covers \Eloquent\Lockbox\Encrypter
  * @covers \Eloquent\Lockbox\Decrypter
  */
@@ -96,108 +97,6 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->decrypt($this->key, str_repeat('!', 100));
     }
 
-    public function testDecryptFailureEmptyVersion()
-    {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, '');
-    }
-
-    public function testDecryptFailureUnsupportedVersion()
-    {
-        $data = $this->base64Url->encode(pack('n', 111) . str_pad('', 100, '1234567890'));
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureEmptyIv()
-    {
-        $data = $this->base64Url->encode($this->version);
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureShortMac()
-    {
-        $data = $this->base64Url->encode($this->version . '1234567890123456789012345678901234567890123');
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureEmptyCiphertext()
-    {
-        $data = $this->base64Url->encode($this->version . '12345678901234567890123456789012345678901234');
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureBadMac()
-    {
-        $data = $this->base64Url->encode($this->version . '1234567890123456foobar1234567890123456789012345678');
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureBadAesData()
-    {
-        $data = $this->base64Url->encode(
-            $this->version .
-            '1234567890123456foobar' .
-            $this->authenticationCode($this->key, $this->version . '1234567890123456foobar')
-        );
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
-    public function testDecryptFailureBadPadding()
-    {
-        $ciphertext = mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_128,
-            $this->key->encryptionSecret(),
-            'foobar',
-            MCRYPT_MODE_CBC,
-            '1234567890123456'
-        );
-        $data = $this->base64Url->encode(
-            $this->version .
-            '1234567890123456' .
-            $ciphertext .
-            $this->authenticationCode($this->key, $this->version . '1234567890123456' . $ciphertext)
-        );
-
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
-    }
-
     public function testInstance()
     {
         $className = get_class($this->cipher);
@@ -206,22 +105,5 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf($className, $instance);
         $this->assertSame($instance, $className::instance());
-    }
-
-    protected function pad($data)
-    {
-        $padSize = intval(16 - (strlen($data) % 16));
-
-        return $data . str_repeat(chr($padSize), $padSize);
-    }
-
-    protected function authenticationCode($key, $data)
-    {
-        return hash_hmac(
-            'sha' . strlen($key->authenticationSecret()) * 8,
-            $data,
-            $key->authenticationSecret(),
-            true
-        );
     }
 }

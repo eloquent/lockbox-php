@@ -16,7 +16,7 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
 
 /**
- * The standard Lockbox decrypter.
+ * Decrypts encoded data.
  */
 class Decrypter implements DecrypterInterface
 {
@@ -37,25 +37,42 @@ class Decrypter implements DecrypterInterface
     /**
      * Construct a new decrypter.
      *
-     * @param DecoderInterface|null $base64UrlDecoder The base64url encoder to use.
+     * @param DecrypterInterface|null $rawDecrypter The raw decrypter to use.
+     * @param DecoderInterface|null   $decoder      The decoder to use.
      */
-    public function __construct(DecoderInterface $base64UrlDecoder = null)
-    {
-        if (null === $base64UrlDecoder) {
-            $base64UrlDecoder = Base64Url::instance();
+    public function __construct(
+        DecrypterInterface $rawDecrypter = null,
+        DecoderInterface $decoder = null
+    ) {
+        if (null === $rawDecrypter) {
+            $rawDecrypter = RawDecrypter::instance();
+        }
+        if (null === $decoder) {
+            $decoder = Base64Url::instance();
         }
 
-        $this->base64UrlDecoder = $base64UrlDecoder;
+        $this->rawDecrypter = $rawDecrypter;
+        $this->decoder = $decoder;
     }
 
     /**
-     * Get the base64url encoder.
+     * Get the raw decrypter.
      *
-     * @return DecoderInterface The base64url encoder.
+     * @return DecrypterInterface The raw decrypter.
      */
-    public function base64UrlDecoder()
+    public function rawDecrypter()
     {
-        return $this->base64UrlDecoder;
+        return $this->rawDecrypter;
+    }
+
+    /**
+     * Get the decoder.
+     *
+     * @return DecoderInterface The decoder.
+     */
+    public function decoder()
+    {
+        return $this->decoder;
     }
 
     /**
@@ -70,117 +87,15 @@ class Decrypter implements DecrypterInterface
     public function decrypt(Key\KeyInterface $key, $data)
     {
         try {
-            $data = $this->base64UrlDecoder()->decode($data);
+            $data = $this->decoder()->decode($data);
         } catch (TransformExceptionInterface $e) {
             throw new Exception\DecryptionFailedException($key, $e);
         }
 
-        $length = strlen($data);
-        $authenticationCodeSize = strlen($key->authenticationSecret());
-
-        if ($length < 18 + $authenticationCodeSize) {
-            throw new Exception\DecryptionFailedException($key);
-        }
-
-        $versionData = substr($data, 0, 2);
-        $version = unpack('n', $versionData);
-        $version = array_shift($version);
-        if (1 !== $version) {
-            throw new Exception\DecryptionFailedException(
-                $key,
-                new Exception\UnsupportedVersionException($version)
-            );
-        }
-
-        $iv = substr($data, 2, 16);
-        $authenticationCode = substr($data, $length - $authenticationCodeSize);
-
-        $data = substr($data, 18, $length - 18 - $authenticationCodeSize);
-        if (!$data) {
-            throw new Exception\DecryptionFailedException($key);
-        }
-
-        if (
-            $this->authenticationCode($key, $versionData . $iv . $data) !==
-                $authenticationCode
-        ) {
-            throw new Exception\DecryptionFailedException($key);
-        }
-
-        return $this->decryptAes($key, $iv, $data);
-    }
-
-    /**
-     * Create a message authentication code for the supplied ciphertext using
-     * HMAC-SHA-256.
-     *
-     * @link https://tools.ietf.org/html/rfc6234
-     *
-     * @param KeyInterface $key        The key to authenticate with.
-     * @param string       $ciphertext The ciphertext.
-     *
-     * @return string The message authentication code.
-     */
-    protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
-    {
-        return hash_hmac(
-            'sha' . $key->authenticationSecretSize(),
-            $ciphertext,
-            $key->authenticationSecret(),
-            true
-        );
-    }
-
-    /**
-     * Decrypt some data with AES and PKCS #7 padding.
-     *
-     * @param Key\KeyInterface $key  The key to decrypt with.
-     * @param string           $iv   The initialization vector to use.
-     * @param string           $data The data to decrypt.
-     *
-     * @return string                              The decrypted data.
-     * @throws Exception\DecryptionFailedException If the decryption failed.
-     */
-    protected function decryptAes(Key\KeyInterface $key, $iv, $data)
-    {
-        $data = mcrypt_decrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key->encryptionSecret(),
-            $data,
-            MCRYPT_MODE_CBC,
-            $iv
-        );
-
-        try {
-            $data = $this->unpad($data);
-        } catch (Exception\InvalidPaddingException $e) {
-            throw new Exception\DecryptionFailedException($key, $e);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Remove PKCS #7 (RFC 2315) padding from a string.
-     *
-     * @link http://tools.ietf.org/html/rfc2315
-     *
-     * @param string $data The padded data.
-     *
-     * @return string                            The data with padding removed.
-     * @throws Exception\InvalidPaddingException If the padding is invalid.
-     */
-    protected function unpad($data)
-    {
-        $padSize = ord(substr($data, -1));
-        $padding = substr($data, -$padSize);
-        if (str_repeat(chr($padSize), $padSize) !== $padding) {
-            throw new Exception\InvalidPaddingException;
-        }
-
-        return substr($data, 0, -$padSize);
+        return $this->rawDecrypter()->decrypt($key, $data);
     }
 
     private static $instance;
-    private $base64UrlDecoder;
+    private $rawDecrypter;
+    private $decoder;
 }
