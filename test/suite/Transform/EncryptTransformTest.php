@@ -65,6 +65,7 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $encrypted .= $output;
 
         $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomsplat'), $encrypted);
+        $this->assertNull($context);
     }
 
     public function testTransformExactBlockSizes()
@@ -74,6 +75,7 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $encrypted .= $output;
 
         $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomfoobarbazquxdoom'), $encrypted);
+        $this->assertNull($context);
     }
 
     protected function assertSameCiphertext($expected, $actual)
