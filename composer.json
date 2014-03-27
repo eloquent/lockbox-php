@@ -14,7 +14,7 @@
     "require": {
         "php": ">=5.3",
         "ext-mcrypt": "*",
-        "eloquent/endec": "~0.1.1",
+        "eloquent/endec": "dev-develop@dev",
         "icecave/isolator": "~2"
     },
     "require-dev": {
