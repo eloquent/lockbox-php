@@ -140,6 +140,7 @@ class RawDecrypter implements DecrypterInterface
     {
         $padSize = ord(substr($data, -1));
         $padding = substr($data, -$padSize);
+
         if (str_repeat(chr($padSize), $padSize) !== $padding) {
             throw new Exception\InvalidPaddingException;
         }

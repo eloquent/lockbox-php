@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Transform\AbstractDataTransform;
+use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
@@ -79,8 +80,8 @@ class EncryptTransform extends AbstractDataTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer>                 A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws Exception\TransformExceptionInterface If the data cannot be transformed.
+     * @return tuple<string,integer>       A 2-tuple of the transformed data, and the number of bytes consumed.
+     * @throws TransformExceptionInterface If the data cannot be transformed.
      */
     public function transform($data, &$context, $isEnd = false)
     {
@@ -94,13 +95,10 @@ class EncryptTransform extends AbstractDataTransform
         }
 
         $context->encryptBuffer .= $data;
-        $consume = $this->calculateConsumeBytes(
-            $context->encryptBuffer,
-            $isEnd,
-            16
-        );
+        $context->encryptBufferSize += $dataSize;
+        $consume = $this->blocksSize($context->encryptBufferSize, 16, $isEnd);
 
-        if (strlen($context->encryptBuffer) === $consume) {
+        if ($context->encryptBufferSize === $consume) {
             if ($isEnd) {
                 $context->outputBuffer .= mcrypt_generic(
                     $context->mcryptModule,
@@ -113,12 +111,14 @@ class EncryptTransform extends AbstractDataTransform
                 );
             }
             $context->encryptBuffer = '';
+            $context->encryptBufferSize = 0;
         } else {
             $context->outputBuffer .= mcrypt_generic(
                 $context->mcryptModule,
                 substr($context->encryptBuffer, 0, $consume)
             );
             $context->encryptBuffer = substr($context->encryptBuffer, $consume);
+            $context->encryptBufferSize -= $consume;
         }
 
         hash_update($context->hashContext, $context->outputBuffer);
@@ -182,10 +182,10 @@ class EncryptTransform extends AbstractDataTransform
     {
         mcrypt_generic_deinit($context->mcryptModule);
         mcrypt_module_close($context->mcryptModule);
-        $output = hash_final($context->hashContext, true);
+        $hash = hash_final($context->hashContext, true);
         $context = null;
 
-        return $output;
+        return $hash;
     }
 
     private $key;
