@@ -11,8 +11,6 @@
 
 namespace Eloquent\Lockbox\Transform;
 
-use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
@@ -29,11 +27,9 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encodingTransform = new Base64UrlEncodeTransform;
-        $this->transform = new EncryptTransform($this->key, $this->randomSource, $this->encodingTransform);
+        $this->transform = new EncryptTransform($this->key, $this->randomSource);
 
-        $this->encrypter = new BoundEncrypter($this->key, new Encrypter(new RawEncrypter($this->randomSource)));
-        $this->base64Url = Base64Url::instance();
+        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter($this->randomSource));
 
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
     }
@@ -42,7 +38,6 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame($this->key, $this->transform->key());
         $this->assertSame($this->randomSource, $this->transform->randomSource());
-        $this->assertSame($this->encodingTransform, $this->transform->encodingTransform());
     }
 
     public function testConstructorDefaults()
@@ -50,17 +45,23 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->transform = new EncryptTransform($this->key);
 
         $this->assertSame(DevUrandom::instance(), $this->transform->randomSource());
-        $this->assertSame(Base64UrlEncodeTransform::instance(), $this->transform->encodingTransform());
     }
 
     public function testTransform()
     {
         $encrypted = '';
+        $buffer = '';
         foreach (array('foo', 'bar', 'baz', 'qux', 'dooms', 'plat') as $data) {
-            list($output) = $this->transform->transform($data, $context);
+            $buffer .= $data;
+            list($output, $consumed) = $this->transform->transform($buffer, $context);
             $encrypted .= $output;
+            if (strlen($buffer) === $consumed) {
+                $buffer = '';
+            } else {
+                $buffer = substr($buffer, $consumed);
+            }
         }
-        list($output) = $this->transform->transform('', $context, true);
+        list($output, $consumed) = $this->transform->transform($buffer, $context, true);
         $encrypted .= $output;
 
         $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomsplat'), $encrypted);
@@ -77,22 +78,20 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
 
     protected function assertSameCiphertext($expected, $actual)
     {
-        $expectedRaw = $this->base64Url->decode($expected);
-        $expectedVersion = $this->base64Url->encode(substr($expectedRaw, 0, 2));
-        $expectedIv = $this->base64Url->encode(substr($expectedRaw, 2, 16));
-        $expectedMac = $this->base64Url->encode(substr($expectedRaw, -28));
-        $expectedData = $this->base64Url->encode(substr($expectedRaw, 18, -28));
+        $expectedVersion = bin2hex(substr($expected, 0, 2));
+        $expectedIv = bin2hex(substr($expected, 2, 16));
+        $expectedData = bin2hex(substr($expected, 18, -28));
+        $expectedMac = bin2hex(substr($expected, -28));
 
-        $actualRaw = $this->base64Url->decode($actual);
-        $actualVersion = $this->base64Url->encode(substr($actualRaw, 0, 2));
-        $actualIv = $this->base64Url->encode(substr($actualRaw, 2, 16));
-        $actualMac = $this->base64Url->encode(substr($actualRaw, -28));
-        $actualData = $this->base64Url->encode(substr($actualRaw, 18, -28));
+        $actualVersion = bin2hex(substr($actual, 0, 2));
+        $actualIv = bin2hex(substr($actual, 2, 16));
+        $actualData = bin2hex(substr($actual, 18, -28));
+        $actualMac = bin2hex(substr($actual, -28));
 
         $this->assertSame($expectedVersion, $actualVersion, 'Version mismatch');
         $this->assertSame($expectedIv, $actualIv, 'IV mismatch');
-        $this->assertSame($expectedMac, $actualMac, 'MAC mismatch');
         $this->assertSame($expectedData, $actualData, 'Data mismatch');
-        $this->assertSame($expected, $actual, 'Ciphertext mismatch');
+        $this->assertSame($expectedMac, $actualMac, 'MAC mismatch');
+        $this->assertSame(bin2hex($expected), bin2hex($actual), 'Ciphertext mismatch');
     }
 }

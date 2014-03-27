@@ -11,9 +11,7 @@
 
 namespace Eloquent\Lockbox\Transform;
 
-use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
 use Eloquent\Endec\Transform\AbstractDataTransform;
-use Eloquent\Endec\Transform\DataTransformInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
@@ -26,25 +24,19 @@ class EncryptTransform extends AbstractDataTransform
     /**
      * Construct a new encrypt data transform.
      *
-     * @param KeyInterface                $key               The key to encrypt with.
-     * @param RandomSourceInterface|null  $randomSource      The random source to use.
-     * @param DataTransformInterface|null $encodingTransform The encoding transform to use.
+     * @param KeyInterface               $key          The key to encrypt with.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
      */
     public function __construct(
         KeyInterface $key,
-        RandomSourceInterface $randomSource = null,
-        DataTransformInterface $encodingTransform = null
+        RandomSourceInterface $randomSource = null
     ) {
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
         }
-        if (null === $encodingTransform) {
-            $encodingTransform = Base64UrlEncodeTransform::instance();
-        }
 
         $this->key = $key;
         $this->randomSource = $randomSource;
-        $this->encodingTransform = $encodingTransform;
         $this->version = pack('n', 1);
     }
 
@@ -66,16 +58,6 @@ class EncryptTransform extends AbstractDataTransform
     public function randomSource()
     {
         return $this->randomSource;
-    }
-
-    /**
-     * Get the encoding transform.
-     *
-     * @return DataTransformInterface The encoding transform.
-     */
-    public function encodingTransform()
-    {
-        return $this->encodingTransform;
     }
 
     /**
@@ -103,83 +85,110 @@ class EncryptTransform extends AbstractDataTransform
     public function transform($data, &$context, $isEnd = false)
     {
         if (null === $context) {
-            /*
-             * Context contains:
-             *
-             * 0: mcrypt module
-             * 1: hmac hashing context
-             * 2: encryption input buffer
-             * 3: hashing/encoding input buffer
-             * 4: encoding transform context
-             */
-            $iv = $this->randomSource()->generate(16);
-            $context = array(
-                mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, ''),
-                hash_init(
-                    'sha' . $this->key()->authenticationSecretSize(),
-                    HASH_HMAC,
-                    $this->key()->authenticationSecret()
-                ),
-                '',
-                $this->version . $iv,
-                null,
-            );
-            mcrypt_generic_init($context[0], $this->key()->encryptionSecret(), $iv);
+            $context = $this->initializeContext();
         }
 
         $dataSize = strlen($data);
-        $context[2] .= $data;
+        if (!$isEnd && $dataSize < 16) {
+            return array('', 0);
+        }
 
-        $consume = $this->calculateConsumeBytes($context[2], $isEnd, 16);
-        if ($consume) {
-            if (strlen($context[2]) === $consume) {
-                if ($isEnd) {
-                    $padSize = intval(16 - (strlen($context[2]) % 16));
-                    $context[3] .= mcrypt_generic(
-                        $context[0],
-                        $context[2] . str_repeat(chr($padSize), $padSize)
-                    );
-                } else {
-                    $context[3] .= mcrypt_generic($context[0], $context[2]);
-                }
-                $context[2] = '';
-            } else {
-                $context[3] .= mcrypt_generic(
-                    $context[0],
-                    substr($context[2], 0, $consume)
+        $context->encryptBuffer .= $data;
+        $consume = $this->calculateConsumeBytes(
+            $context->encryptBuffer,
+            $isEnd,
+            16
+        );
+
+        if (strlen($context->encryptBuffer) === $consume) {
+            if ($isEnd) {
+                $context->outputBuffer .= mcrypt_generic(
+                    $context->mcryptModule,
+                    $this->pad($context->encryptBuffer)
                 );
-                $context[2] = substr($context[2], $consume);
+            } else {
+                $context->outputBuffer .= mcrypt_generic(
+                    $context->mcryptModule,
+                    $context->encryptBuffer
+                );
             }
+            $context->encryptBuffer = '';
+        } else {
+            $context->outputBuffer .= mcrypt_generic(
+                $context->mcryptModule,
+                substr($context->encryptBuffer, 0, $consume)
+            );
+            $context->encryptBuffer = substr($context->encryptBuffer, $consume);
         }
 
-        list($output, $consumed) = $this->encodingTransform()
-            ->transform($context[3], $context[4], false);
-        if (strlen($context[3]) === $consumed) {
-            hash_update($context[1], $context[3]);
-            $context[3] = '';
-        } else {
-            hash_update($context[1], substr($context[3], 0, $consumed));
-            $context[3] = substr($context[3], $consumed);
-        }
+        hash_update($context->hashContext, $context->outputBuffer);
+        $output = $context->outputBuffer;
 
         if ($isEnd) {
-            mcrypt_generic_deinit($context[0]);
-            mcrypt_module_close($context[0]);
-            hash_update($context[1], $context[3]);
-            $context[3] .= hash_final($context[1], true);
-
-            list($endOutput) = $this->encodingTransform()
-                ->transform($context[3], $context[4], true);
-            $output .= $endOutput;
-
-            $context = null;
+            $output .= $this->finalizeContext($context);
+        } else {
+            $context->outputBuffer = '';
         }
 
         return array($output, $dataSize);
     }
 
+    /**
+     * Pad a string using PKCS #7 (RFC 2315) padding.
+     *
+     * @link http://tools.ietf.org/html/rfc2315
+     *
+     * @param string $data The data to pad.
+     *
+     * @return string The padded data.
+     */
+    protected function pad($data)
+    {
+        $padSize = intval(16 - (strlen($data) % 16));
+
+        return $data . str_repeat(chr($padSize), $padSize);
+    }
+
+    private function initializeContext()
+    {
+        $context = new EncryptTransformContext;
+
+        $context->mcryptModule = mcrypt_module_open(
+            MCRYPT_RIJNDAEL_128,
+            '',
+            MCRYPT_MODE_CBC,
+            ''
+        );
+
+        $iv = $this->randomSource()->generate(16);
+        mcrypt_generic_init(
+            $context->mcryptModule,
+            $this->key()->encryptionSecret(),
+            $iv
+        );
+
+        $context->hashContext = hash_init(
+            'sha' . $this->key()->authenticationSecretSize(),
+            HASH_HMAC,
+            $this->key()->authenticationSecret()
+        );
+
+        $context->outputBuffer = $this->version . $iv;
+
+        return $context;
+    }
+
+    private function finalizeContext(EncryptTransformContext &$context)
+    {
+        mcrypt_generic_deinit($context->mcryptModule);
+        mcrypt_module_close($context->mcryptModule);
+        $output = hash_final($context->hashContext, true);
+        $context = null;
+
+        return $output;
+    }
+
     private $key;
     private $randomSource;
-    private $encodingTransform;
     private $version;
 }
