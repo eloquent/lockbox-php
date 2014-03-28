@@ -15,6 +15,7 @@ use Eloquent\Endec\Transform\AbstractDataTransform;
 use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Exception\InvalidPaddingException;
+use Eloquent\Lockbox\Exception\UnsupportedTypeException;
 use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyInterface;
 
@@ -75,7 +76,7 @@ class DecryptTransform extends AbstractDataTransform
         $consumed = 0;
 
         if (!$context->isVersionSeen) {
-            if ($dataSize < 2) {
+            if ($dataSize < 1) {
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
@@ -85,9 +86,10 @@ class DecryptTransform extends AbstractDataTransform
                 return array('', $consumed);
             }
 
-            $versionData = substr($data, 0, 2);
-            $version = unpack('n', $versionData);
-            $version = array_shift($version);
+            $context->isVersionSeen = true;
+
+            $versionData = substr($data, 0, 1);
+            $version = ord($versionData);
             if (1 !== $version) {
                 $this->finalizeContext($context);
 
@@ -98,16 +100,51 @@ class DecryptTransform extends AbstractDataTransform
             }
 
             hash_update($context->hashContext, $versionData);
-            $context->isVersionSeen = true;
 
-            if (2 === $dataSize) {
+            if (1 === $dataSize) {
                 $data = '';
             } else {
-                $data = substr($data, 2);
+                $data = substr($data, 1);
             }
 
-            $dataSize -= 2;
-            $consumed += 2;
+            $dataSize -= 1;
+            $consumed += 1;
+        }
+
+        if (!$context->isTypeSeen) {
+            if ($dataSize < 1) {
+                if ($isEnd) {
+                    $this->finalizeContext($context);
+
+                    throw new DecryptionFailedException($this->key());
+                }
+
+                return array('', $consumed);
+            }
+
+            $context->isTypeSeen = true;
+
+            $typeData = substr($data, 0, 1);
+            $type = ord($typeData);
+            if (1 !== $type) {
+                $this->finalizeContext($context);
+
+                throw new DecryptionFailedException(
+                    $this->key(),
+                    new UnsupportedTypeException($type)
+                );
+            }
+
+            hash_update($context->hashContext, $typeData);
+
+            if (1 === $dataSize) {
+                $data = '';
+            } else {
+                $data = substr($data, 1);
+            }
+
+            $dataSize -= 1;
+            $consumed += 1;
         }
 
         if (!$context->isInitialized) {
@@ -201,9 +238,9 @@ class DecryptTransform extends AbstractDataTransform
     }
 
     /**
-     * Remove PKCS #7 (RFC 2315) padding from a string.
+     * Remove PKCS #7 (RFC 5652) padding from the supplied data.
      *
-     * @link http://tools.ietf.org/html/rfc2315
+     * @link http://tools.ietf.org/html/rfc5652#section-6.3
      *
      * @param string $data The padded data.
      *

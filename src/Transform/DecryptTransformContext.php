@@ -20,6 +20,7 @@ class DecryptTransformContext
     public $hashContext;
     public $hashSize;
     public $isVersionSeen = false;
+    public $isTypeSeen = false;
     public $isInitialized = false;
     public $isHashFinalized = false;
 }

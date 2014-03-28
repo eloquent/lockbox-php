@@ -38,7 +38,7 @@ class EncryptTransform extends AbstractDataTransform
 
         $this->key = $key;
         $this->randomSource = $randomSource;
-        $this->version = pack('n', 1);
+        $this->version = $this->type = chr(1);
     }
 
     /**
@@ -173,7 +173,7 @@ class EncryptTransform extends AbstractDataTransform
             $this->key()->authenticationSecret()
         );
 
-        $context->outputBuffer = $this->version . $iv;
+        $context->outputBuffer = $this->version . $this->type . $iv;
 
         return $context;
     }
@@ -191,4 +191,5 @@ class EncryptTransform extends AbstractDataTransform
     private $key;
     private $randomSource;
     private $version;
+    private $type;
 }

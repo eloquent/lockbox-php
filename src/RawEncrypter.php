@@ -45,7 +45,7 @@ class RawEncrypter implements EncrypterInterface
         }
 
         $this->randomSource = $randomSource;
-        $this->version = pack('n', 1);
+        $this->version = $this->type = chr(1);
     }
 
     /**
@@ -71,8 +71,10 @@ class RawEncrypter implements EncrypterInterface
         $iv = $this->randomSource()->generate(16);
         $ciphertext = $this->encryptAes($key, $iv, $data);
 
-        return $this->version . $iv . $ciphertext .
-            $this->authenticationCode($key, $this->version . $iv . $ciphertext);
+        return $this->version . $this->type . $iv . $ciphertext .
+            $this->authenticationCode(
+                $key, $this->version . $this->type . $iv . $ciphertext
+            );
     }
 
     /**
@@ -134,4 +136,6 @@ class RawEncrypter implements EncrypterInterface
 
     private static $instance;
     private $randomSource;
+    private $version;
+    private $type;
 }

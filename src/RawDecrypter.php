@@ -48,13 +48,21 @@ class RawDecrypter implements DecrypterInterface
             throw new Exception\DecryptionFailedException($key);
         }
 
-        $versionData = substr($data, 0, 2);
-        $version = unpack('n', $versionData);
-        $version = array_shift($version);
+        $versionData = substr($data, 0, 1);
+        $version = ord($versionData);
         if (1 !== $version) {
             throw new Exception\DecryptionFailedException(
                 $key,
                 new Exception\UnsupportedVersionException($version)
+            );
+        }
+
+        $typeData = substr($data, 1, 1);
+        $type = ord($typeData);
+        if (1 !== $type) {
+            throw new Exception\DecryptionFailedException(
+                $key,
+                new Exception\UnsupportedTypeException($type)
             );
         }
 
@@ -67,8 +75,10 @@ class RawDecrypter implements DecrypterInterface
         }
 
         if (
-            $this->authenticationCode($key, $versionData . $iv . $data) !==
-                $authenticationCode
+            $this->authenticationCode(
+                $key,
+                $versionData . $typeData . $iv . $data
+            ) !== $authenticationCode
         ) {
             throw new Exception\DecryptionFailedException($key);
         }
@@ -127,9 +137,9 @@ class RawDecrypter implements DecrypterInterface
     }
 
     /**
-     * Remove PKCS #7 (RFC 2315) padding from a string.
+     * Remove PKCS #7 (RFC 5652) padding from the supplied data.
      *
-     * @link http://tools.ietf.org/html/rfc2315
+     * @link http://tools.ietf.org/html/rfc5652#section-6.3
      *
      * @param string $data The padded data.
      *

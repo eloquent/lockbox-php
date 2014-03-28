@@ -31,7 +31,6 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new Decrypter;
         $this->cipher = new Cipher($this->encrypter, $this->decrypter);
 
-        $this->version = pack('n', 1);
         $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
         $this->base64Url = Base64Url::instance();
     }

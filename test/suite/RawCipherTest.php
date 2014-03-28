@@ -30,7 +30,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new RawDecrypter;
         $this->cipher = new RawCipher($this->encrypter, $this->decrypter);
 
-        $this->version = pack('n', 1);
+        $this->version = $this->type = chr(1);
         $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
     }
 
@@ -97,7 +97,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureUnsupportedVersion()
     {
-        $data = pack('n', 111) . str_pad('', 100, '1234567890');
+        $data = ord(111) . str_pad('', 100, '1234567890');
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -106,7 +106,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->decrypt($this->key, $data);
     }
 
-    public function testDecryptFailureEmptyIv()
+    public function testDecryptFailureEmptyType()
     {
         $data = $this->version;
 
@@ -117,9 +117,31 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->decrypt($this->key, $data);
     }
 
+    public function testDecryptUnsupportedType()
+    {
+        $data = $this->version . ord(111) . str_pad('', 100, '1234567890');
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\DecryptionFailedException',
+            "Decryption failed for key 'key'."
+        );
+        $this->cipher->decrypt($this->key, $data);
+    }
+
+    public function testDecryptFailureEmptyIv()
+    {
+        $data = $this->version . $this->type;
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\DecryptionFailedException',
+            "Decryption failed for key 'key'."
+        );
+        $this->cipher->decrypt($this->key, $data);
+    }
+
     public function testDecryptFailureShortMac()
     {
-        $data = $this->version . '1234567890123456789012345678901234567890123';
+        $data = $this->version . $this->type . '1234567890123456789012345678901234567890123';
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -130,7 +152,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureEmptyCiphertext()
     {
-        $data = $this->version . '12345678901234567890123456789012345678901234';
+        $data = $this->version . $this->type . '12345678901234567890123456789012345678901234';
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -141,7 +163,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadMac()
     {
-        $data = $this->version . '1234567890123456foobar1234567890123456789012345678';
+        $data = $this->version . $this->type . '1234567890123456foobar1234567890123456789012345678';
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -152,9 +174,8 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadAesData()
     {
-        $data = $this->version .
-            '1234567890123456foobar' .
-            $this->authenticationCode($this->key, $this->version . '1234567890123456foobar');
+        $data = $this->version . $this->type . '1234567890123456foobar' .
+            $this->authenticationCode($this->key, $this->version . $this->type . '1234567890123456foobar');
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
@@ -172,10 +193,8 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
             MCRYPT_MODE_CBC,
             '1234567890123456'
         );
-        $data = $this->version .
-            '1234567890123456' .
-            $ciphertext .
-            $this->authenticationCode($this->key, $this->version . '1234567890123456' . $ciphertext);
+        $data = $this->version . $this->type . '1234567890123456' . $ciphertext .
+            $this->authenticationCode($this->key, $this->version . $this->type . '1234567890123456' . $ciphertext);
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',

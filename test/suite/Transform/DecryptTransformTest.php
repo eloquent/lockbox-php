@@ -27,6 +27,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->transform = new DecryptTransform($this->key);
 
+        $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter($this->randomSource));
@@ -70,7 +71,9 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
     public function testTransformByteByByte($input)
     {
         $encrypted = $this->encrypter->encrypt($input);
-        list($output, $buffer, $context, $error) = $this->feedTransform(str_split($encrypted));
+        $chunks = str_split($encrypted);
+        array_unshift($chunks, '');
+        list($output, $buffer, $context, $error) = $this->feedTransform($chunks);
 
         $this->assertSame(array($input, '', null), array($output, $buffer, $error));
         $this->assertNull($context);
@@ -84,7 +87,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->assertSame(110, strlen($encrypted));
 
         list($output, $buffer, $context, $error) = $this->feedTransform(
-            substr($encrypted, 0, 2),   // version
+            substr($encrypted, 0, 1),   // version
+            substr($encrypted, 1, 1),   // type
             substr($encrypted, 2, 16),  // IV
             substr($encrypted, 18, 16), // block 0
             substr($encrypted, 34, 16), // block 1
@@ -99,6 +103,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
 
     public function transformFailureData()
     {
+        $this->version = $this->type = chr(1);
+        $this->iv = '1234567890123456';
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
 
         return array(
@@ -109,43 +115,52 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 '1',
             ),
             'Unsupported version' => array(
-                pack('n', 111),
+                chr(111),
+            ),
+            'Empty type' => array(
+                $this->version,
+            ),
+            'Partial type' => array(
+                $this->version . '1',
+            ),
+            'Unsupported type' => array(
+                $this->version . chr(111),
             ),
             'Empty IV' => array(
-                pack('n', 1),
+                $this->version . $this->type,
             ),
             'Partial IV' => array(
-                pack('n', 1) . '123456789012345',
+                $this->version . $this->type . '123456789012345',
             ),
             'Empty data and MAC' => array(
-                pack('n', 1) . '1234567890123456',
+                $this->version . $this->type . $this->iv,
             ),
             'Empty data' => array(
-                pack('n', 1) . '1234567890123456' . '123456789012345678901234567',
+                $this->version . $this->type . $this->iv . '123456789012345678901234567',
             ),
             'Not enough data for MAC' => array(
-                pack('n', 1) . '1234567890123456' .
+                $this->version . $this->type . $this->iv .
                 $this->encryptAndPadAes('1234567890123456') . '123456789012345678901234567',
             ),
             'Invalid data length' => array(
-                pack('n', 1) . '1234567890123456' .
+                $this->version . $this->type . $this->iv .
                 $this->encryptAes('1234567890123456') .
                 substr($this->encryptAndPadAes('1234567890123456'), 0, 15) .
                 '1234567890123456789012345678',
             ),
             'Bad MAC' => array(
-                pack('n', 1) . '1234567890123456' .
+                $this->version . $this->type . $this->iv .
                 $this->encryptAndPadAes('1234567890123456') .
                 '1234567890123456789012345678',
             ),
             'Bad AES data' => array(
-                pack('n', 1) . '1234567890123456' . '1234567890123457' .
-                $this->authenticationCode(pack('n', 1) . '1234567890123456' . '1234567890123457'),
+                $this->version . $this->type . $this->iv . '1234567890123457' .
+                $this->authenticationCode($this->version . $this->type . '1234567890123456' . '1234567890123457'),
             ),
             'Bad padding' => array(
-                pack('n', 1) . '1234567890123456' .
+                $this->version . $this->type . $this->iv .
                 $this->encryptAes('1234567890123456') .
-                $this->authenticationCode(pack('n', 1) . '1234567890123456' . $this->encryptAes('1234567890123456')),
+                $this->authenticationCode($this->version . $this->type . '1234567890123456' . $this->encryptAes('1234567890123456')),
             ),
         );
     }
@@ -166,13 +181,13 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
     public function testTransformFailureAfterSuccessfulBlocks()
     {
         list($output, $buffer, $context, $error) = $this->feedTransform(
-            pack('n', 1) . '1234567890123456' .
+            $this->version . $this->type . $this->iv .
                 $this->encryptAes('1234567890123456') .
                 $this->encryptAes('1234567890123456') .
                 $this->encryptAes('1234567890123456') .
                 $this->encryptAes('1234567890123456'),
             $this->authenticationCode(
-                pack('n', 1) . '1234567890123456' .
+                $this->version . $this->type . $this->iv .
                     $this->encryptAes('1234567890123456') .
                     $this->encryptAes('1234567890123456') .
                     $this->encryptAes('1234567890123456') .
@@ -205,6 +220,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 list($thisOutput, $consumed) = $this->transform->transform($buffer, $context, $index === $lastIndex);
             } catch (Exception $error) {
                 $error = strval($error);
+
+                break;
             }
 
             $output .= $thisOutput;
