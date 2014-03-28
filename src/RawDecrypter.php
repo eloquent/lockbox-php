@@ -90,7 +90,7 @@ class RawDecrypter implements DecrypterInterface
     protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
     {
         return hash_hmac(
-            'sha' . $key->authenticationSecretSize(),
+            'sha' . $key->authenticationSecretBits(),
             $ciphertext,
             $key->authenticationSecret(),
             true

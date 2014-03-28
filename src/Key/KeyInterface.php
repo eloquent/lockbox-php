@@ -24,11 +24,39 @@ interface KeyInterface
     public function encryptionSecret();
 
     /**
+     * Get the size of the encryption secret in bytes.
+     *
+     * @return integer The size of the encryption secret in bytes.
+     */
+    public function encryptionSecretBytes();
+
+    /**
+     * Get the size of the encryption secret in bits.
+     *
+     * @return integer The size of the encryption secret in bits.
+     */
+    public function encryptionSecretBits();
+
+    /**
      * Get the authentication secret.
      *
      * @return string The authentication secret.
      */
     public function authenticationSecret();
+
+    /**
+     * Get the size of the authentication secret in bytes.
+     *
+     * @return integer The size of the authentication secret in bytes.
+     */
+    public function authenticationSecretBytes();
+
+    /**
+     * Get the size of the authentication secret in bits.
+     *
+     * @return integer The size of the authentication secret in bits.
+     */
+    public function authenticationSecretBits();
 
     /**
      * Get the name.
@@ -43,18 +71,4 @@ interface KeyInterface
      * @return string|null The description, or null if the key has no description.
      */
     public function description();
-
-    /**
-     * Get the size of the encryption secret in bits.
-     *
-     * @return integer The size of the encryption secret in bits.
-     */
-    public function encryptionSecretSize();
-
-    /**
-     * Get the size of the authentication secret in bits.
-     *
-     * @return integer The size of the authentication secret in bits.
-     */
-    public function authenticationSecretSize();
 }

@@ -168,7 +168,7 @@ class EncryptTransform extends AbstractDataTransform
         );
 
         $context->hashContext = hash_init(
-            'sha' . $this->key()->authenticationSecretSize(),
+            'sha' . $this->key()->authenticationSecretBits(),
             HASH_HMAC,
             $this->key()->authenticationSecret()
         );

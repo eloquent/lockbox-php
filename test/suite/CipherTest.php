@@ -53,20 +53,20 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function encryptionData()
     {
         $data = array();
-        foreach (array(16, 24, 32) as $encryptionSecretSize) {
-            foreach (array(28, 32, 48, 64) as $authenticationSecretSize) {
+        foreach (array(16, 24, 32) as $encryptionSecretBytes) {
+            foreach (array(28, 32, 48, 64) as $authenticationSecretBytes) {
                 foreach (array(0, 1, 1024) as $dataSize) {
                     $label = sprintf(
                         '%d byte(s), %dbit encryption, %dbit authentication',
                         $dataSize,
-                        $encryptionSecretSize * 8,
-                        $authenticationSecretSize * 8
+                        $encryptionSecretBytes * 8,
+                        $authenticationSecretBytes * 8
                     );
 
                     $data[$label] = array(
                         $dataSize,
-                        str_pad('', $encryptionSecretSize, '1234567890'),
-                        str_pad('', $authenticationSecretSize, '1234567890'),
+                        str_pad('', $encryptionSecretBytes, '1234567890'),
+                        str_pad('', $authenticationSecretBytes, '1234567890'),
                     );
                 }
             }

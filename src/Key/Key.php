@@ -39,8 +39,9 @@ class Key implements KeyInterface
             throw new Exception\InvalidSecretException($authenticationSecret);
         }
 
-        $encryptionSecretSize = strlen($encryptionSecret);
-        switch ($encryptionSecretSize) {
+        $encryptionSecretBytes = strlen($encryptionSecret);
+        $encryptionSecretBits = $encryptionSecretBytes * 8;
+        switch ($encryptionSecretBytes) {
             case 32:
             case 24:
             case 16:
@@ -48,12 +49,13 @@ class Key implements KeyInterface
 
             default:
                 throw new Exception\InvalidEncryptionSecretSizeException(
-                    $encryptionSecretSize * 8
+                    $encryptionSecretBits
                 );
         }
 
-        $authenticationSecretSize = strlen($authenticationSecret);
-        switch ($authenticationSecretSize) {
+        $authenticationSecretBytes = strlen($authenticationSecret);
+        $authenticationSecretBits = $authenticationSecretBytes * 8;
+        switch ($authenticationSecretBytes) {
             case 64:
             case 48:
             case 32:
@@ -62,12 +64,16 @@ class Key implements KeyInterface
 
             default:
                 throw new Exception\InvalidAuthenticationSecretSizeException(
-                    $authenticationSecretSize * 8
+                    $authenticationSecretBits
                 );
         }
 
         $this->encryptionSecret = $encryptionSecret;
+        $this->encryptionSecretBytes = $encryptionSecretBytes;
+        $this->encryptionSecretBits = $encryptionSecretBits;
         $this->authenticationSecret = $authenticationSecret;
+        $this->authenticationSecretBytes = $authenticationSecretBytes;
+        $this->authenticationSecretBits = $authenticationSecretBits;
         $this->name = $name;
         $this->description = $description;
     }
@@ -83,6 +89,26 @@ class Key implements KeyInterface
     }
 
     /**
+     * Get the size of the encryption secret in bytes.
+     *
+     * @return integer The size of the encryption secret in bytes.
+     */
+    public function encryptionSecretBytes()
+    {
+        return $this->encryptionSecretBytes;
+    }
+
+    /**
+     * Get the size of the encryption secret in bits.
+     *
+     * @return integer The size of the encryption secret in bits.
+     */
+    public function encryptionSecretBits()
+    {
+        return $this->encryptionSecretBits;
+    }
+
+    /**
      * Get the authentication secret.
      *
      * @return string The authentication secret.
@@ -90,6 +116,26 @@ class Key implements KeyInterface
     public function authenticationSecret()
     {
         return $this->authenticationSecret;
+    }
+
+    /**
+     * Get the size of the authentication secret in bytes.
+     *
+     * @return integer The size of the authentication secret in bytes.
+     */
+    public function authenticationSecretBytes()
+    {
+        return $this->authenticationSecretBytes;
+    }
+
+    /**
+     * Get the size of the authentication secret in bits.
+     *
+     * @return integer The size of the authentication secret in bits.
+     */
+    public function authenticationSecretBits()
+    {
+        return $this->authenticationSecretBits;
     }
 
     /**
@@ -112,28 +158,12 @@ class Key implements KeyInterface
         return $this->description;
     }
 
-    /**
-     * Get the size of the encryption secret in bits.
-     *
-     * @return integer The size of the encryption secret in bits.
-     */
-    public function encryptionSecretSize()
-    {
-        return strlen($this->encryptionSecret()) * 8;
-    }
-
-    /**
-     * Get the size of the authentication secret in bits.
-     *
-     * @return integer The size of the authentication secret in bits.
-     */
-    public function authenticationSecretSize()
-    {
-        return strlen($this->authenticationSecret()) * 8;
-    }
-
     private $encryptionSecret;
+    private $encryptionSecretBits;
+    private $encryptionSecretBytes;
     private $authenticationSecret;
+    private $authenticationSecretBits;
+    private $authenticationSecretBytes;
     private $name;
     private $description;
 }

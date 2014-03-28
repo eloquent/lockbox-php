@@ -25,22 +25,22 @@ if (isset($_SERVER['argv'][2])) {
     $description = $_SERVER['argv'][2] ?: null;
 }
 
-$encryptionSecretSize = null;
+$encryptionSecretBits = null;
 if (isset($_SERVER['argv'][3])) {
-    $encryptionSecretSize = intval($_SERVER['argv'][3]) ?: null;
+    $encryptionSecretBits = intval($_SERVER['argv'][3]) ?: null;
 }
 
-$authenticationSecretSize = null;
+$authenticationSecretBits = null;
 if (isset($_SERVER['argv'][4])) {
-    $authenticationSecretSize = intval($_SERVER['argv'][4]) ?: null;
+    $authenticationSecretBits = intval($_SERVER['argv'][4]) ?: null;
 }
 
 KeyWriter::instance()->writeStream(
     KeyGenerator::instance()->generateKey(
         $name,
         $description,
-        $encryptionSecretSize,
-        $authenticationSecretSize
+        $encryptionSecretBits,
+        $authenticationSecretBits
     ),
     STDOUT
 );

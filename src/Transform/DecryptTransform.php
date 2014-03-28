@@ -234,11 +234,11 @@ class DecryptTransform extends AbstractDataTransform
         );
 
         $context->hashContext = hash_init(
-            'sha' . $this->key()->authenticationSecretSize(),
+            'sha' . $this->key()->authenticationSecretBits(),
             HASH_HMAC,
             $this->key()->authenticationSecret()
         );
-        $context->hashSize = $this->key()->authenticationSecretSize() / 8;
+        $context->hashSize = $this->key()->authenticationSecretBytes();
 
         return $context;
     }
