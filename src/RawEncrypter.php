@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
+use Eloquent\Lockbox\Transform\Factory\CryptographicTransformFactoryInterface;
+use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 
 /**
  * Encrypts data and produces raw output.
@@ -36,26 +36,26 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Construct a new raw encrypter.
      *
-     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param CryptographicTransformFactoryInterface|null $transformFactory The transform factory to use.
      */
-    public function __construct(RandomSourceInterface $randomSource = null)
-    {
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
+    public function __construct(
+        CryptographicTransformFactoryInterface $transformFactory = null
+    ) {
+        if (null === $transformFactory) {
+            $transformFactory = EncryptTransformFactory::instance();
         }
 
-        $this->randomSource = $randomSource;
-        $this->version = $this->type = chr(1);
+        $this->transformFactory = $transformFactory;
     }
 
     /**
-     * Get the random source.
+     * Get the transform factory.
      *
-     * @return RandomSourceInterface The random source.
+     * @return CryptographicTransformFactoryInterface The transform factory.
      */
-    public function randomSource()
+    public function transformFactory()
     {
-        return $this->randomSource;
+        return $this->transformFactory;
     }
 
     /**
@@ -68,74 +68,13 @@ class RawEncrypter implements EncrypterInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        $iv = $this->randomSource()->generate(16);
-        $ciphertext = $this->encryptAes($key, $iv, $data);
+        list($data) = $this->transformFactory()
+            ->createTransform($key)
+            ->transform($data, $context, true);
 
-        return $this->version . $this->type . $iv . $ciphertext .
-            $this->authenticationCode(
-                $key, $this->version . $this->type . $iv . $ciphertext
-            );
-    }
-
-    /**
-     * Encrypt some data with AES and PKCS #7 padding.
-     *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $iv   The initialization vector to use.
-     * @param string           $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    protected function encryptAes(Key\KeyInterface $key, $iv, $data)
-    {
-        return mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key->encryptionSecret(),
-            $this->pad($data),
-            MCRYPT_MODE_CBC,
-            $iv
-        );
-    }
-
-    /**
-     * Pad a string using PKCS #7 (RFC 2315) padding.
-     *
-     * @link http://tools.ietf.org/html/rfc2315
-     *
-     * @param string $data The data to pad.
-     *
-     * @return string The padded data.
-     */
-    protected function pad($data)
-    {
-        $padSize = intval(16 - (strlen($data) % 16));
-
-        return $data . str_repeat(chr($padSize), $padSize);
-    }
-
-    /**
-     * Create a message authentication code for the supplied ciphertext using
-     * HMAC-SHA-256.
-     *
-     * @link https://tools.ietf.org/html/rfc6234
-     *
-     * @param KeyInterface $key        The key to authenticate with.
-     * @param string       $ciphertext The ciphertext.
-     *
-     * @return string The message authentication code.
-     */
-    protected function authenticationCode(Key\KeyInterface $key, $ciphertext)
-    {
-        return hash_hmac(
-            'sha' . $key->authenticationSecretBits(),
-            $ciphertext,
-            $key->authenticationSecret(),
-            true
-        );
+        return $data;
     }
 
     private static $instance;
-    private $randomSource;
-    private $version;
-    private $type;
+    private $transformFactory;
 }

@@ -12,8 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Phake;
+use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
 
 class RawEncrypterTest extends PHPUnit_Framework_TestCase
@@ -22,20 +21,20 @@ class RawEncrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encrypter = new RawEncrypter($this->randomSource);
+        $this->transformFactory = new EncryptTransformFactory;
+        $this->encrypter = new RawEncrypter($this->transformFactory);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->randomSource, $this->encrypter->randomSource());
+        $this->assertSame($this->transformFactory, $this->encrypter->transformFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->encrypter = new RawEncrypter;
 
-        $this->assertSame(DevUrandom::instance(), $this->encrypter->randomSource());
+        $this->assertSame(EncryptTransformFactory::instance(), $this->encrypter->transformFactory());
     }
 
     public function testInstance()

@@ -11,11 +11,13 @@
 
 namespace Eloquent\Lockbox\Transform;
 
+use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\RawEncrypter;
+use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -30,7 +32,8 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->transform = new EncryptTransform($this->key, $this->randomSource);
 
-        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter($this->randomSource));
+        $this->base64Url = Base64Url::instance();
+        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter(new EncryptTransformFactory($this->randomSource)));
 
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
     }
@@ -51,8 +54,11 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     public function testTransform()
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
+        $expected = $this->base64Url->decode(
+            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlCbtqOEJ61oMBFXpM6v7kDmoMeEZJHMgZRCj5T4F148Oz_6MtFLxThEKZSPK'
+        );
 
-        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomsplat'), $output);
+        $this->assertSameCiphertext($expected, $output);
         $this->assertSame('', $buffer);
         $this->assertNull($context);
         $this->assertNull($error);
@@ -61,8 +67,12 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     public function testTransformExactBlockSizes()
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
+        $expected = $this->base64Url->decode(
+            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlNPwZN3D1x7C4IHaBSz5' .
+            '5cGl3-VffoOLPey_a_qwiwCZuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
+        );
 
-        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomfoobarbazquxdoom'), $output);
+        $this->assertSameCiphertext($expected, $output);
         $this->assertSame('', $buffer);
         $this->assertNull($context);
         $this->assertNull($error);

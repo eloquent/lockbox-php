@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox\Transform;
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\RawEncrypter;
+use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -30,7 +31,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter($this->randomSource));
+        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter(new EncryptTransformFactory($this->randomSource)));
 
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
     }
