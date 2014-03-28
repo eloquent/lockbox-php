@@ -79,7 +79,7 @@ class DecryptTransform extends AbstractDataTransform
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException;
+                    throw new DecryptionFailedException($this->key());
                 }
 
                 return array('', $consumed);
@@ -92,7 +92,7 @@ class DecryptTransform extends AbstractDataTransform
                 $this->finalizeContext($context);
 
                 throw new DecryptionFailedException(
-                    $key,
+                    $this->key(),
                     new UnsupportedVersionException($version)
                 );
             }
@@ -115,7 +115,7 @@ class DecryptTransform extends AbstractDataTransform
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException;
+                    throw new DecryptionFailedException($this->key());
                 }
 
                 return array('', $consumed);
@@ -141,48 +141,45 @@ class DecryptTransform extends AbstractDataTransform
             $consumed += 16;
         }
 
-        if ($context->decryptBufferSize + $dataSize < 32 + $context->hashSize) {
+        if ($isEnd) {
+            $requiredSize = 16 + $context->hashSize;
+        } else {
+            $requiredSize = 32 + $context->hashSize;
+        }
+
+        if ($dataSize < $requiredSize) {
             if ($isEnd) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException;
+                throw new DecryptionFailedException($this->key());
             }
 
             return array('', $consumed);
         }
 
-        $consume = $this->blocksSize(
-            $context->decryptBufferSize + $dataSize - 16 - $context->hashSize,
-            16,
-            $isEnd
-        );
-
-        if ($dataSize === $consume) {
-            $context->decryptBuffer .= $data;
-        } else {
-            $context->decryptBuffer .= substr($data, 0, $consume);
-        }
-        $context->decryptBufferSize += $consume;
-
         if ($isEnd) {
-            $consumed += $this->decryptBufferSize;
-            $consume = $this->decryptBufferSize - $context->hashSize;
-            $hash = substr($context->decryptBuffer, $consume);
-            $consumedData = substr($this->decryptBuffer, 0, $consume);
-            $this->decryptBuffer = '';
+            $consume = $dataSize - $context->hashSize;
+            $hash = substr($data, $consume);
+            $consumedData = substr($data, 0, $consume);
+            $consumed += $dataSize;
         } else {
+            $consume = $this->blocksSize(
+                $dataSize - 16 - $context->hashSize,
+                16,
+                $isEnd
+            );
             $consumed += $consume;
-            $consumedData = substr($this->decryptBuffer, 0, $consume);
-            $this->decryptBuffer = substr($this->decryptBuffer, $consume);
+            $consumedData = substr($data, 0, $consume);
         }
 
         hash_update($context->hashContext, $consumedData);
 
         if ($isEnd) {
+            $context->isHashFinalized = true;
             if (hash_final($context->hashContext, true) !== $hash) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException;
+                throw new DecryptionFailedException($this->key());
             }
         }
 
@@ -194,8 +191,10 @@ class DecryptTransform extends AbstractDataTransform
             } catch (InvalidPaddingException $e) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($e);
+                throw new DecryptionFailedException($this->key(), $e);
             }
+
+            $this->finalizeContext($context);
         }
 
         return array($output, $consumed);
@@ -244,11 +243,17 @@ class DecryptTransform extends AbstractDataTransform
         return $context;
     }
 
-    private function finalizeContext(EncryptTransformContext &$context)
+    private function finalizeContext(DecryptTransformContext &$context)
     {
         if (null !== $context->mcryptModule) {
-            mcrypt_generic_deinit($context->mcryptModule);
+            if ($context->isInitialized) {
+                mcrypt_generic_deinit($context->mcryptModule);
+            }
+
             mcrypt_module_close($context->mcryptModule);
+        }
+        if (!$context->isHashFinalized) {
+            hash_final($context->hashContext);
         }
 
         $context = null;

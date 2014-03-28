@@ -21,6 +21,5 @@ class DecryptTransformContext
     public $hashSize;
     public $isVersionSeen = false;
     public $isInitialized = false;
-    public $decryptBuffer = '';
-    public $decryptBufferSize = 0;
+    public $isHashFinalized = false;
 }

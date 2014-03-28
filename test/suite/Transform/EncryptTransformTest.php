@@ -16,6 +16,7 @@ use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\RawEncrypter;
+use Exception;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -49,33 +50,52 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
 
     public function testTransform()
     {
-        $encrypted = '';
+        list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
+
+        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomsplat'), $output);
+        $this->assertSame('', $buffer);
+        $this->assertNull($context);
+        $this->assertNull($error);
+    }
+
+    public function testTransformExactBlockSizes()
+    {
+        list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
+
+        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomfoobarbazquxdoom'), $output);
+        $this->assertSame('', $buffer);
+        $this->assertNull($context);
+        $this->assertNull($error);
+    }
+
+    protected function feedTransform($packets)
+    {
+        if (!is_array($packets)) {
+            $packets = func_get_args();
+        }
+
+        $output = '';
         $buffer = '';
-        foreach (array('foo', 'bar', 'baz', 'qux', 'dooms', 'plat') as $data) {
+        $lastIndex = count($packets) - 1;
+        $error = null;
+        foreach ($packets as $index => $data) {
             $buffer .= $data;
-            list($output, $consumed) = $this->transform->transform($buffer, $context);
-            $encrypted .= $output;
+
+            try {
+                list($thisOutput, $consumed) = $this->transform->transform($buffer, $context, $index === $lastIndex);
+            } catch (Exception $error) {
+                $error = strval($error);
+            }
+
+            $output .= $thisOutput;
             if (strlen($buffer) === $consumed) {
                 $buffer = '';
             } else {
                 $buffer = substr($buffer, $consumed);
             }
         }
-        list($output, $consumed) = $this->transform->transform($buffer, $context, true);
-        $encrypted .= $output;
 
-        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomsplat'), $encrypted);
-        $this->assertNull($context);
-    }
-
-    public function testTransformExactBlockSizes()
-    {
-        list($encrypted) = $this->transform->transform('foobarbazquxdoom', $context);
-        list($output) = $this->transform->transform('foobarbazquxdoom', $context, true);
-        $encrypted .= $output;
-
-        $this->assertSameCiphertext($this->encrypter->encrypt('foobarbazquxdoomfoobarbazquxdoom'), $encrypted);
-        $this->assertNull($context);
+        return array($output, $buffer, $context, $error);
     }
 
     protected function assertSameCiphertext($expected, $actual)
