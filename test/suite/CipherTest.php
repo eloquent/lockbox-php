@@ -87,6 +87,32 @@ class CipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame($data, $decrypted);
     }
 
+    /**
+     * @dataProvider encryptionData
+     */
+    public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
+    {
+        $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
+        $encryptStream = $this->cipher->createEncryptStream($this->key);
+        $decryptStream = $this->cipher->createDecryptStream($this->key);
+        $encryptStream->pipe($decryptStream);
+        $decrypted = '';
+        $decryptStream->on(
+            'data',
+            function ($data, $stream) use (&$decrypted) {
+                $decrypted .= $data;
+            }
+        );
+        $data = '';
+        for ($i = 0; $i < $dataSize; $i ++) {
+            $data .= 'A';
+            $encryptStream->write('A');
+        }
+        $encryptStream->end();
+
+        $this->assertSame($data, $decrypted);
+    }
+
     public function testDecryptFailureNotBase64Url()
     {
         $this->setExpectedException(

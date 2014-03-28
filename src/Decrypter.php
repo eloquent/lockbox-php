@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
+use Eloquent\Endec\Transform\TransformStreamInterface;
 
 /**
  * Decrypts encoded data.
@@ -93,6 +94,18 @@ class Decrypter implements DecrypterInterface
         }
 
         return $this->rawDecrypter()->decrypt($key, $data);
+    }
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to decrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createDecryptStream(Key\KeyInterface $key)
+    {
+        return $this->rawDecrypter()->createDecryptStream($key);
     }
 
     private static $instance;

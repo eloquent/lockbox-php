@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Transform\TransformStreamInterface;
+
 /**
  * The interface implemented by encrypters.
  */
@@ -25,4 +27,13 @@ interface EncrypterInterface
      * @return string The encrypted data.
      */
     public function encrypt(Key\KeyInterface $key, $data);
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to encrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createEncryptStream(Key\KeyInterface $key);
 }

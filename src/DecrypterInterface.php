@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Transform\TransformStreamInterface;
+
 /**
  * The interface implemented by decrypters.
  */
@@ -26,4 +28,13 @@ interface DecrypterInterface
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
     public function decrypt(Key\KeyInterface $key, $data);
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to decrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createDecryptStream(Key\KeyInterface $key);
 }

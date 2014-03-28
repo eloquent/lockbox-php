@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Transform\TransformStream;
+use Eloquent\Endec\Transform\TransformStreamInterface;
 use Eloquent\Lockbox\Transform\Factory\CryptographicTransformFactoryInterface;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 
@@ -73,6 +75,20 @@ class RawEncrypter implements EncrypterInterface
             ->transform($data, $context, true);
 
         return $data;
+    }
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to encrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createEncryptStream(Key\KeyInterface $key)
+    {
+        return new TransformStream(
+            $this->transformFactory()->createTransform($key)
+        );
     }
 
     private static $instance;

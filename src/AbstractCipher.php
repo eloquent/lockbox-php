@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Endec\Transform\TransformStreamInterface;
+
 /**
  * An abstract base class for implementing ciphers.
  */
@@ -75,6 +77,30 @@ abstract class AbstractCipher implements CipherInterface
     public function decrypt(Key\KeyInterface $key, $data)
     {
         return $this->decrypter()->decrypt($key, $data);
+    }
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to encrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createEncryptStream(Key\KeyInterface $key)
+    {
+        return $this->encrypter()->createEncryptStream($key);
+    }
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to decrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createDecryptStream(Key\KeyInterface $key)
+    {
+        return $this->decrypter()->createDecryptStream($key);
     }
 
     private $encrypter;

@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
+use Eloquent\Endec\Transform\TransformStreamInterface;
 
 /**
  * Encrypts data and produces encoded output.
@@ -86,6 +87,18 @@ class Encrypter implements EncrypterInterface
     {
         return $this->encoder()
             ->encode($this->rawEncrypter()->encrypt($key, $data));
+    }
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @param Key\KeyInterface $key The key to encrypt with.
+     *
+     * @return TransformStreamInterface The newly created encode stream.
+     */
+    public function createEncryptStream(Key\KeyInterface $key)
+    {
+        return $this->rawEncrypter()->createEncryptStream($key);
     }
 
     private static $instance;
