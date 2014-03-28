@@ -59,6 +59,7 @@ class EncryptTransformFactory implements CryptographicTransformFactoryInterface
     {
         return $this->randomSource;
     }
+
     /**
      * Create a new transform for the supplied key.
      *
