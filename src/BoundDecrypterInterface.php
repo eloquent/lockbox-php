@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by decrypters with a bound key.
+ * The interface implemented by bound decrypters.
  */
 interface BoundDecrypterInterface
 {

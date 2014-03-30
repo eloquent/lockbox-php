@@ -33,7 +33,7 @@ interface EncrypterInterface
      *
      * @param Key\KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(Key\KeyInterface $key);
 }

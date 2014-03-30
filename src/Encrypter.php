@@ -16,7 +16,7 @@ use Eloquent\Endec\EncoderInterface;
 use Eloquent\Endec\Transform\TransformStreamInterface;
 
 /**
- * Encrypts data and produces encoded output.
+ * Encrypts data and produces encoded output using keys.
  */
 class Encrypter implements EncrypterInterface
 {
@@ -94,7 +94,7 @@ class Encrypter implements EncrypterInterface
      *
      * @param Key\KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(Key\KeyInterface $key)
     {

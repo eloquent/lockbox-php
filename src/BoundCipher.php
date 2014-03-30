@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The standard Lockbox cipher, with a bound key.
+ * Binds a key to a cipher.
  */
 class BoundCipher implements BoundCipherInterface
 {

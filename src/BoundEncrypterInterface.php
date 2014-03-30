@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by encrypters with a bound key.
+ * The interface implemented by bound encrypters.
  */
 interface BoundEncrypterInterface
 {

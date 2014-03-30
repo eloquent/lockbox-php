@@ -18,14 +18,14 @@ use Eloquent\Lockbox\Random\RandomSourceInterface;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 
 /**
- * Creates encrypt transforms.
+ * Creates encrypt transforms that use keys.
  */
-class EncryptTransformFactory implements CryptographicTransformFactoryInterface
+class EncryptTransformFactory implements KeyTransformFactoryInterface
 {
     /**
      * Get the static instance of this factory.
      *
-     * @return EncrypterInterface The static factory.
+     * @return KeyTransformFactoryInterface The static factory.
      */
     public static function instance()
     {
@@ -37,7 +37,7 @@ class EncryptTransformFactory implements CryptographicTransformFactoryInterface
     }
 
     /**
-     * Construct a new encrypt data transform.
+     * Construct a new encrypt transform factory.
      *
      * @param RandomSourceInterface|null $randomSource The random source to use.
      */

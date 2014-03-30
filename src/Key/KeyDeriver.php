@@ -96,6 +96,9 @@ class KeyDeriver implements KeyDeriverInterface
         if (!is_string($password)) {
             throw new Exception\InvalidPasswordException($password);
         }
+        if (!is_int($iterations) || $iterations < 1) {
+            throw new Exception\InvalidIterationsException($iterations);
+        }
 
         if (null === $salt) {
             $salt = $this->randomSource()->generate(64);

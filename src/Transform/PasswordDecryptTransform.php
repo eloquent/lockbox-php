@@ -13,35 +13,61 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Transform\AbstractDataTransform;
 use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
-use Eloquent\Lockbox\Exception\InvalidPaddingException;
-use Eloquent\Lockbox\Exception\UnsupportedTypeException;
-use Eloquent\Lockbox\Exception\UnsupportedVersionException;
-use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
+use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Key\KeyDeriverInterface;
 
 /**
- * A data transform for decryption of streaming data.
+ * A data transform for decryption of streaming data with a password.
  */
-class DecryptTransform extends AbstractDataTransform
+class PasswordDecryptTransform extends AbstractDataTransform
 {
     /**
-     * Construct a new decrypt data transform.
+     * Construct a new password decrypt data transform.
      *
-     * @param KeyInterface $key The key to decrypt with.
+     * @param string                   $password   The password to decrypt with.
+     * @param KeyDeriverInterface|null $keyDeriver The key deriver to use.
      */
-    public function __construct(KeyInterface $key)
-    {
-        $this->key = $key;
+    public function __construct(
+        $password,
+        KeyDeriverInterface $keyDeriver = null
+    ) {
+        if (null === $keyDeriver) {
+            $keyDeriver = KeyDeriver::instance();
+        }
+
+        $this->password = $password;
+        $this->keyDeriver = $keyDeriver;
     }
 
     /**
-     * Get the key.
+     * Get the password.
      *
-     * @return KeyInterface The key.
+     * @return string The password.
      */
-    public function key()
+    public function password()
     {
-        return $this->key;
+        return $this->password;
+    }
+
+    /**
+     * Get the key deriver.
+     *
+     * @return KeyDeriverInterface The key deriver.
+     */
+    public function keyDeriver()
+    {
+        return $this->keyDeriver;
+    }
+
+    /**
+     * Get the number of hash iterations used.
+     *
+     * @return integer|null The hash iterations, or null if not yet known.
+     */
+    public function iterations()
+    {
+        return $this->iterations;
     }
 
     /**
@@ -80,7 +106,9 @@ class DecryptTransform extends AbstractDataTransform
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    throw new PasswordDecryptionFailedException(
+                        $this->password()
+                    );
                 }
 
                 return array('', $consumed);
@@ -93,13 +121,13 @@ class DecryptTransform extends AbstractDataTransform
             if (1 !== $version) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException(
-                    $this->key(),
+                throw new PasswordDecryptionFailedException(
+                    $this->password(),
                     new UnsupportedVersionException($version)
                 );
             }
 
-            hash_update($context->hashContext, $versionData);
+            $context->hashBuffer .= $versionData;
 
             if (1 === $dataSize) {
                 $data = '';
@@ -116,7 +144,9 @@ class DecryptTransform extends AbstractDataTransform
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    throw new PasswordDecryptionFailedException(
+                        $this->password()
+                    );
                 }
 
                 return array('', $consumed);
@@ -126,16 +156,16 @@ class DecryptTransform extends AbstractDataTransform
 
             $typeData = substr($data, 0, 1);
             $type = ord($typeData);
-            if (1 !== $type) {
+            if (2 !== $type) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException(
-                    $this->key(),
+                throw new PasswordDecryptionFailedException(
+                    $this->password(),
                     new UnsupportedTypeException($type)
                 );
             }
 
-            hash_update($context->hashContext, $typeData);
+            $context->hashBuffer .= $typeData;
 
             if (1 === $dataSize) {
                 $data = '';
@@ -147,12 +177,82 @@ class DecryptTransform extends AbstractDataTransform
             $consumed += 1;
         }
 
+        if (null === $context->iterations) {
+            if ($dataSize < 4) {
+                if ($isEnd) {
+                    $this->finalizeContext($context);
+
+                    throw new PasswordDecryptionFailedException(
+                        $this->password()
+                    );
+                }
+
+                return array('', $consumed);
+            }
+
+            $context->isIterationsSeen = true;
+
+            $iterationsData = substr($data, 0, 4);
+            $iterations = unpack('N', $iterationsData);
+            $context->iterations = array_shift($iterations);
+
+            $context->hashBuffer .= $iterationsData;
+
+            if (4 === $dataSize) {
+                $data = '';
+            } else {
+                $data = substr($data, 4);
+            }
+
+            $dataSize -= 4;
+            $consumed += 4;
+        }
+
+        if (null === $context->key) {
+            if ($dataSize < 64) {
+                if ($isEnd) {
+                    $this->finalizeContext($context);
+
+                    throw new PasswordDecryptionFailedException(
+                        $this->password()
+                    );
+                }
+
+                return array('', $consumed);
+            }
+
+            $salt = substr($data, 0, 64);
+            list($context->key) = $this->keyDeriver()->deriveKeyFromPassword(
+                $this->password(),
+                $context->iterations,
+                $salt
+            );
+            $context->hashContext = hash_init(
+                'sha256',
+                HASH_HMAC,
+                $context->key->authenticationSecret()
+            );
+
+            $context->hashBuffer .= $salt;
+
+            if (64 === $dataSize) {
+                $data = '';
+            } else {
+                $data = substr($data, 64);
+            }
+
+            $dataSize -= 64;
+            $consumed += 64;
+        }
+
         if (!$context->isInitialized) {
             if ($dataSize < 16) {
                 if ($isEnd) {
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    throw new PasswordDecryptionFailedException(
+                        $this->password()
+                    );
                 }
 
                 return array('', $consumed);
@@ -161,11 +261,11 @@ class DecryptTransform extends AbstractDataTransform
             $iv = substr($data, 0, 16);
             mcrypt_generic_init(
                 $context->mcryptModule,
-                $this->key()->encryptionSecret(),
+                $context->key->encryptionSecret(),
                 $iv
             );
 
-            hash_update($context->hashContext, $iv);
+            $context->hashBuffer .= $iv;
             $context->isInitialized = true;
 
             if (16 === $dataSize) {
@@ -179,44 +279,44 @@ class DecryptTransform extends AbstractDataTransform
         }
 
         if ($isEnd) {
-            $requiredSize = 16 + $context->hashSize;
+            $requiredSize = 48;
         } else {
-            $requiredSize = 32 + $context->hashSize;
+            $requiredSize = 64;
         }
 
         if ($dataSize < $requiredSize) {
             if ($isEnd) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($this->key());
+                throw new PasswordDecryptionFailedException($this->password());
             }
 
             return array('', $consumed);
         }
 
         if ($isEnd) {
-            $consume = $dataSize - $context->hashSize;
+            $consume = $dataSize - 32;
             $hash = substr($data, $consume);
             $consumedData = substr($data, 0, $consume);
             $consumed += $dataSize;
         } else {
-            $consume = $this->blocksSize(
-                $dataSize - 16 - $context->hashSize,
-                16,
-                $isEnd
-            );
+            $consume = $this->blocksSize($dataSize - 48, 16, $isEnd);
             $consumed += $consume;
             $consumedData = substr($data, 0, $consume);
         }
 
-        hash_update($context->hashContext, $consumedData);
+        hash_update(
+            $context->hashContext,
+            $context->hashBuffer . $consumedData
+        );
+        $context->hashBuffer = '';
 
         if ($isEnd) {
             $context->isHashFinalized = true;
             if (hash_final($context->hashContext, true) !== $hash) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($this->key());
+                throw new PasswordDecryptionFailedException($this->password());
             }
         }
 
@@ -228,7 +328,10 @@ class DecryptTransform extends AbstractDataTransform
             } catch (InvalidPaddingException $e) {
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($this->key(), $e);
+                throw new PasswordDecryptionFailedException(
+                    $this->password(),
+                    $e
+                );
             }
 
             $this->finalizeContext($context);
@@ -261,7 +364,7 @@ class DecryptTransform extends AbstractDataTransform
 
     private function initializeContext()
     {
-        $context = new DecryptTransformContext;
+        $context = new PasswordDecryptTransformContext;
 
         $context->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,
@@ -270,17 +373,10 @@ class DecryptTransform extends AbstractDataTransform
             ''
         );
 
-        $context->hashContext = hash_init(
-            'sha' . $this->key()->authenticationSecretBits(),
-            HASH_HMAC,
-            $this->key()->authenticationSecret()
-        );
-        $context->hashSize = $this->key()->authenticationSecretBytes();
-
         return $context;
     }
 
-    private function finalizeContext(DecryptTransformContext &$context)
+    private function finalizeContext(PasswordDecryptTransformContext &$context)
     {
         if (null !== $context->mcryptModule) {
             if ($context->isInitialized) {
@@ -290,12 +386,14 @@ class DecryptTransform extends AbstractDataTransform
             mcrypt_module_close($context->mcryptModule);
         }
 
-        if (!$context->isHashFinalized) {
+        if (null !== $context->hashContext && !$context->isHashFinalized) {
             hash_final($context->hashContext);
         }
 
         $context = null;
     }
 
-    private $key;
+    private $password;
+    private $keyDeriver;
+    private $iterations;
 }

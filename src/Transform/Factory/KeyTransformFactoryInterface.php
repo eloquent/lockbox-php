@@ -15,9 +15,9 @@ use Eloquent\Endec\Transform\DataTransformInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
- * The interface implemented by cryptographic transform factories.
+ * The interface implemented by cryptographic transform factories that use keys.
  */
-interface CryptographicTransformFactoryInterface
+interface KeyTransformFactoryInterface
 {
     /**
      * Create a new transform for the supplied key.

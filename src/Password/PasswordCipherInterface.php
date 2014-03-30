@@ -9,13 +9,12 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox;
+namespace Eloquent\Lockbox\Password;
 
 /**
- * The interface implemented by bound ciphers.
+ * The interface implemented by password ciphers.
  */
-interface BoundCipherInterface extends
-    BoundEncrypterInterface,
-    BoundDecrypterInterface
+interface PasswordCipherInterface extends PasswordEncrypterInterface,
+    PasswordDecrypterInterface
 {
 }

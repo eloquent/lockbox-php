@@ -84,7 +84,7 @@ abstract class AbstractCipher implements CipherInterface
      *
      * @param Key\KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(Key\KeyInterface $key)
     {
@@ -96,7 +96,7 @@ abstract class AbstractCipher implements CipherInterface
      *
      * @param Key\KeyInterface $key The key to decrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {

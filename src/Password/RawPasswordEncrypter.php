@@ -9,22 +9,22 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox;
+namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Endec\Transform\TransformStream;
 use Eloquent\Endec\Transform\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
-use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
 
 /**
- * Encrypts data and produces raw output using keys.
+ * Encrypts data and produces raw output using passwords.
  */
-class RawEncrypter implements EncrypterInterface
+class RawPasswordEncrypter implements PasswordEncrypterInterface
 {
     /**
      * Get the static instance of this encrypter.
      *
-     * @return EncrypterInterface The static encrypter.
+     * @return PasswordEncrypterInterface The static encrypter.
      */
     public static function instance()
     {
@@ -36,15 +36,15 @@ class RawEncrypter implements EncrypterInterface
     }
 
     /**
-     * Construct a new raw encrypter.
+     * Construct a new raw password encrypter.
      *
-     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param PasswordEncryptTransformFactoryInterface|null $transformFactory The transform factory to use.
      */
     public function __construct(
-        KeyTransformFactoryInterface $transformFactory = null
+        PasswordEncryptTransformFactoryInterface $transformFactory = null
     ) {
         if (null === $transformFactory) {
-            $transformFactory = EncryptTransformFactory::instance();
+            $transformFactory = PasswordEncryptTransformFactory::instance();
         }
 
         $this->transformFactory = $transformFactory;
@@ -53,7 +53,7 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Get the transform factory.
      *
-     * @return KeyTransformFactoryInterface The transform factory.
+     * @return PasswordEncryptTransformFactoryInterface The transform factory.
      */
     public function transformFactory()
     {
@@ -63,15 +63,16 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Encrypt a data packet.
      *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $data The data to encrypt.
+     * @param string  $password   The password to encrypt with.
+     * @param integer $iterations The number of hash iterations to use.
+     * @param string  $data       The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\KeyInterface $key, $data)
+    public function encrypt($password, $iterations, $data)
     {
         list($data) = $this->transformFactory()
-            ->createTransform($key)
+            ->createTransform($password, $iterations)
             ->transform($data, $context, true);
 
         return $data;
@@ -80,14 +81,15 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Create a new encrypt stream.
      *
-     * @param Key\KeyInterface $key The key to encrypt with.
+     * @param string  $password   The password to encrypt with.
+     * @param integer $iterations The number of hash iterations to use.
      *
      * @return TransformStreamInterface The newly created encrypt stream.
      */
-    public function createEncryptStream(Key\KeyInterface $key)
+    public function createEncryptStream($password, $iterations)
     {
         return new TransformStream(
-            $this->transformFactory()->createTransform($key)
+            $this->transformFactory()->createTransform($password, $iterations)
         );
     }
 

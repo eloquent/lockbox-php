@@ -16,14 +16,14 @@ use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Transform\DecryptTransform;
 
 /**
- * Creates decrypt transforms.
+ * Creates decrypt transforms that use keys.
  */
-class DecryptTransformFactory implements CryptographicTransformFactoryInterface
+class DecryptTransformFactory implements KeyTransformFactoryInterface
 {
     /**
      * Get the static instance of this factory.
      *
-     * @return EncrypterInterface The static factory.
+     * @return KeyTransformFactoryInterface The static factory.
      */
     public static function instance()
     {

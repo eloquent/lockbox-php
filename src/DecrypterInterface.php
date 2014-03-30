@@ -34,7 +34,7 @@ interface DecrypterInterface
      *
      * @param Key\KeyInterface $key The key to decrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream(Key\KeyInterface $key);
 }
