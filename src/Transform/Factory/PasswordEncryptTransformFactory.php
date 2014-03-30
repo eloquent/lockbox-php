@@ -11,7 +11,7 @@
 
 namespace Eloquent\Lockbox\Transform\Factory;
 
-use Eloquent\Endec\Transform\DataTransformInterface;
+use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
@@ -85,7 +85,7 @@ class PasswordEncryptTransformFactory implements
      * @param string  $password   The password to use.
      * @param integer $iterations The number of hash iterations to use.
      *
-     * @return DataTransformInterface The newly created transform.
+     * @return TransformInterface The newly created transform.
      */
     public function createTransform($password, $iterations)
     {

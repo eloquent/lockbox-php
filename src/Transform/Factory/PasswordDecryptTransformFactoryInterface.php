@@ -11,7 +11,7 @@
 
 namespace Eloquent\Lockbox\Transform\Factory;
 
-use Eloquent\Endec\Transform\DataTransformInterface;
+use Eloquent\Confetti\TransformInterface;
 
 /**
  * The interface implemented by decrypt transform factories that use passwords.
@@ -23,7 +23,7 @@ interface PasswordDecryptTransformFactoryInterface
      *
      * @param string $password The password to use.
      *
-     * @return DataTransformInterface The newly created transform.
+     * @return TransformInterface The newly created transform.
      */
     public function createTransform($password);
 }

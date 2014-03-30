@@ -11,10 +11,10 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Endec\Transform\TransformStream;
-use Eloquent\Endec\Transform\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
+use Eloquent\Confetti\TransformStream;
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
 /**
  * Encrypts data and produces raw output using keys.

@@ -11,18 +11,18 @@
 
 namespace Eloquent\Lockbox\Transform;
 
-use Eloquent\Endec\Transform\AbstractDataTransform;
-use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
+use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Exception\UnsupportedTypeException;
 use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyInterface;
+use Exception;
 
 /**
  * A data transform for decryption of streaming data.
  */
-class DecryptTransform extends AbstractDataTransform
+class DecryptTransform extends AbstractTransform
 {
     /**
      * Construct a new decrypt data transform.
@@ -63,8 +63,8 @@ class DecryptTransform extends AbstractDataTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer>       A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws TransformExceptionInterface If the data cannot be transformed.
+     * @return tuple<string,integer> A 2-tuple of the transformed data, and the number of bytes consumed.
+     * @throws Exception             If the data cannot be transformed.
      */
     public function transform($data, &$context, $isEnd = false)
     {

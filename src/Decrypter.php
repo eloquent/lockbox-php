@@ -11,10 +11,10 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
-use Eloquent\Endec\Transform\TransformStreamInterface;
+use Eloquent\Endec\Exception\EncodingExceptionInterface;
 
 /**
  * Decrypts encoded data using keys.
@@ -89,7 +89,7 @@ class Decrypter implements DecrypterInterface
     {
         try {
             $data = $this->decoder()->decode($data);
-        } catch (TransformExceptionInterface $e) {
+        } catch (EncodingExceptionInterface $e) {
             throw new Exception\DecryptionFailedException($key, $e);
         }
 

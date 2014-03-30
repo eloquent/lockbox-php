@@ -95,6 +95,18 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
         $this->deriver->deriveKeyFromPassword(null, 1000);
     }
 
+    public function testDeriveKeyFromPasswordFailureNonIntegerIterations()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidIterationsException');
+        $this->deriver->deriveKeyFromPassword('foobar', null);
+    }
+
+    public function testDeriveKeyFromPasswordFailureIterationsLessThanOne()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidIterationsException');
+        $this->deriver->deriveKeyFromPassword('foobar', 0);
+    }
+
     public function testDeriveKeyFromPasswordFailureNonStringSalt()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSaltException');

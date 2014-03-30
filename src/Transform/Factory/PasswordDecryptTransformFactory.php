@@ -11,7 +11,7 @@
 
 namespace Eloquent\Lockbox\Transform\Factory;
 
-use Eloquent\Endec\Transform\DataTransformInterface;
+use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
@@ -65,7 +65,7 @@ class PasswordDecryptTransformFactory implements
      *
      * @param string $password The password to use.
      *
-     * @return DataTransformInterface The newly created transform.
+     * @return TransformInterface The newly created transform.
      */
     public function createTransform($password)
     {

@@ -93,7 +93,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $encrypted = $this->cipher->encrypt($this->password, $this->iterations, $data);
         $decrypted = $this->cipher->decrypt($this->password, $encrypted);
 
-        $this->assertSame($data, $decrypted);
+        $this->assertSame(array($data, $this->iterations), $decrypted);
     }
 
     /**

@@ -11,16 +11,16 @@
 
 namespace Eloquent\Lockbox\Transform;
 
-use Eloquent\Endec\Transform\AbstractDataTransform;
-use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
+use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Exception;
 
 /**
  * A data transform for decryption of streaming data with a password.
  */
-class PasswordDecryptTransform extends AbstractDataTransform
+class PasswordDecryptTransform extends AbstractTransform
 {
     /**
      * Construct a new password decrypt data transform.
@@ -89,8 +89,8 @@ class PasswordDecryptTransform extends AbstractDataTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer>       A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws TransformExceptionInterface If the data cannot be transformed.
+     * @return tuple<string,integer> A 2-tuple of the transformed data, and the number of bytes consumed.
+     * @throws Exception             If the data cannot be transformed.
      */
     public function transform($data, &$context, $isEnd = false)
     {
@@ -334,6 +334,7 @@ class PasswordDecryptTransform extends AbstractDataTransform
                 );
             }
 
+            $this->iterations = $context->iterations;
             $this->finalizeContext($context);
         }
 

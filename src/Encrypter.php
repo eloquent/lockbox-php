@@ -11,9 +11,9 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
-use Eloquent\Endec\Transform\TransformStreamInterface;
 
 /**
  * Encrypts data and produces encoded output using keys.

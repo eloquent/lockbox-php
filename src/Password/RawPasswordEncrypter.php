@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Transform\TransformStream;
-use Eloquent\Endec\Transform\TransformStreamInterface;
+use Eloquent\Confetti\TransformStream;
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
 

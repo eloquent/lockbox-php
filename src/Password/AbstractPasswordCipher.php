@@ -11,7 +11,7 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Transform\TransformStreamInterface;
+use Eloquent\Confetti\TransformStreamInterface;
 
 /**
  * An abstract base class for implementing password ciphers.

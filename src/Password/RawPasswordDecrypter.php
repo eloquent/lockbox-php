@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Transform\TransformStream;
-use Eloquent\Endec\Transform\TransformStreamInterface;
+use Eloquent\Confetti\TransformStream;
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
@@ -72,11 +72,10 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      */
     public function decrypt($password, $data)
     {
-        list($data) = $this->transformFactory()
-            ->createTransform($password)
-            ->transform($data, $context, true);
+        $transform = $this->transformFactory()->createTransform($password);
+        list($data) = $transform->transform($data, $context, true);
 
-        return $data;
+        return array($data, $transform->iterations());
     }
 
     /**
