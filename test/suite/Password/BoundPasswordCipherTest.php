@@ -20,19 +20,19 @@ class BoundPasswordCipherTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->innerCipher = new PasswordCipher;
-        $this->cipher = new BoundPasswordCipher('password', 1000, $this->innerCipher);
+        $this->cipher = new BoundPasswordCipher('password', 10, $this->innerCipher);
     }
 
     public function testConstructor()
     {
         $this->assertSame('password', $this->cipher->password());
-        $this->assertSame(1000, $this->cipher->iterations());
+        $this->assertSame(10, $this->cipher->iterations());
         $this->assertSame($this->innerCipher, $this->cipher->cipher());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundPasswordCipher('password', 1000);
+        $this->cipher = new BoundPasswordCipher('password', 10);
 
         $this->assertSame(PasswordCipher::instance(), $this->cipher->cipher());
     }
@@ -54,6 +54,6 @@ class BoundPasswordCipherTest extends PHPUnit_Framework_TestCase
         $encrypted = $this->cipher->encrypt($data);
         $decrypted = $this->cipher->decrypt($encrypted);
 
-        $this->assertSame(array($data, 1000), $decrypted);
+        $this->assertSame(array($data, 10), $decrypted);
     }
 }

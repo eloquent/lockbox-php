@@ -25,7 +25,7 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->password = 'password';
-        $this->iterations = 1000;
+        $this->iterations = 10;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->transform = new PasswordEncryptTransform(
@@ -62,10 +62,10 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
         $expected = $this->base64Url->decode(
-            'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbAF3CQDwGShW4H' .
-            '_YShk8lCxkkkPaC3gJUaGMzDORvdqxhjCLKblVg26_OCdEe4rV3iSV4l-hCT3KCW' .
-            'og6H26u7'
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
+            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ' .
+            '6QgffQ8xEkiQRBzIKi8Ko4tnVoT_T6Gp5NzsM5rAWms3TtutWnxbwTwuHKzlVjWo' .
+            '89HxKMZu'
         );
 
         $this->assertSameCiphertext($expected, $output);
@@ -78,10 +78,10 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
         $expected = $this->base64Url->decode(
-            'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbAF3CQDwGShW4H' .
-            '_YShk8lCmg8ADKI8Oa-mwCHMCrLt9cg3iJZlfUkW7imm27GwdmsiJmnQcxRBjVom' .
-            '09ZHJGBQ86jnvhRZWuZuUJhKt1eXSw'
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
+            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ' .
+            '6QgffQ8xLtn32Sqez5sdiOXL-UkepclGdzDvz0Nd3BUA44CHw4jaMtOz4vKJAcX6' .
+            'tX5AQx7EjgnCyLfLpbLURpxf1q3ueA'
         );
 
         $this->assertSameCiphertext($expected, $output);

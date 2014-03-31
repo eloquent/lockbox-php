@@ -32,7 +32,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->version = chr(1);
         $this->type = chr(2);
-        $this->iterations = 1000;
+        $this->iterations = 10;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
@@ -132,7 +132,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->password = 'password';
         $this->version = chr(1);
         $this->type = chr(2);
-        $this->iterations = 1000;
+        $this->iterations = 10;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';

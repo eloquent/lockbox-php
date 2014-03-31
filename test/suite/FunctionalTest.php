@@ -242,9 +242,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
-        $encrypted = $this->passwordEncrypter->encrypt('password', 1000, 'foobar');
+        $encrypted = $this->passwordEncrypter->encrypt('password', 10, 'foobar');
         $decrypted = $this->passwordDecrypter->decrypt('password', $encrypted);
 
-        $this->assertSame(array('foobar', 1000), $decrypted);
+        $this->assertSame(array('foobar', 10), $decrypted);
     }
 }

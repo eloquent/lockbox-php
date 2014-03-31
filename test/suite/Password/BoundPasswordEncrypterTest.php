@@ -20,7 +20,7 @@ class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->innerEncrypter = new PasswordEncrypter;
-        $this->encrypter = new BoundPasswordEncrypter('password', 1000, $this->innerEncrypter);
+        $this->encrypter = new BoundPasswordEncrypter('password', 10, $this->innerEncrypter);
 
         $this->decrypter = new BoundPasswordDecrypter('password');
     }
@@ -28,13 +28,13 @@ class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $this->assertSame('password', $this->encrypter->password());
-        $this->assertSame(1000, $this->encrypter->iterations());
+        $this->assertSame(10, $this->encrypter->iterations());
         $this->assertSame($this->innerEncrypter, $this->encrypter->encrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->encrypter = new BoundPasswordEncrypter('password', 1000);
+        $this->encrypter = new BoundPasswordEncrypter('password', 10);
 
         $this->assertSame(PasswordEncrypter::instance(), $this->encrypter->encrypter());
     }
@@ -56,6 +56,6 @@ class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
         $encrypted = $this->encrypter->encrypt($data);
         $decrypted = $this->decrypter->decrypt($encrypted);
 
-        $this->assertSame(array($data, 1000), $decrypted);
+        $this->assertSame(array($data, 10), $decrypted);
     }
 }
