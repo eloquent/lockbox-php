@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\DecoderInterface;
+use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
 
 /**

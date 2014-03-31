@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Password;
 
 /**
- * Encrypts and decrypts unencoded data using passwords.
+ * Encrypts and decrypts raw data using passwords.
  */
 class RawPasswordCipher extends AbstractPasswordCipher
 {

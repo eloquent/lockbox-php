@@ -9,45 +9,47 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox;
+namespace Eloquent\Lockbox\Password;
+
+use Eloquent\Lockbox\BoundDecrypterInterface;
 
 /**
- * Binds a key to a decrypter.
+ * Binds a password to a decrypter.
  */
-class BoundDecrypter implements BoundDecrypterInterface
+class BoundPasswordDecrypter implements BoundDecrypterInterface
 {
     /**
      * Construct a new bound decrypter.
      *
-     * @param Key\KeyInterface        $key       The key to use.
-     * @param DecrypterInterface|null $decrypter The decrypter to use.
+     * @param string                          $password  The password to decrypt with.
+     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
-        Key\KeyInterface $key,
-        DecrypterInterface $decrypter = null
+        $password,
+        PasswordDecrypterInterface $decrypter = null
     ) {
         if (null === $decrypter) {
-            $decrypter = Decrypter::instance();
+            $decrypter = PasswordDecrypter::instance();
         }
 
-        $this->key = $key;
+        $this->password = $password;
         $this->decrypter = $decrypter;
     }
 
     /**
-     * Get the key.
+     * Get the password.
      *
-     * @return Key\KeyInterface The key.
+     * @return string The password.
      */
-    public function key()
+    public function password()
     {
-        return $this->key;
+        return $this->password;
     }
 
     /**
      * Get the decrypter.
      *
-     * @return DecrypterInterface The decrypter;
+     * @return PasswordDecrypterInterface The decrypter;
      */
     public function decrypter()
     {
@@ -64,9 +66,9 @@ class BoundDecrypter implements BoundDecrypterInterface
      */
     public function decrypt($data)
     {
-        return $this->decrypter()->decrypt($this->key(), $data);
+        return $this->decrypter()->decrypt($this->password(), $data);
     }
 
-    private $key;
+    private $password;
     private $decrypter;
 }

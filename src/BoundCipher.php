@@ -19,25 +19,19 @@ class BoundCipher implements BoundCipherInterface
     /**
      * Construct a new bound cipher.
      *
-     * @param Key\KeyInterface        $key       The key to use.
-     * @param EncrypterInterface|null $encrypter The encrypter to use.
-     * @param DecrypterInterface|null $decrypter The decrypter to use.
+     * @param Key\KeyInterface     $key    The key to use.
+     * @param CipherInterface|null $cipher The cipher to use.
      */
     public function __construct(
         Key\KeyInterface $key,
-        EncrypterInterface $encrypter = null,
-        DecrypterInterface $decrypter = null
+        CipherInterface $cipher = null
     ) {
-        if (null === $encrypter) {
-            $encrypter = Encrypter::instance();
-        }
-        if (null === $decrypter) {
-            $decrypter = Decrypter::instance();
+        if (null === $cipher) {
+            $cipher = Cipher::instance();
         }
 
         $this->key = $key;
-        $this->encrypter = $encrypter;
-        $this->decrypter = $decrypter;
+        $this->cipher = $cipher;
     }
 
     /**
@@ -51,23 +45,13 @@ class BoundCipher implements BoundCipherInterface
     }
 
     /**
-     * Get the encrypter.
+     * Get the cipher.
      *
-     * @return EncrypterInterface The encrypter.
+     * @return CipherInterface The cipher.
      */
-    public function encrypter()
+    public function cipher()
     {
-        return $this->encrypter;
-    }
-
-    /**
-     * Get the decrypter.
-     *
-     * @return DecrypterInterface The decrypter.
-     */
-    public function decrypter()
-    {
-        return $this->decrypter;
+        return $this->cipher;
     }
 
     /**
@@ -79,7 +63,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->encrypter()->encrypt($this->key(), $data);
+        return $this->cipher()->encrypt($this->key(), $data);
     }
 
     /**
@@ -92,10 +76,9 @@ class BoundCipher implements BoundCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->decrypter()->decrypt($this->key(), $data);
+        return $this->cipher()->decrypt($this->key(), $data);
     }
 
     private $key;
-    private $encrypter;
-    private $decrypter;
+    private $cipher;
 }

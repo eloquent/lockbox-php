@@ -30,9 +30,8 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->encrypter = new RawPasswordEncrypter(
-            new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource))
-        );
+        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->encrypter = new RawPasswordEncrypter(new PasswordEncryptTransformFactory($this->keyDeriver));
         $this->decrypter = new RawPasswordDecrypter;
         $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
 
@@ -40,9 +39,14 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $this->type = chr(2);
         $this->password = 'foobar';
         $this->iterations = 1000;
+        $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
+        $this->iv = '1234567890123456';
 
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
+        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
+
+        list($this->key) = $this->keyDeriver->deriveKeyFromPassword($this->password, $this->iterations);
     }
 
     public function testConstructor()
@@ -62,23 +66,8 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     public function encryptionData()
     {
         $data = array();
-        foreach (array(16, 24, 32) as $encryptionSecretBytes) {
-            foreach (array(28, 32, 48, 64) as $authenticationSecretBytes) {
-                foreach (array(0, 1, 1024) as $dataSize) {
-                    $label = sprintf(
-                        '%d byte(s), %dbit encryption, %dbit authentication',
-                        $dataSize,
-                        $encryptionSecretBytes * 8,
-                        $authenticationSecretBytes * 8
-                    );
-
-                    $data[$label] = array(
-                        $dataSize,
-                        str_pad('', $encryptionSecretBytes, '1234567890'),
-                        str_pad('', $authenticationSecretBytes, '1234567890'),
-                    );
-                }
-            }
+        foreach (array(0, 1, 1024) as $dataSize) {
+            $data[sprintf('%d byte(s)', $dataSize)] = array($dataSize);
         }
 
         return $data;
@@ -87,7 +76,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecrypt($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecrypt($dataSize)
     {
         $data = str_repeat('A', $dataSize);
         $encrypted = $this->cipher->encrypt($this->password, $this->iterations, $data);
@@ -99,7 +88,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecryptStreaming($dataSize)
     {
         $encryptStream = $this->cipher->createEncryptStream($this->password, $this->iterations);
         $decryptStream = $this->cipher->createDecryptStream($this->password);
@@ -121,122 +110,151 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame($data, $decrypted);
     }
 
-    // public function testDecryptFailureEmptyVersion()
-    // {
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, '');
-    // }
+    public function testDecryptFailureEmptyVersion()
+    {
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, '');
+    }
 
-    // public function testDecryptFailureUnsupportedVersion()
-    // {
-    //     $data = ord(111) . str_pad('', 100, '1234567890');
+    public function testDecryptFailureUnsupportedVersion()
+    {
+        $data = ord(111) . str_pad('', 100, '1234567890');
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureEmptyType()
-    // {
-    //     $data = $this->version;
+    public function testDecryptFailureEmptyType()
+    {
+        $data = $this->version;
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptUnsupportedType()
-    // {
-    //     $data = $this->version . ord(111) . str_pad('', 100, '1234567890');
+    public function testDecryptUnsupportedType()
+    {
+        $data = $this->version . ord(111) . str_pad('', 100, '1234567890');
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureEmptyIv()
-    // {
-    //     $data = $this->version . $this->type;
+    public function testDecryptFailureEmptyIterations()
+    {
+        $data = $this->version . $this->type;
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureShortMac()
-    // {
-    //     $data = $this->version . $this->type . '1234567890123456789012345678901234567890123';
+    public function testDecryptFailureEmptySalt()
+    {
+        $data = $this->version . $this->type . $this->iterationsData;
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureEmptyCiphertext()
-    // {
-    //     $data = $this->version . $this->type . '12345678901234567890123456789012345678901234';
+    public function testDecryptFailureEmptyIv()
+    {
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt;
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureBadMac()
-    // {
-    //     $data = $this->version . $this->type . '1234567890123456foobar1234567890123456789012345678';
+    public function testDecryptFailureShortMac()
+    {
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+            '789012345678901234567890123';
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureBadAesData()
-    // {
-    //     $data = $this->version . $this->type . '1234567890123456foobar' .
-    //         $this->authenticationCode($this->key, $this->version . $this->type . '1234567890123456foobar');
+    public function testDecryptFailureEmptyCiphertext()
+    {
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+            '7890123456789012345678901234';
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
-    // public function testDecryptFailureBadPadding()
-    // {
-    //     $ciphertext = mcrypt_encrypt(
-    //         MCRYPT_RIJNDAEL_128,
-    //         $this->key->encryptionSecret(),
-    //         'foobar',
-    //         MCRYPT_MODE_CBC,
-    //         '1234567890123456'
-    //     );
-    //     $data = $this->version . $this->type . '1234567890123456' . $ciphertext .
-    //         $this->authenticationCode($this->key, $this->version . $this->type . '1234567890123456' . $ciphertext);
+    public function testDecryptFailureBadMac()
+    {
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+            'foobar1234567890123456789012345678';
 
-    //     $this->setExpectedException(
-    //         'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-    //         "Password decryption failed."
-    //     );
-    //     $this->cipher->decrypt($this->password, $data);
-    // }
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
+
+    public function testDecryptFailureBadAesData()
+    {
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . 'foobar' .
+            $this->authenticationCode(
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . 'foobar'
+            );
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
+
+    public function testDecryptFailureBadPadding()
+    {
+        $ciphertext = mcrypt_encrypt(
+            MCRYPT_RIJNDAEL_128,
+            $this->key->encryptionSecret(),
+            'foobar',
+            MCRYPT_MODE_CBC,
+            $this->iv
+        );
+        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $ciphertext .
+            $this->authenticationCode(
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $ciphertext
+            );
+
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
+            "Password decryption failed."
+        );
+        $this->cipher->decrypt($this->password, $data);
+    }
 
     public function testInstance()
     {
@@ -255,12 +273,12 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         return $data . str_repeat(chr($padSize), $padSize);
     }
 
-    protected function authenticationCode($key, $data)
+    protected function authenticationCode($data)
     {
         return hash_hmac(
-            'sha' . strlen($key->authenticationSecret()) * 8,
+            'sha256',
             $data,
-            $key->authenticationSecret(),
+            $this->key->authenticationSecret(),
             true
         );
     }

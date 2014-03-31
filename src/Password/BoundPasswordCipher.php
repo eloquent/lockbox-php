@@ -11,32 +11,32 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Lockbox\BoundEncrypterInterface;
+use Eloquent\Lockbox\BoundCipherInterface;
 
 /**
- * Binds a password to an encrypter.
+ * Binds a password to a cipher.
  */
-class BoundPasswordEncrypter implements BoundEncrypterInterface
+class BoundPasswordCipher implements BoundCipherInterface
 {
     /**
-     * Construct a new bound password encrypter.
+     * Construct a new bound password cipher.
      *
-     * @param string                          $password   The password to encrypt with.
-     * @param integer                         $iterations The number of hash iterations to use.
-     * @param PasswordEncrypterInterface|null $encrypter  The encrypter to use.
+     * @param string                       $password   The password to use.
+     * @param integer                      $iterations The number of hash iterations to use.
+     * @param PasswordCipherInterface|null $cipher     The cipher to use.
      */
     public function __construct(
         $password,
         $iterations,
-        PasswordEncrypterInterface $encrypter = null
+        PasswordCipherInterface $cipher = null
     ) {
-        if (null === $encrypter) {
-            $encrypter = PasswordEncrypter::instance();
+        if (null === $cipher) {
+            $cipher = PasswordCipher::instance();
         }
 
         $this->password = $password;
         $this->iterations = $iterations;
-        $this->encrypter = $encrypter;
+        $this->cipher = $cipher;
     }
 
     /**
@@ -60,13 +60,13 @@ class BoundPasswordEncrypter implements BoundEncrypterInterface
     }
 
     /**
-     * Get the encrypter.
+     * Get the cipher.
      *
-     * @return PasswordEncrypterInterface The encrypter.
+     * @return PasswordCipherInterface The cipher.
      */
-    public function encrypter()
+    public function cipher()
     {
-        return $this->encrypter;
+        return $this->cipher;
     }
 
     /**
@@ -78,11 +78,24 @@ class BoundPasswordEncrypter implements BoundEncrypterInterface
      */
     public function encrypt($data)
     {
-        return $this->encrypter()
+        return $this->cipher()
             ->encrypt($this->password(), $this->iterations(), $data);
+    }
+
+    /**
+     * Decrypt a data packet.
+     *
+     * @param string $data The data to decrypt.
+     *
+     * @return string                              The decrypted data.
+     * @throws Exception\DecryptionFailedException If the decryption failed.
+     */
+    public function decrypt($data)
+    {
+        return $this->cipher()->decrypt($this->password(), $data);
     }
 
     private $password;
     private $iterations;
-    private $encrypter;
+    private $cipher;
 }
