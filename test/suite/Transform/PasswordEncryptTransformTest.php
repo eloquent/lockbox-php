@@ -12,37 +12,49 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Exception;
-use Phake;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
-class EncryptTransformTest extends PHPUnit_Framework_TestCase
+class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->key = new Key('1234567890123456', '1234567890123456789012345678');
+        $this->password = 'password';
+        $this->iterations = 1000;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->transform = new EncryptTransform($this->key, $this->randomSource);
+        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->transform = new PasswordEncryptTransform(
+            $this->password,
+            $this->iterations,
+            $this->keyDeriver,
+            $this->randomSource
+        );
 
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
+        Phake::when($this->randomSource)->generate(64)->thenReturn('1234567890123456789012345678901234567890123456789012345678901234');
+
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->transform->key());
+        $this->assertSame($this->password, $this->transform->password());
+        $this->assertSame($this->iterations, $this->transform->iterations());
+        $this->assertSame($this->keyDeriver, $this->transform->keyDeriver());
         $this->assertSame($this->randomSource, $this->transform->randomSource());
     }
 
     public function testConstructorDefaults()
     {
-        $this->transform = new EncryptTransform($this->key);
+        $this->transform = new PasswordEncryptTransform($this->password, $this->iterations);
 
+        $this->assertSame(KeyDeriver::instance(), $this->transform->keyDeriver());
         $this->assertSame(DevUrandom::instance(), $this->transform->randomSource());
     }
 
@@ -50,7 +62,10 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
         $expected = $this->base64Url->decode(
-            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlCbtqOEJ61oMBFXpM6v7kDmoMeEZJHMgZRCj5T4F148Oz_6MtFLxThEKZSPK'
+            'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
+            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbAF3CQDwGShW4H' .
+            '_YShk8lCxkkkPaC3gJUaGMzDORvdqxhjCLKblVg26_OCdEe4rV3iSV4l-hCT3KCW' .
+            'og6H26u7'
         );
 
         $this->assertSameCiphertext($expected, $output);
@@ -63,8 +78,10 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
         $expected = $this->base64Url->decode(
-            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlNPwZN3D1x7C4IHaBSz5' .
-            '5cGl3-VffoOLPey_a_qwiwCZuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
+            'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
+            'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbAF3CQDwGShW4H' .
+            '_YShk8lCmg8ADKI8Oa-mwCHMCrLt9cg3iJZlfUkW7imm27GwdmsiJmnQcxRBjVom' .
+            '09ZHJGBQ86jnvhRZWuZuUJhKt1eXSw'
         );
 
         $this->assertSameCiphertext($expected, $output);
@@ -107,18 +124,24 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         $expectedVersion = bin2hex(substr($expected, 0, 1));
         $expectedType = bin2hex(substr($expected, 1, 1));
-        $expectedIv = bin2hex(substr($expected, 2, 16));
-        $expectedData = bin2hex(substr($expected, 18, -28));
-        $expectedMac = bin2hex(substr($expected, -28));
+        $expectedIterations = bin2hex(substr($expected, 2, 4));
+        $expectedSalt = bin2hex(substr($expected, 6, 64));
+        $expectedIv = bin2hex(substr($expected, 70, 16));
+        $expectedData = bin2hex(substr($expected, 86, -32));
+        $expectedMac = bin2hex(substr($expected, -32));
 
         $actualVersion = bin2hex(substr($actual, 0, 1));
         $actualType = bin2hex(substr($actual, 1, 1));
-        $actualIv = bin2hex(substr($actual, 2, 16));
-        $actualData = bin2hex(substr($actual, 18, -28));
-        $actualMac = bin2hex(substr($actual, -28));
+        $actualIterations = bin2hex(substr($actual, 2, 4));
+        $actualSalt = bin2hex(substr($actual, 6, 64));
+        $actualIv = bin2hex(substr($actual, 70, 16));
+        $actualData = bin2hex(substr($actual, 86, -32));
+        $actualMac = bin2hex(substr($actual, -32));
 
         $this->assertSame($expectedVersion, $actualVersion, 'Version mismatch');
         $this->assertSame($expectedType, $actualType, 'Type mismatch');
+        $this->assertSame($expectedIterations, $actualIterations, 'Iterations mismatch');
+        $this->assertSame($expectedSalt, $actualSalt, 'Salt mismatch');
         $this->assertSame($expectedIv, $actualIv, 'IV mismatch');
         $this->assertSame($expectedData, $actualData, 'Data mismatch');
         $this->assertSame($expectedMac, $actualMac, 'MAC mismatch');

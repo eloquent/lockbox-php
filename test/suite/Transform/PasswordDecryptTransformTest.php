@@ -16,8 +16,8 @@ use Eloquent\Lockbox\Password\BoundPasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Phake;
+use PHPUnit_Framework_TestCase;
 
 class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 {

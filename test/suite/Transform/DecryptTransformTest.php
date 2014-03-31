@@ -16,8 +16,8 @@ use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\RawEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Phake;
+use PHPUnit_Framework_TestCase;
 
 class DecryptTransformTest extends PHPUnit_Framework_TestCase
 {
