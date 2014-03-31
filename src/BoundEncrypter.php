@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\TransformStreamInterface;
+
 /**
  * Binds a key to an encrypter.
  */
@@ -64,6 +66,16 @@ class BoundEncrypter implements BoundEncrypterInterface
     public function encrypt($data)
     {
         return $this->encrypter()->encrypt($this->key(), $data);
+    }
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @return TransformStreamInterface The newly created encrypt stream.
+     */
+    public function createEncryptStream()
+    {
+        return $this->encrypter()->createEncryptStream($this->key());
     }
 
     private $key;

@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundCipherInterface;
 
 /**
@@ -93,6 +94,27 @@ class BoundPasswordCipher implements BoundCipherInterface
     public function decrypt($data)
     {
         return $this->cipher()->decrypt($this->password(), $data);
+    }
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @return TransformStreamInterface The newly created encrypt stream.
+     */
+    public function createEncryptStream()
+    {
+        return $this->cipher()
+            ->createEncryptStream($this->password(), $this->iterations());
+    }
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @return TransformStreamInterface The newly created decrypt stream.
+     */
+    public function createDecryptStream()
+    {
+        return $this->cipher()->createDecryptStream($this->password());
     }
 
     private $password;

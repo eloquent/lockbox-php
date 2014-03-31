@@ -58,4 +58,28 @@ class BoundEncrypterTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($data, $decrypted);
     }
+
+    /**
+     * @dataProvider encryptionData
+     */
+    public function testEncryptDecryptStreaming($data)
+    {
+        $encryptStream = $this->encrypter->createEncryptStream();
+        $decryptStream = $this->decrypter->createDecryptStream();
+        $encryptStream->pipe($decryptStream);
+        $decrypted = '';
+        $decryptStream->on(
+            'data',
+            function ($data, $stream) use (&$decrypted) {
+                $decrypted .= $data;
+            }
+        );
+        $data = '';
+        foreach (str_split($data) as $byte) {
+            $encryptStream->write($byte);
+        }
+        $encryptStream->end();
+
+        $this->assertSame($data, $decrypted);
+    }
 }

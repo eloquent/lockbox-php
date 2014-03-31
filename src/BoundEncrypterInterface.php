@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\TransformStreamInterface;
+
 /**
  * The interface implemented by bound encrypters.
  */
@@ -24,4 +26,11 @@ interface BoundEncrypterInterface
      * @return string The encrypted data.
      */
     public function encrypt($data);
+
+    /**
+     * Create a new encrypt stream.
+     *
+     * @return TransformStreamInterface The newly created encrypt stream.
+     */
+    public function createEncryptStream();
 }

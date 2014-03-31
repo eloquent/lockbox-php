@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundDecrypterInterface;
 
 /**
@@ -67,6 +68,16 @@ class BoundPasswordDecrypter implements BoundDecrypterInterface
     public function decrypt($data)
     {
         return $this->decrypter()->decrypt($this->password(), $data);
+    }
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @return TransformStreamInterface The newly created decrypt stream.
+     */
+    public function createDecryptStream()
+    {
+        return $this->decrypter()->createDecryptStream($this->password());
     }
 
     private $password;

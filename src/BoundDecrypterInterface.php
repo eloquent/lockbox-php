@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\TransformStreamInterface;
+
 /**
  * The interface implemented by bound decrypters.
  */
@@ -25,4 +27,11 @@ interface BoundDecrypterInterface
      * @throws Exception\DecryptionFailedException If the decryption failed.
      */
     public function decrypt($data);
+
+    /**
+     * Create a new decrypt stream.
+     *
+     * @return TransformStreamInterface The newly created decrypt stream.
+     */
+    public function createDecryptStream();
 }
