@@ -9,6 +9,7 @@
  * that was distributed with this source code.
  */
 
+use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
@@ -40,6 +41,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->passwordDecrypter = new PasswordDecrypter;
 
         $this->keyGenerator = new KeyGenerator;
+        $this->keyDeriver = new KeyDeriver;
+
+        $this->base64Url = Base64Url::instance();
     }
 
     public function specVectorData()
@@ -310,5 +314,98 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $decrypted = $this->passwordDecrypter->decrypt('password', $encrypted);
 
         $this->assertSame(array('foobar', 10), $decrypted);
+    }
+
+    public function keyDerivationSpecVectorData()
+    {
+        return array(
+            'Test vector 1' => array(
+                '',
+                1000,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                '2k1fkksUHSjVMxOMNkPBihtocgu1ziAI' .
+                '4CVRFfC7ClM',
+                'lNXoGLA83xvvlAUuHCQEw9OcsUloYygz' .
+                '2Oq4PFRMUh4'
+            ),
+
+            'Test vector 2' => array(
+                'foo',
+                1000,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                '9eWWednk0FFnvE_NXA0uElPqBvSRDxTN' .
+                'NfKjj8j-w74',
+                'H8-n0cCupLeoCYckdGFWlwWc8GAl_XvB' .
+                'okZMgWbhB1U'
+            ),
+
+            'Test vector 3' => array(
+                'foobar',
+                1000,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                'gvP8UROn7oLyZpbguWlDryCE82uANmVH' .
+                'dp4cV1ZKNik',
+                'shiABRhWtR0nKk6uO_efWMf6yk7iZ8On' .
+                'D9PjIdYJxVQ'
+            ),
+
+            'Test vector 4' => array(
+                'foobar',
+                10000,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                'ZYRW2br9KSzOY4KKpoEGHMXzT4PYa_CP' .
+                '5qPdqSkZKXI',
+                'Bq2Yqmr9iwi89x-DV5MUIMUmvEAXgYNh' .
+                'uLR0dt10jv0'
+            ),
+
+            'Test vector 5' => array(
+                'foobar',
+                100000,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                'Zbz3tZJjWJDGwMmer1aY1TNBW3uscUCz' .
+                'iUpIpAF9sXw',
+                'pS5s8iWZBHwzf_hIIm4SMsR9dTHo2yfl' .
+                '2WHpa1Fp6wc'
+            ),
+
+            'Test vector 6' => array(
+                'foobar',
+                1,
+                '12345678901234567890123456789012' .
+                '34567890123456789012345678901234',
+
+                'nrmJyhdG9gAbFrTidwKwg5xeKBFF11wk' .
+                'MkJVbVsWG6A',
+                'cclAcqBRCzX8VMT-DkiNzHiH4emz6GT_' .
+                'iVVpIB84ccw'
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider keyDerivationSpecVectorData
+     */
+    public function testKeyDerivationSpecVectors(
+        $password,
+        $iterations,
+        $salt,
+        $expectedEncryptionSecret,
+        $expectedAuthenticationSecret
+    ) {
+        list($key) = $this->keyDeriver->deriveKeyFromPassword($password, $iterations, $salt);
+
+        $this->assertSame($expectedEncryptionSecret, $this->base64Url->encode($key->encryptionSecret()));
+        $this->assertSame($expectedAuthenticationSecret, $this->base64Url->encode($key->authenticationSecret()));
     }
 }
