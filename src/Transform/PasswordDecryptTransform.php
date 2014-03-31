@@ -12,7 +12,10 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
+use Eloquent\Lockbox\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
+use Eloquent\Lockbox\Exception\UnsupportedTypeException;
+use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Exception;
