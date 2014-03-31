@@ -11,13 +11,13 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Endec\Transform\TransformStream;
-use Eloquent\Endec\Transform\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\CryptographicTransformFactoryInterface;
+use Eloquent\Confetti\TransformStream;
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
 /**
- * Decrypts raw data.
+ * Decrypts raw data using keys.
  */
 class RawDecrypter implements DecrypterInterface
 {
@@ -38,10 +38,10 @@ class RawDecrypter implements DecrypterInterface
     /**
      * Construct a new raw encrypter.
      *
-     * @param CryptographicTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
      */
     public function __construct(
-        CryptographicTransformFactoryInterface $transformFactory = null
+        KeyTransformFactoryInterface $transformFactory = null
     ) {
         if (null === $transformFactory) {
             $transformFactory = DecryptTransformFactory::instance();
@@ -53,7 +53,7 @@ class RawDecrypter implements DecrypterInterface
     /**
      * Get the transform factory.
      *
-     * @return CryptographicTransformFactoryInterface The transform factory.
+     * @return KeyTransformFactoryInterface The transform factory.
      */
     public function transformFactory()
     {
@@ -83,7 +83,7 @@ class RawDecrypter implements DecrypterInterface
      *
      * @param Key\KeyInterface $key The key to decrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {

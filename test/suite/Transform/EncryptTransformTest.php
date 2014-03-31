@@ -12,15 +12,11 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Lockbox\BoundEncrypter;
-use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\RawEncrypter;
-use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Phake;
+use PHPUnit_Framework_TestCase;
 
 class EncryptTransformTest extends PHPUnit_Framework_TestCase
 {
@@ -33,7 +29,6 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->transform = new EncryptTransform($this->key, $this->randomSource);
 
         $this->base64Url = Base64Url::instance();
-        $this->encrypter = new BoundEncrypter($this->key, new RawEncrypter(new EncryptTransformFactory($this->randomSource)));
 
         Phake::when($this->randomSource)->generate(16)->thenReturn('1234567890123456');
     }
@@ -110,17 +105,20 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
 
     protected function assertSameCiphertext($expected, $actual)
     {
-        $expectedVersion = bin2hex(substr($expected, 0, 2));
+        $expectedVersion = bin2hex(substr($expected, 0, 1));
+        $expectedType = bin2hex(substr($expected, 1, 1));
         $expectedIv = bin2hex(substr($expected, 2, 16));
         $expectedData = bin2hex(substr($expected, 18, -28));
         $expectedMac = bin2hex(substr($expected, -28));
 
-        $actualVersion = bin2hex(substr($actual, 0, 2));
+        $actualVersion = bin2hex(substr($actual, 0, 1));
+        $actualType = bin2hex(substr($actual, 1, 1));
         $actualIv = bin2hex(substr($actual, 2, 16));
         $actualData = bin2hex(substr($actual, 18, -28));
         $actualMac = bin2hex(substr($actual, -28));
 
         $this->assertSame($expectedVersion, $actualVersion, 'Version mismatch');
+        $this->assertSame($expectedType, $actualType, 'Type mismatch');
         $this->assertSame($expectedIv, $actualIv, 'IV mismatch');
         $this->assertSame($expectedData, $actualData, 'Data mismatch');
         $this->assertSame($expectedMac, $actualMac, 'MAC mismatch');

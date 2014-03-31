@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * Encrypts and decrypts encoded data.
+ * Encrypts and decrypts encoded data using keys.
  */
 class Cipher extends AbstractCipher
 {

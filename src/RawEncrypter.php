@@ -11,13 +11,13 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Endec\Transform\TransformStream;
-use Eloquent\Endec\Transform\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\CryptographicTransformFactoryInterface;
+use Eloquent\Confetti\TransformStream;
+use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
 /**
- * Encrypts data and produces raw output.
+ * Encrypts data and produces raw output using keys.
  */
 class RawEncrypter implements EncrypterInterface
 {
@@ -38,10 +38,10 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Construct a new raw encrypter.
      *
-     * @param CryptographicTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
      */
     public function __construct(
-        CryptographicTransformFactoryInterface $transformFactory = null
+        KeyTransformFactoryInterface $transformFactory = null
     ) {
         if (null === $transformFactory) {
             $transformFactory = EncryptTransformFactory::instance();
@@ -53,7 +53,7 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Get the transform factory.
      *
-     * @return CryptographicTransformFactoryInterface The transform factory.
+     * @return KeyTransformFactoryInterface The transform factory.
      */
     public function transformFactory()
     {
@@ -82,7 +82,7 @@ class RawEncrypter implements EncrypterInterface
      *
      * @param Key\KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encode stream.
+     * @return TransformStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(Key\KeyInterface $key)
     {

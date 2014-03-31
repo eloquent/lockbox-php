@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
+use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Exception as NativeException;
 use Icecave\Isolator\Isolator;
 
@@ -153,7 +153,7 @@ class KeyReader implements KeyReaderInterface
             try {
                 $encryptionSecret = $this->decoder()
                     ->decode($data->encryptionSecret);
-            } catch (TransformExceptionInterface $e) {
+            } catch (EncodingExceptionInterface $e) {
                 throw new Exception\KeyReadException($path, $e);
             }
         }
@@ -166,7 +166,7 @@ class KeyReader implements KeyReaderInterface
             try {
                 $authenticationSecret = $this->decoder()
                     ->decode($data->authenticationSecret);
-            } catch (TransformExceptionInterface $e) {
+            } catch (EncodingExceptionInterface $e) {
                 throw new Exception\KeyReadException($path, $e);
             }
         }

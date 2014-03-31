@@ -20,24 +20,21 @@ class BoundCipherTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
-        $this->encrypter = new Encrypter;
-        $this->decrypter = new Decrypter;
-        $this->cipher = new BoundCipher($this->key, $this->encrypter, $this->decrypter);
+        $this->innerCipher = new Cipher;
+        $this->cipher = new BoundCipher($this->key, $this->innerCipher);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->key, $this->cipher->key());
-        $this->assertSame($this->encrypter, $this->cipher->encrypter());
-        $this->assertSame($this->decrypter, $this->cipher->decrypter());
+        $this->assertSame($this->innerCipher, $this->cipher->cipher());
     }
 
     public function testConstructorDefaults()
     {
         $this->cipher = new BoundCipher($this->key);
 
-        $this->assertEquals($this->encrypter, $this->cipher->encrypter());
-        $this->assertEquals($this->decrypter, $this->cipher->decrypter());
+        $this->assertSame(Cipher::instance(), $this->cipher->cipher());
     }
 
     public function encryptionData()

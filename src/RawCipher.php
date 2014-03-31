@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 /**
- * Encrypts and decrypts unencoded data.
+ * Encrypts and decrypts raw data using keys.
  */
 class RawCipher extends AbstractCipher
 {

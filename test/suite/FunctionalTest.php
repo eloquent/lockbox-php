@@ -12,9 +12,14 @@
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\Password\PasswordDecrypter;
+use Eloquent\Lockbox\Password\PasswordEncrypter;
+use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\RawEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 
 class FunctionalTest extends PHPUnit_Framework_TestCase
 {
@@ -23,8 +28,17 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+
         $this->encrypter = new Encrypter(new RawEncrypter(new EncryptTransformFactory($this->randomSource)));
         $this->decrypter = new Decrypter;
+
+        $this->passwordEncrypter = new PasswordEncrypter(
+            new RawPasswordEncrypter(
+                new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            )
+        );
+        $this->passwordDecrypter = new PasswordDecrypter;
+
         $this->keyGenerator = new KeyGenerator;
     }
 
@@ -137,5 +151,100 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $decrypted = $this->decrypter->decrypt($key, $encrypted);
 
         $this->assertSame('foobar', $decrypted);
+    }
+
+    public function passwordSpecVectorData()
+    {
+        return array(
+            'Test vector 1' => array(
+                '',
+                'password',
+                1000,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbKO-iACmwcdh00okIG4I0km7UcGenLttXSOhf-wascYwpYjoQQcMwCK-qo2NhdE8Q',
+            ),
+
+            'Test vector 2' => array(
+                '1234',
+                'password',
+                1000,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTYe6N-KqDbnBK8hqAyTEA2G3_bLsGUbsQ0pfSkbpLX4lc5RHdolslukKcErjsxh1HI',
+            ),
+
+            'Test vector 3' => array(
+                '1234567890123456',
+                'password',
+                1000,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTb-18_f5tw1j9guUZtvGVYPUTdVy72UWvs-tjgpu5ZxsDOZBCv2YrpgIAd6XX-hqEAga0iM6DFwhEnDRq-23O1A',
+            ),
+
+            'Test vector 4' => array(
+                '1234567890123456',
+                'foobar',
+                1000,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTa94Xlqf2aIeVQprx_9arAgo4zah8CILCNrLWvNH9FT1bcL_g_eKEXVJe_g6Kej2swgoB12ILDdSmme873foyY2',
+            ),
+
+            'Test vector 5' => array(
+                '1234567890123456',
+                'password',
+                1,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAAABMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTb9vjKl34mezWUWSt8xkFJolZmUjryWvu3UUzZBNmbeVnL8OLm4DXcibx9vN6uymKOeUqBgoVDHN-hSM2wLrHcF',
+            ),
+
+            'Test vector 6' => array(
+                '1234567890123456',
+                'password',
+                100000,
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                '1234567890123456',
+
+                'AQIAAYagMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZXSSXsZAg0Ah7ins7upI60Dca-caOFRYQ0d0J4EyCY1FIUCKDyWUyUcD-zC3GyLj6z75S9jbzhnOuquby8sFTW',
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider passwordSpecVectorData
+     */
+    public function testPasswordSpecVectorsEncryption($data, $password, $iterations, $salt, $iv, $encrypted)
+    {
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
+        Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
+        $actual = $this->passwordEncrypter->encrypt($password, $iterations, $data);
+
+        $this->assertSame($encrypted, $actual);
+    }
+
+    /**
+     * @dataProvider passwordSpecVectorData
+     */
+    public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
+    {
+        $this->assertSame(array($data, $iterations), $this->passwordDecrypter->decrypt($password, $encrypted));
+    }
+
+    public function testEncryptDecryptWithPassword()
+    {
+        Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
+        Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
+        $encrypted = $this->passwordEncrypter->encrypt('password', 10, 'foobar');
+        $decrypted = $this->passwordDecrypter->decrypt('password', $encrypted);
+
+        $this->assertSame(array('foobar', 10), $decrypted);
     }
 }

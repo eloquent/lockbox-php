@@ -11,15 +11,13 @@
 
 namespace Eloquent\Lockbox\Exception;
 
-use Eloquent\Endec\Transform\Exception\TransformExceptionInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Exception;
 
 /**
  * Decryption failed.
  */
-final class DecryptionFailedException extends Exception implements
-    TransformExceptionInterface
+final class DecryptionFailedException extends Exception
 {
     /**
      * Construct a new decryption failed exception.

@@ -81,10 +81,10 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
     public function testDeriveKeyFromPasswordDefaults()
     {
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
-        list($key, $salt) = $this->deriver->deriveKeyFromPassword('foobar', 1000);
+        list($key, $salt) = $this->deriver->deriveKeyFromPassword('foobar', 10);
 
-        $this->assertSame('gvP8UROn7oLyZpbguWlDryCE82uANmVHdp4cV1ZKNik', $this->base64Url->encode($key->encryptionSecret()));
-        $this->assertSame('shiABRhWtR0nKk6uO_efWMf6yk7iZ8OnD9PjIdYJxVQ', $this->base64Url->encode($key->authenticationSecret()));
+        $this->assertSame('pcVNTpc-PE-kn5dDsuK6UDMQXXJmAQpOygkGavbvTXE', $this->base64Url->encode($key->encryptionSecret()));
+        $this->assertSame('1HoCzL6MzfPLCUXIkCdNrQT4v7vpjltxDGbT2qTLqZk', $this->base64Url->encode($key->authenticationSecret()));
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -92,19 +92,31 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
     public function testDeriveKeyFromPasswordFailureNonStringPassword()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidPasswordException');
-        $this->deriver->deriveKeyFromPassword(null, 1000);
+        $this->deriver->deriveKeyFromPassword(null, 10);
+    }
+
+    public function testDeriveKeyFromPasswordFailureNonIntegerIterations()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidIterationsException');
+        $this->deriver->deriveKeyFromPassword('foobar', null);
+    }
+
+    public function testDeriveKeyFromPasswordFailureIterationsLessThanOne()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidIterationsException');
+        $this->deriver->deriveKeyFromPassword('foobar', 0);
     }
 
     public function testDeriveKeyFromPasswordFailureNonStringSalt()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSaltException');
-        $this->deriver->deriveKeyFromPassword('foobar', 1000, 111);
+        $this->deriver->deriveKeyFromPassword('foobar', 10, 111);
     }
 
     public function testDeriveKeyFromPasswordFailureSaltSize()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSaltSizeException');
-        $this->deriver->deriveKeyFromPassword('foobar', 1000, 'foobar');
+        $this->deriver->deriveKeyFromPassword('foobar', 10, 'foobar');
     }
 
     public function testInstance()

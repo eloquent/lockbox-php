@@ -11,19 +11,19 @@
 
 namespace Eloquent\Lockbox\Transform\Factory;
 
-use Eloquent\Endec\Transform\DataTransformInterface;
+use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Transform\DecryptTransform;
 
 /**
- * Creates decrypt transforms.
+ * Creates decrypt transforms that use keys.
  */
-class DecryptTransformFactory implements CryptographicTransformFactoryInterface
+class DecryptTransformFactory implements KeyTransformFactoryInterface
 {
     /**
      * Get the static instance of this factory.
      *
-     * @return EncrypterInterface The static factory.
+     * @return KeyTransformFactoryInterface The static factory.
      */
     public static function instance()
     {
@@ -39,7 +39,7 @@ class DecryptTransformFactory implements CryptographicTransformFactoryInterface
      *
      * @param KeyInterface $key The key to use.
      *
-     * @return DataTransformInterface The newly created transform.
+     * @return TransformInterface The newly created transform.
      */
     public function createTransform(KeyInterface $key)
     {

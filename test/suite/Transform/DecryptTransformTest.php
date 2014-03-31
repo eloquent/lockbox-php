@@ -16,8 +16,8 @@ use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\RawEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
-use PHPUnit_Framework_TestCase;
 use Phake;
+use PHPUnit_Framework_TestCase;
 
 class DecryptTransformTest extends PHPUnit_Framework_TestCase
 {
@@ -44,13 +44,13 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
     public function transformData()
     {
         return array(
-            'Partial block'              => array('foobar'),
-            'One block'                  => array('foobarbazquxdoom'),
-            'One block plus partial'     => array('foobarbazquxdoomfoobar'),
-            'Two blocks'                 => array('foobarbazquxdoomfoobarbazquxdoom'),
-            'Two blocks plus partial'    => array('foobarbazquxdoomfoobarbazquxdoomfoobar'),
-            'Three blocks'               => array('foobarbazquxdoomfoobarbazquxdoomfoobarbazquxdoom'),
-            'Three blocks plus partial'  => array('foobarbazquxdoomfoobarbazquxdoomfoobarbazquxdoomfoobar'),
+            'Partial block'             => array('foobar'),
+            'One block'                 => array('foobarbazquxdoom'),
+            'One block plus partial'    => array('foobarbazquxdoomfoobar'),
+            'Two blocks'                => array('foobarbazquxdoomfoobarbazquxdoom'),
+            'Two blocks plus partial'   => array('foobarbazquxdoomfoobarbazquxdoomfoobar'),
+            'Three blocks'              => array('foobarbazquxdoomfoobarbazquxdoomfoobarbazquxdoom'),
+            'Three blocks plus partial' => array('foobarbazquxdoomfoobarbazquxdoomfoobarbazquxdoomfoobar'),
         );
     }
 
@@ -156,12 +156,12 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
             ),
             'Bad AES data' => array(
                 $this->version . $this->type . $this->iv . '1234567890123457' .
-                $this->authenticationCode($this->version . $this->type . '1234567890123456' . '1234567890123457'),
+                $this->authenticationCode($this->version . $this->type . $this->iv . '1234567890123457'),
             ),
             'Bad padding' => array(
                 $this->version . $this->type . $this->iv .
                 $this->encryptAes('1234567890123456') .
-                $this->authenticationCode($this->version . $this->type . '1234567890123456' . $this->encryptAes('1234567890123456')),
+                $this->authenticationCode($this->version . $this->type . $this->iv . $this->encryptAes('1234567890123456')),
             ),
         );
     }

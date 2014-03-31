@@ -11,20 +11,20 @@
 
 namespace Eloquent\Lockbox\Transform\Factory;
 
-use Eloquent\Endec\Transform\DataTransformInterface;
+use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
- * The interface implemented by cryptographic transform factories.
+ * The interface implemented by cryptographic transform factories that use keys.
  */
-interface CryptographicTransformFactoryInterface
+interface KeyTransformFactoryInterface
 {
     /**
      * Create a new transform for the supplied key.
      *
      * @param KeyInterface $key The key to use.
      *
-     * @return DataTransformInterface The newly created transform.
+     * @return TransformInterface The newly created transform.
      */
     public function createTransform(KeyInterface $key);
 }
