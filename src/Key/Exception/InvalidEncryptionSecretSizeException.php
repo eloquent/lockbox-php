@@ -43,7 +43,7 @@ final class InvalidEncryptionSecretSizeException extends Exception implements
     /**
      * Get the invalid secret size.
      *
-     * @return string The size.
+     * @return integer The size.
      */
     public function size()
     {

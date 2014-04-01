@@ -36,7 +36,7 @@ class RawDecrypter implements DecrypterInterface
     }
 
     /**
-     * Construct a new raw encrypter.
+     * Construct a new raw decrypter.
      *
      * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
      */

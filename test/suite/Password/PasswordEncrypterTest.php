@@ -11,8 +11,9 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
 
 class PasswordEncrypterTest extends PHPUnit_Framework_TestCase
@@ -21,23 +22,23 @@ class PasswordEncrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->rawEncrypter = new RawPasswordEncrypter;
-        $this->encoder = new Base64Url;
-        $this->encrypter = new PasswordEncrypter($this->rawEncrypter, $this->encoder);
+        $this->transformFactory = new PasswordEncryptTransformFactory;
+        $this->encodeTransform = new Base64UrlEncodeTransform;
+        $this->encrypter = new PasswordEncrypter($this->transformFactory, $this->encodeTransform);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->rawEncrypter, $this->encrypter->rawEncrypter());
-        $this->assertSame($this->encoder, $this->encrypter->encoder());
+        $this->assertSame($this->transformFactory, $this->encrypter->transformFactory());
+        $this->assertSame($this->encodeTransform, $this->encrypter->encodeTransform());
     }
 
     public function testConstructorDefaults()
     {
         $this->encrypter = new PasswordEncrypter;
 
-        $this->assertSame(RawPasswordEncrypter::instance(), $this->encrypter->rawEncrypter());
-        $this->assertSame(Base64Url::instance(), $this->encrypter->encoder());
+        $this->assertSame(PasswordEncryptTransformFactory::instance(), $this->encrypter->transformFactory());
+        $this->assertSame(Base64UrlEncodeTransform::instance(), $this->encrypter->encodeTransform());
     }
 
     public function testInstance()

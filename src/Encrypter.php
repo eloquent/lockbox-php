@@ -11,9 +11,13 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\CompoundTransform;
+use Eloquent\Confetti\TransformInterface;
+use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Endec\EncoderInterface;
+use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
+use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
 /**
  * Encrypts data and produces encoded output using keys.
@@ -37,42 +41,42 @@ class Encrypter implements EncrypterInterface
     /**
      * Construct a new encrypter.
      *
-     * @param EncrypterInterface|null $rawEncrypter The raw encrypter to use.
-     * @param EncoderInterface|null   $encoder      The encoder to use.
+     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param TransformInterface|null           $encodeTransform  The encode transform to use.
      */
     public function __construct(
-        EncrypterInterface $rawEncrypter = null,
-        EncoderInterface $encoder = null
+        KeyTransformFactoryInterface $transformFactory = null,
+        TransformInterface $encodeTransform = null
     ) {
-        if (null === $rawEncrypter) {
-            $rawEncrypter = RawEncrypter::instance();
+        if (null === $transformFactory) {
+            $transformFactory = EncryptTransformFactory::instance();
         }
-        if (null === $encoder) {
-            $encoder = Base64Url::instance();
+        if (null === $encodeTransform) {
+            $encodeTransform = Base64UrlEncodeTransform::instance();
         }
 
-        $this->rawEncrypter = $rawEncrypter;
-        $this->encoder = $encoder;
+        $this->transformFactory = $transformFactory;
+        $this->encodeTransform = $encodeTransform;
     }
 
     /**
-     * Get the raw encrypter.
+     * Get the transform factory.
      *
-     * @return EncrypterInterface The raw encrypter.
+     * @return KeyTransformFactoryInterface The transform factory.
      */
-    public function rawEncrypter()
+    public function transformFactory()
     {
-        return $this->rawEncrypter;
+        return $this->transformFactory;
     }
 
     /**
-     * Get the encoder.
+     * Get the encode transform.
      *
-     * @return EncoderInterface The encoder.
+     * @return TransformInterface The encode transform.
      */
-    public function encoder()
+    public function encodeTransform()
     {
-        return $this->encoder;
+        return $this->encodeTransform;
     }
 
     /**
@@ -85,8 +89,15 @@ class Encrypter implements EncrypterInterface
      */
     public function encrypt(Key\KeyInterface $key, $data)
     {
-        return $this->encoder()
-            ->encode($this->rawEncrypter()->encrypt($key, $data));
+        list($data) = $this->transformFactory()
+            ->createTransform($key)
+            ->transform($data, $context, true);
+
+        $context = null;
+        list($data) = $this->encodeTransform()
+            ->transform($data, $context, true);
+
+        return $data;
     }
 
     /**
@@ -98,10 +109,17 @@ class Encrypter implements EncrypterInterface
      */
     public function createEncryptStream(Key\KeyInterface $key)
     {
-        return $this->rawEncrypter()->createEncryptStream($key);
+        return new TransformStream(
+            new CompoundTransform(
+                array(
+                    $this->transformFactory()->createTransform($key),
+                    $this->encodeTransform(),
+                )
+            )
+        );
     }
 
     private static $instance;
-    private $rawEncrypter;
-    private $encoder;
+    private $transformFactory;
+    private $encodeTransform;
 }

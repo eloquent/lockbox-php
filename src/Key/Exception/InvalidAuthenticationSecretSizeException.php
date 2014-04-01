@@ -43,7 +43,7 @@ final class InvalidAuthenticationSecretSizeException extends Exception implement
     /**
      * Get the invalid secret size.
      *
-     * @return string The size.
+     * @return integer The size.
      */
     public function size()
     {

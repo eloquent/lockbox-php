@@ -17,8 +17,6 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Password\RawPasswordEncrypter;
-use Eloquent\Lockbox\RawEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 
@@ -30,13 +28,11 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
 
-        $this->encrypter = new Encrypter(new RawEncrypter(new EncryptTransformFactory($this->randomSource)));
+        $this->encrypter = new Encrypter(new EncryptTransformFactory($this->randomSource));
         $this->decrypter = new Decrypter;
 
         $this->passwordEncrypter = new PasswordEncrypter(
-            new RawPasswordEncrypter(
-                new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
-            )
+            new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
         );
         $this->passwordDecrypter = new PasswordDecrypter;
 
@@ -163,12 +159,67 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
+    public function testSpecVectorsEncryptionStreaming($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    {
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
+        $stream = $this->encrypter->createEncryptStream(new Key($encryptionSecret, $authenticationSecret));
+        $actual = '';
+        $stream->on(
+            'data',
+            function ($data, $stream) use (&$actual) {
+                $actual .= $data;
+            }
+        );
+        $stream->on(
+            'error',
+            function ($error, $stream) {
+                throw $error;
+            }
+        );
+        foreach (str_split($data) as $byte) {
+            $stream->write($byte);
+        }
+        $stream->end();
+
+        $this->assertSame($encrypted, $actual);
+    }
+
+    /**
+     * @dataProvider specVectorData
+     */
     public function testSpecVectorsDecryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
         $this->assertSame(
             $data,
             $this->decrypter->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted)
         );
+    }
+
+    /**
+     * @dataProvider specVectorData
+     */
+    public function testSpecVectorsDecryptionStreaming($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    {
+        $stream = $this->decrypter->createDecryptStream(new Key($encryptionSecret, $authenticationSecret));
+        $actual = '';
+        $stream->on(
+            'data',
+            function ($data, $stream) use (&$actual) {
+                $actual .= $data;
+            }
+        );
+        $stream->on(
+            'error',
+            function ($error, $stream) {
+                throw $error;
+            }
+        );
+        foreach (str_split($encrypted) as $byte) {
+            $stream->write($byte);
+        }
+        $stream->end();
+
+        $this->assertSame($data, $actual);
     }
 
     public function testEncryptDecryptWithGeneratedKey()
@@ -301,9 +352,73 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider passwordSpecVectorData
      */
+    public function testPasswordSpecVectorsEncryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
+    {
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
+        Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
+        $stream = $this->passwordEncrypter->createEncryptStream($password, $iterations);
+        $actual = '';
+        $stream->on(
+            'data',
+            function ($data, $stream) use (&$actual) {
+                $actual .= $data;
+            }
+        );
+        $stream->on(
+            'error',
+            function ($error, $stream) {
+                throw $error;
+            }
+        );
+        foreach (str_split($data) as $byte) {
+            $stream->write($byte);
+        }
+        $stream->end();
+
+        $this->assertSame($encrypted, $actual);
+    }
+
+    /**
+     * @dataProvider passwordSpecVectorData
+     */
     public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
         $this->assertSame(array($data, $iterations), $this->passwordDecrypter->decrypt($password, $encrypted));
+    }
+
+    /**
+     * @dataProvider passwordSpecVectorData
+     */
+    public function testPasswordSpecVectorsDecryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
+    {
+        $stream = $this->passwordDecrypter->createDecryptStream($password);
+        $actual = '';
+        $stream->on(
+            'data',
+            function ($data, $stream) use (&$actual) {
+                $actual .= $data;
+            }
+        );
+        $actualIterations = null;
+        $stream->on(
+            'success',
+            function ($stream) use (&$actualIterations) {
+                $transforms = $stream->transform()->transforms();
+                $actualIterations = $transforms[1]->iterations();
+            }
+        );
+        $stream->on(
+            'error',
+            function ($error, $stream) {
+                throw $error;
+            }
+        );
+        foreach (str_split($encrypted) as $byte) {
+            $stream->write($byte);
+        }
+        $stream->end();
+
+        $this->assertSame(array($data, $iterations), array($actual, $actualIterations));
     }
 
     public function testEncryptDecryptWithPassword()

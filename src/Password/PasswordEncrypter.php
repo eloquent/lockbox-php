@@ -11,9 +11,13 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Confetti\CompoundTransform;
+use Eloquent\Confetti\TransformInterface;
+use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Endec\EncoderInterface;
+use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
 
 /**
  * Encrypts data and produces encoded output using passwords.
@@ -35,44 +39,44 @@ class PasswordEncrypter implements PasswordEncrypterInterface
     }
 
     /**
-     * Construct a new password encrypter.
+     * Construct a new encrypter.
      *
-     * @param PasswordEncrypterInterface|null $rawEncrypter The raw encrypter to use.
-     * @param EncoderInterface|null           $encoder      The encoder to use.
+     * @param PasswordEncryptTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param TransformInterface|null                       $encodeTransform  The encode transform to use.
      */
     public function __construct(
-        PasswordEncrypterInterface $rawEncrypter = null,
-        EncoderInterface $encoder = null
+        PasswordEncryptTransformFactoryInterface $transformFactory = null,
+        TransformInterface $encodeTransform = null
     ) {
-        if (null === $rawEncrypter) {
-            $rawEncrypter = RawPasswordEncrypter::instance();
+        if (null === $transformFactory) {
+            $transformFactory = PasswordEncryptTransformFactory::instance();
         }
-        if (null === $encoder) {
-            $encoder = Base64Url::instance();
+        if (null === $encodeTransform) {
+            $encodeTransform = Base64UrlEncodeTransform::instance();
         }
 
-        $this->rawEncrypter = $rawEncrypter;
-        $this->encoder = $encoder;
+        $this->transformFactory = $transformFactory;
+        $this->encodeTransform = $encodeTransform;
     }
 
     /**
-     * Get the raw encrypter.
+     * Get the transform factory.
      *
-     * @return PasswordEncrypterInterface The raw encrypter.
+     * @return PasswordEncryptTransformFactoryInterface The transform factory.
      */
-    public function rawEncrypter()
+    public function transformFactory()
     {
-        return $this->rawEncrypter;
+        return $this->transformFactory;
     }
 
     /**
-     * Get the encoder.
+     * Get the encode transform.
      *
-     * @return EncoderInterface The encoder.
+     * @return TransformInterface The encode transform.
      */
-    public function encoder()
+    public function encodeTransform()
     {
-        return $this->encoder;
+        return $this->encodeTransform;
     }
 
     /**
@@ -86,9 +90,15 @@ class PasswordEncrypter implements PasswordEncrypterInterface
      */
     public function encrypt($password, $iterations, $data)
     {
-        return $this->encoder()->encode(
-            $this->rawEncrypter()->encrypt($password, $iterations, $data)
-        );
+        list($data) = $this->transformFactory()
+            ->createTransform($password, $iterations)
+            ->transform($data, $context, true);
+
+        $context = null;
+        list($data) = $this->encodeTransform()
+            ->transform($data, $context, true);
+
+        return $data;
     }
 
     /**
@@ -101,11 +111,18 @@ class PasswordEncrypter implements PasswordEncrypterInterface
      */
     public function createEncryptStream($password, $iterations)
     {
-        return $this->rawEncrypter()
-            ->createEncryptStream($password, $iterations);
+        return new TransformStream(
+            new CompoundTransform(
+                array(
+                    $this->transformFactory()
+                        ->createTransform($password, $iterations),
+                    $this->encodeTransform(),
+                )
+            )
+        );
     }
 
     private static $instance;
-    private $rawEncrypter;
-    private $encoder;
+    private $transformFactory;
+    private $encodeTransform;
 }

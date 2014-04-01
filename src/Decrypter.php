@@ -11,10 +11,14 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Confetti\CompoundTransform;
+use Eloquent\Confetti\TransformInterface;
+use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Endec\DecoderInterface;
+use Eloquent\Endec\Base64\Base64UrlDecodeTransform;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
+use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
+use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
 /**
  * Decrypts encoded data using keys.
@@ -38,42 +42,42 @@ class Decrypter implements DecrypterInterface
     /**
      * Construct a new decrypter.
      *
-     * @param DecrypterInterface|null $rawDecrypter The raw decrypter to use.
-     * @param DecoderInterface|null   $decoder      The decoder to use.
+     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param TransformInterface|null           $decodeTransform  The decode transform to use.
      */
     public function __construct(
-        DecrypterInterface $rawDecrypter = null,
-        DecoderInterface $decoder = null
+        KeyTransformFactoryInterface $transformFactory = null,
+        TransformInterface $decodeTransform = null
     ) {
-        if (null === $rawDecrypter) {
-            $rawDecrypter = RawDecrypter::instance();
+        if (null === $transformFactory) {
+            $transformFactory = DecryptTransformFactory::instance();
         }
-        if (null === $decoder) {
-            $decoder = Base64Url::instance();
+        if (null === $decodeTransform) {
+            $decodeTransform = Base64UrlDecodeTransform::instance();
         }
 
-        $this->rawDecrypter = $rawDecrypter;
-        $this->decoder = $decoder;
+        $this->transformFactory = $transformFactory;
+        $this->decodeTransform = $decodeTransform;
     }
 
     /**
-     * Get the raw decrypter.
+     * Get the transform factory.
      *
-     * @return DecrypterInterface The raw decrypter.
+     * @return KeyTransformFactoryInterface The transform factory.
      */
-    public function rawDecrypter()
+    public function transformFactory()
     {
-        return $this->rawDecrypter;
+        return $this->transformFactory;
     }
 
     /**
-     * Get the decoder.
+     * Get the decode transform.
      *
-     * @return DecoderInterface The decoder.
+     * @return TransformInterface The decode transform.
      */
-    public function decoder()
+    public function decodeTransform()
     {
-        return $this->decoder;
+        return $this->decodeTransform;
     }
 
     /**
@@ -88,12 +92,18 @@ class Decrypter implements DecrypterInterface
     public function decrypt(Key\KeyInterface $key, $data)
     {
         try {
-            $data = $this->decoder()->decode($data);
+            list($data) = $this->decodeTransform()
+                ->transform($data, $context, true);
         } catch (EncodingExceptionInterface $e) {
             throw new Exception\DecryptionFailedException($key, $e);
         }
 
-        return $this->rawDecrypter()->decrypt($key, $data);
+        $context = null;
+        list($data) = $this->transformFactory()
+            ->createTransform($key)
+            ->transform($data, $context, true);
+
+        return $data;
     }
 
     /**
@@ -105,10 +115,17 @@ class Decrypter implements DecrypterInterface
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {
-        return $this->rawDecrypter()->createDecryptStream($key);
+        return new TransformStream(
+            new CompoundTransform(
+                array(
+                    $this->decodeTransform(),
+                    $this->transformFactory()->createTransform($key),
+                )
+            )
+        );
     }
 
     private static $instance;
-    private $rawDecrypter;
-    private $decoder;
+    private $transformFactory;
+    private $decodeTransform;
 }
