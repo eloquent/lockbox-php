@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
@@ -121,7 +122,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureUnsupportedVersion()
     {
-        $data = ord(111) . str_pad('', 100, '1234567890');
+        $data = ord(111) . str_pad('', 200, '1234567890');
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
@@ -143,7 +144,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptUnsupportedType()
     {
-        $data = $this->version . ord(111) . str_pad('', 100, '1234567890');
+        $data = $this->version . ord(111) . str_pad('', 200, '1234567890');
 
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
@@ -211,14 +212,32 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadMac()
     {
+        $decryptTransformFactory = Phake::partialMock(
+            'Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface'
+        );
+        $decryptTransform = Phake::partialMock(
+            'Eloquent\Lockbox\Transform\PasswordDecryptTransform',
+            $this->password,
+            $this->keyDeriver
+        );
+        $this->decrypter = new RawPasswordDecrypter($decryptTransformFactory);
+        $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
+        Phake::when($decryptTransformFactory)->createTransform($this->password)->thenReturn($decryptTransform);
         $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
             'foobar1234567890123456789012345678';
 
+        $e = null;
+        try {
+            $this->cipher->decrypt($this->password, $data);
+        } catch (PasswordDecryptionFailedException $e) {}
+        Phake::verify($decryptTransform, Phake::never())->transform(Phake::anyParameters());
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
             "Password decryption failed."
         );
-        $this->cipher->decrypt($this->password, $data);
+        if (null !== $e) {
+            throw $e;
+        }
     }
 
     public function testDecryptFailureBadAesData()

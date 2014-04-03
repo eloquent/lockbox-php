@@ -71,6 +71,20 @@ class RawDecrypter implements DecrypterInterface
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
+        $size = strlen($data);
+        $hash = hash_hmac(
+            'sha' . $key->authenticationSecretBits(),
+            substr($data, 0, $size - $key->authenticationSecretBytes()),
+            $key->authenticationSecret(),
+            true
+        );
+
+        if (
+            substr($data, $size - $key->authenticationSecretBytes()) !== $hash
+        ) {
+            throw new Exception\DecryptionFailedException($key);
+        }
+
         list($data) = $this->transformFactory()
             ->createTransform($key)
             ->transform($data, $context, true);

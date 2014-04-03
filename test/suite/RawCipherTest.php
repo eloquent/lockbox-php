@@ -12,7 +12,9 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 /**
  * @covers \Eloquent\Lockbox\RawCipher
@@ -190,13 +192,25 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadMac()
     {
+        $decryptTransformFactory = Phake::partialMock('Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface');
+        $decryptTransform = Phake::partialMock('Eloquent\Lockbox\Transform\DecryptTransform', $this->key);
+        $this->decrypter = new RawDecrypter($decryptTransformFactory);
+        $this->cipher = new Cipher($this->encrypter, $this->decrypter);
+        Phake::when($decryptTransformFactory)->createTransform($this->key)->thenReturn($decryptTransform);
         $data = $this->version . $this->type . $this->iv . 'foobar1234567890123456789012345678';
 
+        $e = null;
+        try {
+            $this->cipher->decrypt($this->key, $data);
+        } catch (DecryptionFailedException $e) {}
+        Phake::verify($decryptTransform, Phake::never())->transform(Phake::anyParameters());
         $this->setExpectedException(
             'Eloquent\Lockbox\Exception\DecryptionFailedException',
             "Decryption failed for key 'key'."
         );
-        $this->cipher->decrypt($this->key, $data);
+        if (null !== $e) {
+            throw $e;
+        }
     }
 
     public function testDecryptFailureBadAesData()
