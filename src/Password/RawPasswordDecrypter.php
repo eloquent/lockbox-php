@@ -166,10 +166,12 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
             substr($data, 70, 16)
         );
 
-        try {
-            $data = $this->unpadder()->unpad($data);
-        } catch (InvalidPaddingException $e) {
-            throw new PasswordDecryptionFailedException($password, $e);
+        list($isSuccessful, $data) = $this->unpadder()->unpad($data);
+        if (!$isSuccessful) {
+            throw new PasswordDecryptionFailedException(
+                $password,
+                new InvalidPaddingException
+            );
         }
 
         return array($data, $iterations);

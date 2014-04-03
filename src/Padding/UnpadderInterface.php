@@ -21,8 +21,7 @@ interface UnpadderInterface
      *
      * @param string $data The padded data.
      *
-     * @return string                            The unpadded data.
-     * @throws Exception\InvalidPaddingException If the padding is invalid.
+     * @return tuple<boolean,string> A 2-tuple containing a boolean true if successful, and the data, which will be unpadded if successful.
      */
     public function unpad($data);
 }

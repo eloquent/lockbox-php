@@ -84,7 +84,7 @@ class PkcsPaddingTest extends PHPUnit_Framework_TestCase
      */
     public function testUnpad($data, $blockSize, $padded)
     {
-        $this->assertSame($data, $this->padding->unpad(pack('H*', $padded)));
+        $this->assertSame(array(true, $data), $this->padding->unpad(pack('H*', $padded)));
     }
 
     public function unpadFailureData()
@@ -100,10 +100,9 @@ class PkcsPaddingTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider unpadFailureData
      */
-    public function testUnpadFailure($data)
+    public function testUnpadFailure($padded)
     {
-        $this->setExpectedException('Eloquent\Lockbox\Padding\Exception\InvalidPaddingException');
-        $this->padding->unpad(pack('H*', $data));
+        $this->assertSame(array(false, $padded), $this->padding->unpad(pack('H*', $padded)));
     }
 
     public function testInstance()

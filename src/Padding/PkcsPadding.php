@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Padding;
 
+use Eloquent\Lockbox\Comparator\SlowStringComparator;
+
 /**
  * PCKS #5 / PKCS #7 padding scheme.
  *
@@ -81,19 +83,59 @@ class PkcsPadding implements PaddingSchemeInterface
      *
      * @param string $data The padded data.
      *
-     * @return string                            The unpadded data.
-     * @throws Exception\InvalidPaddingException If the padding is invalid.
+     * @return tuple<boolean,string> A 2-tuple containing a boolean true if successful, and the data, which will be unpadded if successful.
      */
     public function unpad($data)
     {
-        $padSize = ord(substr($data, -1));
-        $padding = substr($data, -$padSize);
+        $dataSize = strlen($data);
+        $isEmpty = 0 === $dataSize;
+        if ($isEmpty) {
+            $data = "\0";
+        }
+        $padSize = ord(substr($data, $dataSize - 1, 1));
+        $padIndex = $dataSize - $padSize;
+        $padding = $this->slowSubString(
+            $data,
+            $padIndex,
+            $padSize,
+            $this->blockSize()
+        );
 
-        if (str_repeat(chr($padSize), $padSize) !== $padding) {
-            throw new Exception\InvalidPaddingException;
+        var_dump($padSize, $padIndex, $padding, $padSize, $dataSize);
+
+        $isSuccessful = SlowStringComparator::isEqual(
+            str_repeat(chr($padSize), $padSize),
+            $padding
+        ) && $padding;
+
+        if ($isSuccessful) {
+            $finalSize = $padIndex;
+        } else {
+            $finalSize = $dataSize;
         }
 
-        return substr($data, 0, -$padSize);
+        return array(
+            $isSuccessful,
+            $this->slowSubString($data, 0, $finalSize, $this->blockSize())
+        );
+    }
+
+    private function slowSubString($data, $offset, $size, $maxSize)
+    {
+        $result = '';
+        $discard = '';
+
+        for ($i = 0; $i < $maxSize; $i ++) {
+            if ($i >= $offset && $i < $size) {
+                $result .= $data[$i];
+            } else {
+                $discard .= $data[$i];
+            }
+        }
+
+        var_dump($result, $discard);
+
+        return $result;
     }
 
     private static $instance;
