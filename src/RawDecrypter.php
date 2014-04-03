@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
@@ -80,7 +81,10 @@ class RawDecrypter implements DecrypterInterface
         );
 
         if (
-            substr($data, $size - $key->authenticationSecretBytes()) !== $hash
+            !SlowStringComparator::isEqual(
+                substr($data, $size - $key->authenticationSecretBytes()),
+                $hash
+            )
         ) {
             throw new Exception\DecryptionFailedException($key);
         }

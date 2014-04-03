@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
+use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Exception\UnsupportedTypeException;
 use Eloquent\Lockbox\Exception\UnsupportedVersionException;
@@ -233,7 +234,12 @@ class DecryptTransform extends AbstractTransform
 
         if ($isEnd) {
             $context->isHashFinalized = true;
-            if (hash_final($context->hashContext, true) !== $hash) {
+            if (
+                !SlowStringComparator::isEqual(
+                    hash_final($context->hashContext, true),
+                    $hash
+                )
+            ) {
                 $this->finalizeContext($context);
 
                 throw new DecryptionFailedException($this->key());
