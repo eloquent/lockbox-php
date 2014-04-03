@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use PHPUnit_Framework_TestCase;
 
@@ -24,13 +25,15 @@ class RawPasswordDecrypterTest extends PHPUnit_Framework_TestCase
 
         $this->transformFactory = new PasswordDecryptTransformFactory;
         $this->keyDeriver = new KeyDeriver;
-        $this->decrypter = new RawPasswordDecrypter($this->transformFactory, $this->keyDeriver);
+        $this->unpadder = new PkcsPadding;
+        $this->decrypter = new RawPasswordDecrypter($this->transformFactory, $this->keyDeriver, $this->unpadder);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->transformFactory, $this->decrypter->transformFactory());
         $this->assertSame($this->keyDeriver, $this->decrypter->keyDeriver());
+        $this->assertSame($this->unpadder, $this->decrypter->unpadder());
     }
 
     public function testConstructorDefaults()
@@ -39,6 +42,7 @@ class RawPasswordDecrypterTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(PasswordDecryptTransformFactory::instance(), $this->decrypter->transformFactory());
         $this->assertSame(KeyDeriver::instance(), $this->decrypter->keyDeriver());
+        $this->assertSame(PkcsPadding::instance(), $this->decrypter->unpadder());
     }
 
     public function testInstance()

@@ -14,6 +14,8 @@ namespace Eloquent\Lockbox\Transform;
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Padding\PadderInterface;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 use Exception;
@@ -30,12 +32,14 @@ class PasswordEncryptTransform extends AbstractTransform
      * @param integer                    $iterations   The number of hash iterations to use.
      * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
      * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
         $password,
         $iterations,
         KeyDeriverInterface $keyDeriver = null,
-        RandomSourceInterface $randomSource = null
+        RandomSourceInterface $randomSource = null,
+        PadderInterface $padder = null
     ) {
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
@@ -43,11 +47,15 @@ class PasswordEncryptTransform extends AbstractTransform
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
         }
+        if (null === $padder) {
+            $padder = PkcsPadding::instance();
+        }
 
         $this->password = $password;
         $this->iterations = $iterations;
         $this->keyDeriver = $keyDeriver;
         $this->randomSource = $randomSource;
+        $this->padder = $padder;
         $this->version = chr(1);
         $this->type = chr(2);
     }
@@ -93,6 +101,16 @@ class PasswordEncryptTransform extends AbstractTransform
     }
 
     /**
+     * Get the padder.
+     *
+     * @return PadderInterface The padder.
+     */
+    public function padder()
+    {
+        return $this->padder;
+    }
+
+    /**
      * Transform the supplied data.
      *
      * This method may transform only part of the supplied data. The return
@@ -133,7 +151,7 @@ class PasswordEncryptTransform extends AbstractTransform
             if ($isEnd) {
                 $context->outputBuffer .= mcrypt_generic(
                     $context->mcryptModule,
-                    $this->pad($context->encryptBuffer)
+                    $this->padder()->pad($context->encryptBuffer)
                 );
             } else {
                 $context->outputBuffer .= mcrypt_generic(
@@ -162,22 +180,6 @@ class PasswordEncryptTransform extends AbstractTransform
         }
 
         return array($output, $dataSize);
-    }
-
-    /**
-     * Pad a string using PKCS #7 (RFC 2315) padding.
-     *
-     * @link http://tools.ietf.org/html/rfc2315
-     *
-     * @param string $data The data to pad.
-     *
-     * @return string The padded data.
-     */
-    protected function pad($data)
-    {
-        $padSize = intval(16 - (strlen($data) % 16));
-
-        return $data . str_repeat(chr($padSize), $padSize);
     }
 
     private function initializeContext()
@@ -229,6 +231,7 @@ class PasswordEncryptTransform extends AbstractTransform
     private $iterations;
     private $keyDeriver;
     private $randomSource;
+    private $padder;
     private $version;
     private $type;
 }

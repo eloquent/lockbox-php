@@ -13,12 +13,14 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
 use Eloquent\Lockbox\Exception\UnsupportedTypeException;
 use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Padding\Exception\InvalidPaddingException;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Padding\UnpadderInterface;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
 
@@ -46,10 +48,12 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      *
      * @param PasswordDecryptTransformFactoryInterface|null $transformFactory The transform factory to use.
      * @param KeyDeriverInterface|null                      $keyDeriver       The key deriver to use.
+     * @param UnpadderInterface|null                        $unpadder         The unpadder to use.
      */
     public function __construct(
         PasswordDecryptTransformFactoryInterface $transformFactory = null,
-        KeyDeriverInterface $keyDeriver = null
+        KeyDeriverInterface $keyDeriver = null,
+        UnpadderInterface $unpadder = null
     ) {
         if (null === $transformFactory) {
             $transformFactory = PasswordDecryptTransformFactory::instance();
@@ -57,9 +61,13 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
+        if (null === $unpadder) {
+            $unpadder = PkcsPadding::instance();
+        }
 
         $this->transformFactory = $transformFactory;
         $this->keyDeriver = $keyDeriver;
+        $this->unpadder = $unpadder;
     }
 
     /**
@@ -80,6 +88,16 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
     public function keyDeriver()
     {
         return $this->keyDeriver;
+    }
+
+    /**
+     * Get the unpadder.
+     *
+     * @return UnpadderInterface The unpadder.
+     */
+    public function unpadder()
+    {
+        return $this->unpadder;
     }
 
     /**
@@ -145,7 +163,7 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
         );
 
         try {
-            $data = $this->unpad($data);
+            $data = $this->unpadder()->unpad($data);
         } catch (InvalidPaddingException $e) {
             throw new PasswordDecryptionFailedException($password, $e);
         }
@@ -167,29 +185,8 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
         );
     }
 
-    /**
-     * Remove PKCS #7 (RFC 5652) padding from the supplied data.
-     *
-     * @link http://tools.ietf.org/html/rfc5652#section-6.3
-     *
-     * @param string $data The padded data.
-     *
-     * @return string                  The data with padding removed.
-     * @throws InvalidPaddingException If the padding is invalid.
-     */
-    protected function unpad($data)
-    {
-        $padSize = ord(substr($data, -1));
-        $padding = substr($data, -$padSize);
-
-        if (str_repeat(chr($padSize), $padSize) !== $padding) {
-            throw new InvalidPaddingException;
-        }
-
-        return substr($data, 0, -$padSize);
-    }
-
     private static $instance;
     private $transformFactory;
     private $keyDeriver;
+    private $unpadder;
 }

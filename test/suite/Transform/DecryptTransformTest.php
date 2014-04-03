@@ -13,11 +13,12 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\RawEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
 use Exception;
-use Phake;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class DecryptTransformTest extends PHPUnit_Framework_TestCase
 {
@@ -26,7 +27,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
-        $this->transform = new DecryptTransform($this->key);
+        $this->unpadder = new PkcsPadding;
+        $this->transform = new DecryptTransform($this->key, $this->unpadder);
 
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
@@ -39,6 +41,14 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         $this->assertSame($this->key, $this->transform->key());
+        $this->assertSame($this->unpadder, $this->transform->unpadder());
+    }
+
+    public function testConstructorDefaults()
+    {
+        $this->transform = new DecryptTransform($this->key);
+
+        $this->assertSame(PkcsPadding::instance(), $this->transform->unpadder());
     }
 
     public function transformData()

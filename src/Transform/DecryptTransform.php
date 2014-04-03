@@ -13,10 +13,12 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Exception\DecryptionFailedException;
-use Eloquent\Lockbox\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Exception\UnsupportedTypeException;
 use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Padding\Exception\InvalidPaddingException;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Padding\UnpadderInterface;
 use Exception;
 
 /**
@@ -27,11 +29,19 @@ class DecryptTransform extends AbstractTransform
     /**
      * Construct a new decrypt data transform.
      *
-     * @param KeyInterface $key The key to decrypt with.
+     * @param KeyInterface           $key      The key to decrypt with.
+     * @param UnpadderInterface|null $unpadder The unpadder to use.
      */
-    public function __construct(KeyInterface $key)
-    {
+    public function __construct(
+        KeyInterface $key,
+        UnpadderInterface $unpadder = null
+    ) {
+        if (null === $unpadder) {
+            $unpadder = PkcsPadding::instance();
+        }
+
         $this->key = $key;
+        $this->unpadder = $unpadder;
     }
 
     /**
@@ -42,6 +52,16 @@ class DecryptTransform extends AbstractTransform
     public function key()
     {
         return $this->key;
+    }
+
+    /**
+     * Get the unpadder.
+     *
+     * @return UnpadderInterface The unpadder.
+     */
+    public function unpadder()
+    {
+        return $this->unpadder;
     }
 
     /**
@@ -224,7 +244,7 @@ class DecryptTransform extends AbstractTransform
 
         if ($isEnd) {
             try {
-                $output = $this->unpad($output);
+                $output = $this->unpadder()->unpad($output);
             } catch (InvalidPaddingException $e) {
                 $this->finalizeContext($context);
 
@@ -235,28 +255,6 @@ class DecryptTransform extends AbstractTransform
         }
 
         return array($output, $consumed);
-    }
-
-    /**
-     * Remove PKCS #7 (RFC 5652) padding from the supplied data.
-     *
-     * @link http://tools.ietf.org/html/rfc5652#section-6.3
-     *
-     * @param string $data The padded data.
-     *
-     * @return string                  The data with padding removed.
-     * @throws InvalidPaddingException If the padding is invalid.
-     */
-    protected function unpad($data)
-    {
-        $padSize = ord(substr($data, -1));
-        $padding = substr($data, -$padSize);
-
-        if (str_repeat(chr($padSize), $padSize) !== $padding) {
-            throw new InvalidPaddingException;
-        }
-
-        return substr($data, 0, -$padSize);
     }
 
     private function initializeContext()
@@ -298,4 +296,5 @@ class DecryptTransform extends AbstractTransform
     }
 
     private $key;
+    private $unpadder;
 }

@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Exception;
 use PHPUnit_Framework_TestCase;
@@ -28,11 +29,13 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->iterations = 10;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->padder = new PkcsPadding;
         $this->transform = new PasswordEncryptTransform(
             $this->password,
             $this->iterations,
             $this->keyDeriver,
-            $this->randomSource
+            $this->randomSource,
+            $this->padder
         );
 
         $this->base64Url = Base64Url::instance();
@@ -48,6 +51,7 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->iterations, $this->transform->iterations());
         $this->assertSame($this->keyDeriver, $this->transform->keyDeriver());
         $this->assertSame($this->randomSource, $this->transform->randomSource());
+        $this->assertSame($this->padder, $this->transform->padder());
     }
 
     public function testConstructorDefaults()
@@ -56,6 +60,7 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(KeyDeriver::instance(), $this->transform->keyDeriver());
         $this->assertSame(DevUrandom::instance(), $this->transform->randomSource());
+        $this->assertSame(PkcsPadding::instance(), $this->transform->padder());
     }
 
     public function testTransform()

@@ -12,12 +12,13 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\BoundPasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use Exception;
-use Phake;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 {
@@ -28,7 +29,8 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->password = 'password';
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->transform = new PasswordDecryptTransform($this->password, $this->keyDeriver);
+        $this->unpadder = new PkcsPadding;
+        $this->transform = new PasswordDecryptTransform($this->password, $this->keyDeriver, $this->unpadder);
 
         $this->version = chr(1);
         $this->type = chr(2);
@@ -52,6 +54,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame($this->password, $this->transform->password());
         $this->assertSame($this->keyDeriver, $this->transform->keyDeriver());
+        $this->assertSame($this->unpadder, $this->transform->unpadder());
     }
 
     public function testConstructorDefaults()
@@ -59,6 +62,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->transform = new PasswordDecryptTransform($this->password);
 
         $this->assertSame(KeyDeriver::instance(), $this->transform->keyDeriver());
+        $this->assertSame(PkcsPadding::instance(), $this->transform->unpadder());
     }
 
     public function transformData()

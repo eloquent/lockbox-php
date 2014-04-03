@@ -9,7 +9,7 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Exception;
+namespace Eloquent\Lockbox\Padding\Exception;
 
 use Exception;
 
