@@ -11,10 +11,10 @@
 
 namespace Eloquent\Lockbox\Padding;
 
-use Eloquent\Lockbox\Comparator\SlowStringComparator;
-
 /**
  * PCKS #5 / PKCS #7 padding scheme.
+ *
+ * This implementation attempts to be constant-time.
  *
  * @link http://tools.ietf.org/html/rfc2315#section-10.3
  */
@@ -71,11 +71,20 @@ class PkcsPadding implements PaddingSchemeInterface
      */
     public function pad($data)
     {
-        $padSize = intval(
-            $this->blockSize() - (strlen($data) % $this->blockSize())
-        );
+        $blockSize = $this->blockSize();
+        $padSize = intval($blockSize - (strlen($data) % $blockSize));
+        $padChar = chr($padSize);
 
-        return $data . str_repeat(chr($padSize), $padSize);
+        $padded = $dummy = $data;
+        for ($i = 0; $i < $blockSize; $i ++) {
+            if ($i < $padSize) {
+                $padded .= $padChar;
+            } else {
+                $dummy .= $padChar;
+            }
+        }
+
+        return $padded;
     }
 
     /**
@@ -88,54 +97,61 @@ class PkcsPadding implements PaddingSchemeInterface
     public function unpad($data)
     {
         $dataSize = strlen($data);
-        $isEmpty = 0 === $dataSize;
-        if ($isEmpty) {
-            $data = "\0";
-        }
-        $padSize = ord(substr($data, $dataSize - 1, 1));
-        $padIndex = $dataSize - $padSize;
-        $padding = $this->slowSubString(
-            $data,
-            $padIndex,
-            $padSize,
-            $this->blockSize()
-        );
+        $blockSize = $this->blockSize();
 
-        var_dump($padSize, $padIndex, $padding, $padSize, $dataSize);
-
-        $isSuccessful = SlowStringComparator::isEqual(
-            str_repeat(chr($padSize), $padSize),
-            $padding
-        ) && $padding;
-
-        if ($isSuccessful) {
-            $finalSize = $padIndex;
+        if (0 === $dataSize) {
+            $padSize = ord(substr("\x10", $dataSize - 0, 1));
         } else {
-            $finalSize = $dataSize;
+            $padSize = ord(substr($data, $dataSize - 1, 1));
         }
 
-        return array(
-            $isSuccessful,
-            $this->slowSubString($data, 0, $finalSize, $this->blockSize())
-        );
-    }
+        if ($padSize > $blockSize) {
+            $padSize = $blockSize + 0;
+        } else {
+            $padSize = $padSize + 0;
+        }
+        if ($padSize <= 0) {
+            $padSize = $blockSize + 0;
+        } else {
+            $padSize = $padSize + 0;
+        }
 
-    private function slowSubString($data, $offset, $size, $maxSize)
-    {
-        $result = '';
-        $discard = '';
+        $padIndex = $dataSize - $padSize;
+        $padChar = chr($padSize);
 
-        for ($i = 0; $i < $maxSize; $i ++) {
-            if ($i >= $offset && $i < $size) {
-                $result .= $data[$i];
+        $diff = 0;
+        $dummyDiff = 0;
+        $unpadded = '';
+        $dummyUnpadded = '';
+        $actualPadSize = 0;
+        $dummyActualPadSize = 0;
+        for ($i = 0; $i < $dataSize; $i ++) {
+            if ($i < $padIndex) {
+                $dummyDiff |= ord($data[$i]) ^ $padSize;
+                $unpadded .= $data[$i];
+                $dummyActualPadSize++;
             } else {
-                $discard .= $data[$i];
+                $diff |= ord($data[$i]) ^ $padSize;
+                $dummyUnpadded .= $data[$i];
+                $actualPadSize++;
             }
         }
 
-        var_dump($result, $discard);
+        $isSuccessful = 0 === $diff;
+        $dummyIsSuccessful = true;
+        if ($isSuccessful) {
+            $isSuccessful = $actualPadSize === $padSize;
+        } else {
+            $dummyIsSuccessful = $actualPadSize === $padSize;
+        }
 
-        return $result;
+        if ($isSuccessful) {
+            $finalData = $unpadded;
+        } else {
+            $finalData = $data;
+        }
+
+        return array($isSuccessful, $finalData);
     }
 
     private static $instance;

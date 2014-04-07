@@ -58,6 +58,7 @@ class PkcsPaddingTest extends PHPUnit_Framework_TestCase
         //                                            data        blockSize padded
         return array(
             'Empty'                          => array('',         8,        '0808080808080808'),
+            'Empty 16 bit'                   => array('',         16,       '10101010101010101010101010101010'),
             'Block size'                     => array('12345678', 8,        '31323334353637380808080808080808'),
             'Single byte'                    => array('1234567',  8,        '3132333435363701'),
             'Partial block'                  => array('1234',     8,        '3132333404040404'),
@@ -84,6 +85,8 @@ class PkcsPaddingTest extends PHPUnit_Framework_TestCase
      */
     public function testUnpad($data, $blockSize, $padded)
     {
+        $this->padding = new PkcsPadding($blockSize);
+
         $this->assertSame(array(true, $data), $this->padding->unpad(pack('H*', $padded)));
     }
 
@@ -102,7 +105,7 @@ class PkcsPaddingTest extends PHPUnit_Framework_TestCase
      */
     public function testUnpadFailure($padded)
     {
-        $this->assertSame(array(false, $padded), $this->padding->unpad(pack('H*', $padded)));
+        $this->assertSame(array(false, pack('H*', $padded)), $this->padding->unpad(pack('H*', $padded)));
     }
 
     public function testInstance()

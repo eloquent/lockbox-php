@@ -251,6 +251,8 @@ class DecryptTransform extends AbstractTransform
         if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
             if (!$isSuccessful) {
+                $this->finalizeContext($context);
+
                 throw new DecryptionFailedException(
                     $this->key(),
                     new InvalidPaddingException

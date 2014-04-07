@@ -352,8 +352,10 @@ class PasswordDecryptTransform extends AbstractTransform
         if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
             if (!$isSuccessful) {
+                $this->finalizeContext($context);
+
                 throw new PasswordDecryptionFailedException(
-                    $password,
+                    $this->password(),
                     new InvalidPaddingException
                 );
             }
