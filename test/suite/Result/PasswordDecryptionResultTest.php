@@ -14,24 +14,26 @@ namespace Eloquent\Lockbox\Result;
 use PHPUnit_Framework_TestCase;
 
 /**
- * @covers \Eloquent\Lockbox\Result\DecryptionResult
+ * @covers \Eloquent\Lockbox\Result\PasswordDecryptionResult
  * @covers \Eloquent\Lockbox\Result\AbstractDecryptionResult
  */
-class DecryptionResultTest extends PHPUnit_Framework_TestCase
+class PasswordDecryptionResultTest extends PHPUnit_Framework_TestCase
 {
     public function testSuccessResult()
     {
-        $result = new DecryptionResult(DecryptionResultType::SUCCESS());
+        $result = new PasswordDecryptionResult(DecryptionResultType::SUCCESS(), 111);
 
         $this->assertSame(DecryptionResultType::SUCCESS(), $result->type());
+        $this->assertSame(111, $result->iterations());
         $this->assertTrue($result->isSuccessful());
     }
 
     public function testFailureResult()
     {
-        $result = new DecryptionResult(DecryptionResultType::INVALID_MAC());
+        $result = new PasswordDecryptionResult(DecryptionResultType::INVALID_MAC());
 
         $this->assertSame(DecryptionResultType::INVALID_MAC(), $result->type());
+        $this->assertNull($result->iterations());
         $this->assertFalse($result->isSuccessful());
     }
 }
