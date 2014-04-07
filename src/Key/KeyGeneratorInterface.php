@@ -24,9 +24,8 @@ interface KeyGeneratorInterface
      * @param integer|null $encryptionSecretBits     The size of the encryption secret in bits.
      * @param integer|null $authenticationSecretBits The size of the authentication secret in bits.
      *
-     * @return KeyInterface                                       The generated key.
-     * @throws Exception\InvalidEncryptionSecretSizeException     If the requested encryption secret size is invalid.
-     * @throws Exception\InvalidAuthenticationSecretSizeException If the requested authentication secret size is invalid.
+     * @return KeyInterface                           The generated key.
+     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
      */
     public function generateKey(
         $name = null,

@@ -11,17 +11,16 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
-use Eloquent\Lockbox\Exception\UnsupportedTypeException;
-use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
-use Eloquent\Lockbox\Padding\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
+use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Stream\RawDecryptStream;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
 
@@ -107,29 +106,28 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      * @param string $password The password to decrypt with.
      * @param string $data     The data to decrypt.
      *
-     * @return tuple<string,integer>             A 2-tuple of the decrypted data, and the number of iterations used.
-     * @throws PasswordDecryptionFailedException If the decryption failed.
+     * @return PasswordDecryptionResultInterface The decryption result.
      */
     public function decrypt($password, $data)
     {
         $size = strlen($data);
         if ($size < 118) {
-            throw new PasswordDecryptionFailedException($password);
+            return new PasswordDecryptionResult(
+                DecryptionResultType::INSUFFICIENT_DATA()
+            );
         }
 
         $version = ord(substr($data, 0, 1));
         if (1 !== $version) {
-            throw new PasswordDecryptionFailedException(
-                $password,
-                new UnsupportedVersionException($version)
+            return new PasswordDecryptionResult(
+                DecryptionResultType::UNSUPPORTED_VERSION()
             );
         }
 
         $type = ord(substr($data, 1, 1));
         if (2 !== $type) {
-            throw new PasswordDecryptionFailedException(
-                $password,
-                new UnsupportedTypeException($type)
+            return new PasswordDecryptionResult(
+                DecryptionResultType::UNSUPPORTED_TYPE()
             );
         }
 
@@ -155,7 +153,9 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
                 $hash
             )
         ) {
-            throw new PasswordDecryptionFailedException($password);
+            return new PasswordDecryptionResult(
+                DecryptionResultType::INVALID_MAC()
+            );
         }
 
         $data = mcrypt_decrypt(
@@ -168,13 +168,16 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
 
         list($isSuccessful, $data) = $this->unpadder()->unpad($data);
         if (!$isSuccessful) {
-            throw new PasswordDecryptionFailedException(
-                $password,
-                new InvalidPaddingException
+            return new PasswordDecryptionResult(
+                DecryptionResultType::INVALID_PADDING()
             );
         }
 
-        return array($data, $iterations);
+        return new PasswordDecryptionResult(
+            DecryptionResultType::SUCCESS(),
+            $data,
+            $iterations
+        );
     }
 
     /**
@@ -186,7 +189,7 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      */
     public function createDecryptStream($password)
     {
-        return new TransformStream(
+        return new RawDecryptStream(
             $this->transformFactory()->createTransform($password)
         );
     }

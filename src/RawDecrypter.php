@@ -11,9 +11,12 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
+use Eloquent\Lockbox\Result\DecryptionResult;
+use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Stream\RawDecryptStream;
 use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
 
@@ -67,8 +70,7 @@ class RawDecrypter implements DecrypterInterface
      * @param Key\KeyInterface $key  The key to decrypt with.
      * @param string           $data The data to decrypt.
      *
-     * @return string                              The decrypted data.
-     * @throws Exception\DecryptionFailedException If the decryption failed.
+     * @return DecryptionResultInterface The decryption result.
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
@@ -86,14 +88,18 @@ class RawDecrypter implements DecrypterInterface
                 $hash
             )
         ) {
-            throw new Exception\DecryptionFailedException($key);
+            return new DecryptionResult(DecryptionResultType::INVALID_MAC());
         }
 
-        list($data) = $this->transformFactory()
-            ->createTransform($key)
-            ->transform($data, $context, true);
+        $transform = $this->transformFactory()->createTransform($key);
 
-        return $data;
+        list($data) = $transform->transform($data, $context, true);
+        $result = $transform->result();
+        if ($result->isSuccessful()) {
+            $result->setData($data);
+        }
+
+        return $result;
     }
 
     /**
@@ -105,7 +111,7 @@ class RawDecrypter implements DecrypterInterface
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {
-        return new TransformStream(
+        return new RawDecryptStream(
             $this->transformFactory()->createTransform($key)
         );
     }

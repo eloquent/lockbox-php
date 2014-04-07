@@ -13,19 +13,17 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
-use Eloquent\Lockbox\Exception\UnsupportedTypeException;
-use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyInterface;
-use Eloquent\Lockbox\Padding\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Exception;
+use Eloquent\Lockbox\Result\DecryptionResult;
+use Eloquent\Lockbox\Result\DecryptionResultType;
 
 /**
  * A data transform for decryption of streaming data.
  */
-class DecryptTransform extends AbstractTransform
+class DecryptTransform extends AbstractTransform implements
+    DecryptTransformInterface
 {
     /**
      * Construct a new decrypt data transform.
@@ -66,6 +64,16 @@ class DecryptTransform extends AbstractTransform
     }
 
     /**
+     * Get the decryption result.
+     *
+     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
+     */
+    public function result()
+    {
+        return $this->result;
+    }
+
+    /**
      * Transform the supplied data.
      *
      * This method may transform only part of the supplied data. The return
@@ -84,11 +92,14 @@ class DecryptTransform extends AbstractTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer> A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws Exception             If the data cannot be transformed.
+     * @return tuple<string,integer,mixed> A 3-tuple of the transformed data, the number of bytes consumed, and any resulting error.
      */
     public function transform($data, &$context, $isEnd = false)
     {
+        if ($this->result) {
+            return array('', 0, null);
+        }
+
         if (null === $context) {
             $context = $this->initializeContext();
         }
@@ -99,12 +110,15 @@ class DecryptTransform extends AbstractTransform
         if (!$context->isVersionSeen) {
             if ($dataSize < 1) {
                 if ($isEnd) {
+                    $this->result = new DecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $context->isVersionSeen = true;
@@ -112,12 +126,12 @@ class DecryptTransform extends AbstractTransform
             $versionData = substr($data, 0, 1);
             $version = ord($versionData);
             if (1 !== $version) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::UNSUPPORTED_VERSION()
+                );
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException(
-                    $this->key(),
-                    new UnsupportedVersionException($version)
-                );
+                return array('', 1, $this->result);
             }
 
             hash_update($context->hashContext, $versionData);
@@ -135,12 +149,15 @@ class DecryptTransform extends AbstractTransform
         if (!$context->isTypeSeen) {
             if ($dataSize < 1) {
                 if ($isEnd) {
+                    $this->result = new DecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $context->isTypeSeen = true;
@@ -148,12 +165,12 @@ class DecryptTransform extends AbstractTransform
             $typeData = substr($data, 0, 1);
             $type = ord($typeData);
             if (1 !== $type) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::UNSUPPORTED_TYPE()
+                );
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException(
-                    $this->key(),
-                    new UnsupportedTypeException($type)
-                );
+                return array('', 1, $this->result);
             }
 
             hash_update($context->hashContext, $typeData);
@@ -171,12 +188,15 @@ class DecryptTransform extends AbstractTransform
         if (!$context->isInitialized) {
             if ($dataSize < 16) {
                 if ($isEnd) {
+                    $this->result = new DecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new DecryptionFailedException($this->key());
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $iv = substr($data, 0, 16);
@@ -207,12 +227,15 @@ class DecryptTransform extends AbstractTransform
 
         if ($dataSize < $requiredSize) {
             if ($isEnd) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::INSUFFICIENT_DATA()
+                );
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($this->key());
+                return array('', $consumed, $this->result);
             }
 
-            return array('', $consumed);
+            return array('', $consumed, null);
         }
 
         if ($isEnd) {
@@ -240,9 +263,12 @@ class DecryptTransform extends AbstractTransform
                     $hash
                 )
             ) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::INVALID_MAC()
+                );
                 $this->finalizeContext($context);
 
-                throw new DecryptionFailedException($this->key());
+                return array('', $consumed, $this->result);
             }
         }
 
@@ -250,19 +276,22 @@ class DecryptTransform extends AbstractTransform
 
         if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
-            if (!$isSuccessful) {
-                $this->finalizeContext($context);
-
-                throw new DecryptionFailedException(
-                    $this->key(),
-                    new InvalidPaddingException
-                );
-            }
-
             $this->finalizeContext($context);
+
+            if ($isSuccessful) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::SUCCESS()
+                );
+            } else {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::INVALID_PADDING()
+                );
+
+                return array('', $consumed, $this->result);
+            }
         }
 
-        return array($output, $consumed);
+        return array($output, $consumed, null);
     }
 
     private function initializeContext()
@@ -305,4 +334,5 @@ class DecryptTransform extends AbstractTransform
 
     private $key;
     private $unpadder;
+    private $result;
 }

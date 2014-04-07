@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
 
 /**
  * An abstract base class for implementing password ciphers.
@@ -71,8 +72,7 @@ abstract class AbstractPasswordCipher implements PasswordCipherInterface
      * @param string $password The password to decrypt with.
      * @param string $data     The data to decrypt.
      *
-     * @return tuple<string,integer>             A 2-tuple of the decrypted data, and the number of iterations used.
-     * @throws PasswordDecryptionFailedException If the decryption failed.
+     * @return PasswordDecryptionResultInterface The decryption result.
      */
     public function decrypt($password, $data)
     {

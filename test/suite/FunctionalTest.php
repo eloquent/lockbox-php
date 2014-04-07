@@ -173,7 +173,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $stream->on(
             'error',
             function ($error, $stream) {
-                throw $error;
+                throw new Exception($error->type()->key());
             }
         );
         foreach (str_split($data) as $byte) {
@@ -189,10 +189,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testSpecVectorsDecryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
     {
-        $this->assertSame(
-            $data,
-            $this->decrypter->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted)
-        );
+        $result = $this->decrypter->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted);
+
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame($data, $result->data());
     }
 
     /**
@@ -208,10 +208,17 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 $actual .= $data;
             }
         );
+        $result = null;
+        $stream->on(
+            'success',
+            function ($stream) use (&$result) {
+                $result = $stream->result();
+            }
+        );
         $stream->on(
             'error',
             function ($error, $stream) {
-                throw $error;
+                throw new Exception($error->type()->key());
             }
         );
         foreach (str_split($encrypted) as $byte) {
@@ -219,6 +226,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         }
         $stream->end();
 
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isSuccessful());
         $this->assertSame($data, $actual);
     }
 
@@ -227,9 +236,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         $key = $this->keyGenerator->generateKey();
         $encrypted = $this->encrypter->encrypt($key, 'foobar');
-        $decrypted = $this->decrypter->decrypt($key, $encrypted);
+        $result = $this->decrypter->decrypt($key, $encrypted);
 
-        $this->assertSame('foobar', $decrypted);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame('foobar', $result->data());
     }
 
     public function passwordSpecVectorData()
@@ -367,7 +377,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $stream->on(
             'error',
             function ($error, $stream) {
-                throw $error;
+                throw new Exception($error->type()->key());
             }
         );
         foreach (str_split($data) as $byte) {
@@ -383,7 +393,11 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        $this->assertSame(array($data, $iterations), $this->passwordDecrypter->decrypt($password, $encrypted));
+        $result = $this->passwordDecrypter->decrypt($password, $encrypted);
+
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame($data, $result->data());
+        $this->assertSame($iterations, $result->iterations());
     }
 
     /**
@@ -399,18 +413,17 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                 $actual .= $data;
             }
         );
-        $actualIterations = null;
+        $result = null;
         $stream->on(
             'success',
-            function ($stream) use (&$actualIterations) {
-                $transforms = $stream->transform()->transforms();
-                $actualIterations = $transforms[1]->iterations();
+            function ($stream) use (&$result) {
+                $result = $stream->result();
             }
         );
         $stream->on(
             'error',
             function ($error, $stream) {
-                throw $error;
+                throw new Exception($error->type()->key());
             }
         );
         foreach (str_split($encrypted) as $byte) {
@@ -418,7 +431,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         }
         $stream->end();
 
-        $this->assertSame(array($data, $iterations), array($actual, $actualIterations));
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame($data, $actual);
+        $this->assertSame($iterations, $result->iterations());
     }
 
     public function testEncryptDecryptWithPassword()
@@ -426,9 +442,11 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
         $encrypted = $this->passwordEncrypter->encrypt('password', 10, 'foobar');
-        $decrypted = $this->passwordDecrypter->decrypt('password', $encrypted);
+        $result = $this->passwordDecrypter->decrypt('password', $encrypted);
 
-        $this->assertSame(array('foobar', 10), $decrypted);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame('foobar', $result->data());
+        $this->assertSame(10, $result->iterations());
     }
 
     public function keyDerivationSpecVectorData()

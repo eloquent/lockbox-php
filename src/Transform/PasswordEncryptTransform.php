@@ -18,7 +18,6 @@ use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
-use Exception;
 
 /**
  * A data transform for encryption of streaming data with a password.
@@ -129,8 +128,7 @@ class PasswordEncryptTransform extends AbstractTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer> A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws Exception             If the data cannot be transformed.
+     * @return tuple<string,integer,mixed> A 3-tuple of the transformed data, the number of bytes consumed, and any resulting error.
      */
     public function transform($data, &$context, $isEnd = false)
     {
@@ -140,7 +138,7 @@ class PasswordEncryptTransform extends AbstractTransform
 
         $dataSize = strlen($data);
         if (!$isEnd && $dataSize < 16) {
-            return array('', 0);
+            return array('', 0, null);
         }
 
         $context->encryptBuffer .= $data;
@@ -179,7 +177,7 @@ class PasswordEncryptTransform extends AbstractTransform
             $context->outputBuffer = '';
         }
 
-        return array($output, $dataSize);
+        return array($output, $dataSize, null);
     }
 
     private function initializeContext()

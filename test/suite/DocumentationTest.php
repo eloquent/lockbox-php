@@ -13,7 +13,6 @@ use Eloquent\Lockbox\BoundDecrypter;
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
@@ -100,9 +99,10 @@ $encrypted =
     'AQHJqPyMjO0oNSwu1HctzQp9_OQe2tmuQyMWWnetqT-N6vdB9O27NcCyfErbywGh' .
     'I04N0Cr5CcFiOLHkpn3yTvGravUE8RsvesmvldJU8iIZYw';
 
-try {
-    echo $decrypter->decrypt($key, $encrypted);
-} catch (DecryptionFailedException $e) {
+$result = $decrypter->decrypt($key, $encrypted);
+if ($result->isSuccessful()) {
+    echo $result->data();
+} else {
     echo 'Decryption failed.';
 }
     }
@@ -130,9 +130,10 @@ $encrypted = array(
 );
 
 foreach ($encrypted as $string) {
-    try {
-        echo $decrypter->decrypt($string);
-    } catch (DecryptionFailedException $e) {
+    $result = $decrypter->decrypt($string);
+    if ($result->isSuccessful()) {
+        echo $result->data();
+    } else {
         echo 'Decryption failed.';
     }
 }

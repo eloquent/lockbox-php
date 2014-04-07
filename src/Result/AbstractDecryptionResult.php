@@ -20,7 +20,7 @@ abstract class AbstractDecryptionResult implements DecryptionResultInterface
      * Construct a new decryption result.
      *
      * @param DecryptionResultType $type The result type.
-     * @param string|null $data The data, or null if unavailable.
+     * @param string|null          $data The data, or null if unavailable.
      */
     public function __construct(DecryptionResultType $type, $data = null)
     {
@@ -46,6 +46,16 @@ abstract class AbstractDecryptionResult implements DecryptionResultInterface
     public function isSuccessful()
     {
         return $this->type()->isSuccessful();
+    }
+
+    /**
+     * Set the decrypted data.
+     *
+     * @param string|null $data The data, or null if unavailable.
+     */
+    public function setData($data)
+    {
+        $this->data = $data;
     }
 
     /**

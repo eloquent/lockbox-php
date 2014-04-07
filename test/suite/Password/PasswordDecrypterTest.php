@@ -22,13 +22,15 @@ class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+        $this->rawDecrypter = new RawPasswordDecrypter;
         $this->transformFactory = new PasswordDecryptTransformFactory;
         $this->decodeTransform = new Base64UrlDecodeTransform;
-        $this->encrypter = new PasswordDecrypter($this->transformFactory, $this->decodeTransform);
+        $this->encrypter = new PasswordDecrypter($this->rawDecrypter, $this->transformFactory, $this->decodeTransform);
     }
 
     public function testConstructor()
     {
+        $this->assertSame($this->rawDecrypter, $this->encrypter->rawDecrypter());
         $this->assertSame($this->transformFactory, $this->encrypter->transformFactory());
         $this->assertSame($this->decodeTransform, $this->encrypter->decodeTransform());
     }
@@ -37,6 +39,7 @@ class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         $this->encrypter = new PasswordDecrypter;
 
+        $this->assertSame(RawPasswordDecrypter::instance(), $this->encrypter->rawDecrypter());
         $this->assertSame(PasswordDecryptTransformFactory::instance(), $this->encrypter->transformFactory());
         $this->assertSame(Base64UrlDecodeTransform::instance(), $this->encrypter->decodeTransform());
     }

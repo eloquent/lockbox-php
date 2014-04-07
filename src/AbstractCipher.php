@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Result\DecryptionResultInterface;
 
 /**
  * An abstract base class for implementing ciphers.
@@ -71,8 +72,7 @@ abstract class AbstractCipher implements CipherInterface
      * @param Key\KeyInterface $key  The key to decrypt with.
      * @param string           $data The data to decrypt.
      *
-     * @return string                              The decrypted data.
-     * @throws Exception\DecryptionFailedException If the decryption failed.
+     * @return DecryptionResultInterface The decryption result.
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {

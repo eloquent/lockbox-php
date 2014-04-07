@@ -25,8 +25,8 @@ interface KeyDeriverInterface
      * @param string|null $name        The name.
      * @param string|null $description The description.
      *
-     * @return tuple<KeyInterface,string> A 2-tuple of the derived key, and the salt used.
-     * @throws
+     * @return tuple<KeyInterface,string>             A 2-tuple of the derived key, and the salt used.
+     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
      */
     public function deriveKeyFromPassword(
         $password,

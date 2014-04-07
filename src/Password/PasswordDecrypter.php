@@ -13,11 +13,12 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\CompoundTransform;
 use Eloquent\Confetti\TransformInterface;
-use Eloquent\Confetti\TransformStream;
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64UrlDecodeTransform;
-use Eloquent\Endec\Exception\EncodingExceptionInterface;
-use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
+use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Stream\DecryptStream;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
 
@@ -43,13 +44,18 @@ class PasswordDecrypter implements PasswordDecrypterInterface
     /**
      * Construct a new decrypter.
      *
+     * @param PasswordDecrypterInterface|null               $rawDecrypter     The raw decrypter to use.
      * @param PasswordDecryptTransformFactoryInterface|null $transformFactory The transform factory to use.
      * @param TransformInterface|null                       $decodeTransform  The decode transform to use.
      */
     public function __construct(
+        PasswordDecrypterInterface $rawDecrypter = null,
         PasswordDecryptTransformFactoryInterface $transformFactory = null,
         TransformInterface $decodeTransform = null
     ) {
+        if (null === $rawDecrypter) {
+            $rawDecrypter = RawPasswordDecrypter::instance();
+        }
         if (null === $transformFactory) {
             $transformFactory = PasswordDecryptTransformFactory::instance();
         }
@@ -57,8 +63,19 @@ class PasswordDecrypter implements PasswordDecrypterInterface
             $decodeTransform = Base64UrlDecodeTransform::instance();
         }
 
+        $this->rawDecrypter = $rawDecrypter;
         $this->transformFactory = $transformFactory;
         $this->decodeTransform = $decodeTransform;
+    }
+
+    /**
+     * Get the raw decrypter.
+     *
+     * @return PasswordDecrypterInterface The raw decrypter.
+     */
+    public function rawDecrypter()
+    {
+        return $this->rawDecrypter;
     }
 
     /**
@@ -87,23 +104,19 @@ class PasswordDecrypter implements PasswordDecrypterInterface
      * @param string $password The password to decrypt with.
      * @param string $data     The data to decrypt.
      *
-     * @return tuple<string,integer>             A 2-tuple of the decrypted data, and the number of iterations used.
-     * @throws PasswordDecryptionFailedException If the decryption failed.
+     * @return PasswordDecryptionResultInterface The decryption result.
      */
     public function decrypt($password, $data)
     {
-        try {
-            list($data) = $this->decodeTransform()
-                ->transform($data, $context, true);
-        } catch (EncodingExceptionInterface $e) {
-            throw new PasswordDecryptionFailedException($password, $e);
+        list($data, $consumed, $error) = $this->decodeTransform()
+            ->transform($data, $context, true);
+        if (null !== $error) {
+            return new PasswordDecryptionResult(
+                DecryptionResultType::INVALID_ENCODING()
+            );
         }
 
-        $transform = $this->transformFactory()->createTransform($password);
-        $context = null;
-        list($data) = $transform->transform($data, $context, true);
-
-        return array($data, $transform->iterations());
+        return $this->rawDecrypter()->decrypt($password, $data);
     }
 
     /**
@@ -115,7 +128,7 @@ class PasswordDecrypter implements PasswordDecrypterInterface
      */
     public function createDecryptStream($password)
     {
-        return new TransformStream(
+        return new DecryptStream(
             new CompoundTransform(
                 array(
                     $this->decodeTransform(),
@@ -126,6 +139,7 @@ class PasswordDecrypter implements PasswordDecrypterInterface
     }
 
     private static $instance;
+    private $rawDecrypter;
     private $transformFactory;
     private $decodeTransform;
 }

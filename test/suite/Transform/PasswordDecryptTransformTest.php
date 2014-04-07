@@ -16,7 +16,6 @@ use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\BoundPasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
-use Exception;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -85,9 +84,13 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
     {
         $encrypted = $this->encrypter->encrypt($input);
         list($output, $buffer, $context, $error) = $this->feedTransform($encrypted);
+        $result = $this->transform->result();
 
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertNull($result->data());
+        $this->assertSame($this->iterations, $result->iterations());
         $this->assertSame(array($input, '', null), array($output, $buffer, $error));
-        $this->assertSame($this->iterations, $this->transform->iterations());
         $this->assertNull($context);
     }
 
@@ -100,9 +103,13 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $chunks = str_split($encrypted);
         array_unshift($chunks, '');
         list($output, $buffer, $context, $error) = $this->feedTransform($chunks);
+        $result = $this->transform->result();
 
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertNull($result->data());
+        $this->assertSame($this->iterations, $result->iterations());
         $this->assertSame(array($input, '', null), array($output, $buffer, $error));
-        $this->assertSame($this->iterations, $this->transform->iterations());
         $this->assertNull($context);
     }
 
@@ -125,9 +132,13 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
             substr($encrypted, 134, 16), // padding block
             substr($encrypted, 150)      // MAC
         );
+        $result = $this->transform->result();
 
+        $this->assertNotNull($result);
+        $this->assertTrue($result->isSuccessful());
+        $this->assertNull($result->data());
+        $this->assertSame($this->iterations, $result->iterations());
         $this->assertSame(array($input, '', null), array($output, $buffer, $error));
-        $this->assertSame($this->iterations, $this->transform->iterations());
         $this->assertNull($context);
     }
 
@@ -149,67 +160,77 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         return array(
             'Empty' => array(
                 '',
-            ),
-            'Partial version'=> array(
-                '1',
+                'INSUFFICIENT_DATA',
             ),
             'Unsupported version' => array(
                 chr(111),
+                'UNSUPPORTED_VERSION',
             ),
             'Empty type' => array(
                 $this->version,
-            ),
-            'Partial type' => array(
-                $this->version . '1',
+                'INSUFFICIENT_DATA',
             ),
             'Unsupported type' => array(
                 $this->version . chr(111),
+                'UNSUPPORTED_TYPE',
             ),
             'Empty iterations' => array(
                 $this->version . $this->type,
+                'INSUFFICIENT_DATA',
             ),
             'Partial iterations' => array(
                 $this->version . $this->type . '123',
+                'INSUFFICIENT_DATA',
             ),
             'Empty salt' => array(
                 $this->version . $this->type . $this->iterationsData,
+                'INSUFFICIENT_DATA',
             ),
             'Partial salt' => array(
                 $this->version . $this->type . $this->iterationsData . '123456789012345678901234567890123456789012345678901234567890123',
+                'INSUFFICIENT_DATA',
             ),
             'Empty IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt,
+                'INSUFFICIENT_DATA',
             ),
             'Partial IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . '123456789012345',
+                'INSUFFICIENT_DATA',
             ),
             'Empty data and MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv,
+                'INSUFFICIENT_DATA',
             ),
             'Empty data' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 '123456789012345678901234567',
+                'INSUFFICIENT_DATA',
             ),
             'Not enough data for MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $this->encryptAndPadAes('1234567890123456') . '123456789012345678901234567',
+                'INVALID_MAC',
             ),
             'Invalid data length' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $this->encryptAes('1234567890123456') .
                 substr($this->encryptAndPadAes('1234567890123456'), 0, 15) .
                 '1234567890123456789012345678',
+                'INVALID_MAC',
             ),
             'Bad MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $this->encryptAndPadAes('1234567890123456') .
                 '1234567890123456789012345678',
+                'INVALID_MAC',
             ),
             'Bad AES data' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '1234567890123457' .
                 $this->authenticationCode(
                     $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '1234567890123457'
                 ),
+                'INVALID_PADDING',
             ),
             'Bad padding' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
@@ -218,6 +239,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
                     $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                     $this->encryptAes('1234567890123456')
                 ),
+                'INVALID_PADDING',
             ),
         );
     }
@@ -225,14 +247,19 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider transformFailureData
      */
-    public function testTransformFailure($input)
+    public function testTransformFailure($input, $expected)
     {
         list($output, $buffer, $context, $error) = $this->feedTransform($input);
+        $result = $this->transform->result();
 
+        $this->assertNotNull($result);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame($expected, $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertNull($result->iterations());
         $this->assertNotNull($error);
-        $this->assertRegExp("/'Eloquent\\\\Lockbox\\\\Exception\\\\PasswordDecryptionFailedException'/", $error);
+        $this->assertSame($expected, $error);
         $this->assertSame('', $output);
-        $this->assertNull($this->transform->iterations());
         $this->assertNull($context);
     }
 
@@ -252,12 +279,27 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
                     $this->encryptAes('1234567890123456')
             )
         );
+        $result = $this->transform->result();
 
+        $this->assertNotNull($result);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_PADDING', $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertNull($result->iterations());
         $this->assertNotNull($error);
-        $this->assertRegExp("/'Eloquent\\\\Lockbox\\\\Exception\\\\PasswordDecryptionFailedException'/", $error);
+        $this->assertSame('INVALID_PADDING', $error);
         $this->assertSame('1234567890123456', $output);
-        $this->assertNull($this->transform->iterations());
         $this->assertNull($context);
+    }
+
+    public function testTransformAfterFailure()
+    {
+        $this->transform->transform(str_repeat(' ', 200), $context);
+        list($data, $consumed, $error) = $this->transform->transform('', $context, true);
+
+        $this->assertSame('', $data);
+        $this->assertSame(0, $consumed);
+        $this->assertNull($error);
     }
 
     protected function feedTransform($packets)
@@ -275,10 +317,9 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 
             $thisOutput = '';
             $consumed = 0;
-            try {
-                list($thisOutput, $consumed) = $this->transform->transform($buffer, $context, $index === $lastIndex);
-            } catch (Exception $error) {
-                $error = strval($error);
+            list($thisOutput, $consumed, $error) = $this->transform->transform($buffer, $context, $index === $lastIndex);
+            if (null !== $error) {
+                $error = $error->type()->key();
 
                 break;
             }

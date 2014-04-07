@@ -12,7 +12,6 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -84,9 +83,10 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         $data = str_repeat('A', $dataSize);
         $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
         $encrypted = $this->cipher->encrypt($this->key, $data);
-        $decrypted = $this->cipher->decrypt($this->key, $encrypted);
+        $decryptionResult = $this->cipher->decrypt($this->key, $encrypted);
 
-        $this->assertSame($data, $decrypted);
+        $this->assertTrue($decryptionResult->isSuccessful());
+        $this->assertSame($data, $decryptionResult->data());
     }
 
     /**
@@ -117,77 +117,78 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureEmptyVersion()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, '');
+        $data = '';
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
+
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('UNSUPPORTED_VERSION', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureUnsupportedVersion()
     {
         $data = ord(111) . str_pad('', 100, '1234567890');
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('UNSUPPORTED_VERSION', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureEmptyType()
     {
         $data = $this->version;
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('UNSUPPORTED_TYPE', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptUnsupportedType()
     {
         $data = $this->version . ord(111) . str_pad('', 100, '1234567890');
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('UNSUPPORTED_TYPE', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureEmptyIv()
     {
         $data = $this->version . $this->type;
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureShortMac()
     {
         $data = $this->version . $this->type . $this->iv . '789012345678901234567890123';
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_MAC', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureEmptyCiphertext()
     {
         $data = $this->version . $this->type . $this->iv . '7890123456789012345678901234';
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_PADDING', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureBadMac()
@@ -198,31 +199,23 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher = new Cipher($this->encrypter, $this->decrypter);
         Phake::when($decryptTransformFactory)->createTransform($this->key)->thenReturn($decryptTransform);
         $data = $this->version . $this->type . $this->iv . 'foobar1234567890123456789012345678';
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $e = null;
-        try {
-            $this->cipher->decrypt($this->key, $data);
-        } catch (DecryptionFailedException $e) {}
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_MAC', $result->type()->key());
+        $this->assertNull($result->data());
         Phake::verify($decryptTransform, Phake::never())->transform(Phake::anyParameters());
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        if (null !== $e) {
-            throw $e;
-        }
     }
 
     public function testDecryptFailureBadAesData()
     {
-        $data = $this->version . $this->type . $this->iv . 'foobar' .
-            $this->authenticationCode($this->key, $this->version . $this->type . $this->iv . 'foobar');
+        $data = $this->version . $this->type . $this->iv . 'foobarbaxquxdoom';
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_PADDING', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testDecryptFailureBadPadding()
@@ -234,14 +227,13 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
             MCRYPT_MODE_CBC,
             $this->iv
         );
-        $data = $this->version . $this->type . $this->iv . $ciphertext .
-            $this->authenticationCode($this->key, $this->version . $this->type . $this->iv . $ciphertext);
+        $data = $this->version . $this->type . $this->iv . $ciphertext;
+        $data .= $this->authenticationCode($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\DecryptionFailedException',
-            "Decryption failed for key 'key'."
-        );
-        $this->cipher->decrypt($this->key, $data);
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_PADDING', $result->type()->key());
+        $this->assertNull($result->data());
     }
 
     public function testInstance()
@@ -261,12 +253,12 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
         return $data . str_repeat(chr($padSize), $padSize);
     }
 
-    protected function authenticationCode($key, $data)
+    protected function authenticationCode($data)
     {
         return hash_hmac(
-            'sha' . strlen($key->authenticationSecret()) * 8,
+            'sha' . strlen($this->key->authenticationSecret()) * 8,
             $data,
-            $key->authenticationSecret(),
+            $this->key->authenticationSecret(),
             true
         );
     }

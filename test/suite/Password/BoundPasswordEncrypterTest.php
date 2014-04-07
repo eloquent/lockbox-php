@@ -54,9 +54,11 @@ class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecrypt($data)
     {
         $encrypted = $this->encrypter->encrypt($data);
-        $decrypted = $this->decrypter->decrypt($encrypted);
+        $decryptionResult = $this->decrypter->decrypt($encrypted);
 
-        $this->assertSame(array($data, 10), $decrypted);
+        $this->assertTrue($decryptionResult->isSuccessful());
+        $this->assertSame($data, $decryptionResult->data());
+        $this->assertSame(10, $decryptionResult->iterations());
     }
 
     /**

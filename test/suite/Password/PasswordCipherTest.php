@@ -80,9 +80,11 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
     {
         $data = str_repeat('A', $dataSize);
         $encrypted = $this->cipher->encrypt($this->password, $this->iterations, $data);
-        $decrypted = $this->cipher->decrypt($this->password, $encrypted);
+        $decryptionResult = $this->cipher->decrypt($this->password, $encrypted);
 
-        $this->assertSame(array($data, $this->iterations), $decrypted);
+        $this->assertTrue($decryptionResult->isSuccessful());
+        $this->assertSame($data, $decryptionResult->data());
+        $this->assertSame($this->iterations, $decryptionResult->iterations());
     }
 
     /**
@@ -112,11 +114,12 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureNotBase64Url()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Exception\PasswordDecryptionFailedException',
-            "Password decryption failed."
-        );
-        $this->cipher->decrypt($this->key, str_repeat('!', 100));
+        $result = $this->cipher->decrypt($this->password, str_repeat('!', 100));
+
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_ENCODING', $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertNull($result->iterations());
     }
 
     public function testInstance()

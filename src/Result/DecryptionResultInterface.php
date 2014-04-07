@@ -31,6 +31,13 @@ interface DecryptionResultInterface
     public function isSuccessful();
 
     /**
+     * Set the decrypted data.
+     *
+     * @param string|null $data The data, or null if unavailable.
+     */
+    public function setData($data);
+
+    /**
      * Get the decrypted data.
      *
      * This method will return null for unsuccessful and/or streaming results.

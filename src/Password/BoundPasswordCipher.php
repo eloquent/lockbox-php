@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundCipherInterface;
+use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
 
 /**
  * Binds a password to a cipher.
@@ -88,8 +89,7 @@ class BoundPasswordCipher implements BoundCipherInterface
      *
      * @param string $data The data to decrypt.
      *
-     * @return string                              The decrypted data.
-     * @throws Exception\DecryptionFailedException If the decryption failed.
+     * @return PasswordDecryptionResultInterface The decryption result.
      */
     public function decrypt($data)
     {

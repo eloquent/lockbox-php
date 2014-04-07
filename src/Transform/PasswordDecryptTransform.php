@@ -13,20 +13,19 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Exception\PasswordDecryptionFailedException;
-use Eloquent\Lockbox\Exception\UnsupportedTypeException;
-use Eloquent\Lockbox\Exception\UnsupportedVersionException;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
-use Eloquent\Lockbox\Padding\Exception\InvalidPaddingException;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Exception;
+use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Result\PasswordDecryptionResult;
 
 /**
  * A data transform for decryption of streaming data with a password.
  */
-class PasswordDecryptTransform extends AbstractTransform
+class PasswordDecryptTransform extends AbstractTransform implements
+    DecryptTransformInterface
 {
     /**
      * Construct a new password decrypt data transform.
@@ -83,13 +82,13 @@ class PasswordDecryptTransform extends AbstractTransform
     }
 
     /**
-     * Get the number of hash iterations used.
+     * Get the decryption result.
      *
-     * @return integer|null The hash iterations, or null if not yet known.
+     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
      */
-    public function iterations()
+    public function result()
     {
-        return $this->iterations;
+        return $this->result;
     }
 
     /**
@@ -111,11 +110,14 @@ class PasswordDecryptTransform extends AbstractTransform
      * @param mixed   &$context An arbitrary context value.
      * @param boolean $isEnd    True if all supplied data must be transformed.
      *
-     * @return tuple<string,integer> A 2-tuple of the transformed data, and the number of bytes consumed.
-     * @throws Exception             If the data cannot be transformed.
+     * @return tuple<string,integer,mixed> A 3-tuple of the transformed data, the number of bytes consumed, and any resulting error.
      */
     public function transform($data, &$context, $isEnd = false)
     {
+        if ($this->result) {
+            return array('', 0, null);
+        }
+
         if (null === $context) {
             $context = $this->initializeContext();
         }
@@ -126,14 +128,15 @@ class PasswordDecryptTransform extends AbstractTransform
         if (!$context->isVersionSeen) {
             if ($dataSize < 1) {
                 if ($isEnd) {
+                    $this->result = new PasswordDecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new PasswordDecryptionFailedException(
-                        $this->password()
-                    );
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $context->isVersionSeen = true;
@@ -141,12 +144,12 @@ class PasswordDecryptTransform extends AbstractTransform
             $versionData = substr($data, 0, 1);
             $version = ord($versionData);
             if (1 !== $version) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::UNSUPPORTED_VERSION()
+                );
                 $this->finalizeContext($context);
 
-                throw new PasswordDecryptionFailedException(
-                    $this->password(),
-                    new UnsupportedVersionException($version)
-                );
+                return array('', 1, $this->result);
             }
 
             $context->hashBuffer .= $versionData;
@@ -164,14 +167,15 @@ class PasswordDecryptTransform extends AbstractTransform
         if (!$context->isTypeSeen) {
             if ($dataSize < 1) {
                 if ($isEnd) {
+                    $this->result = new PasswordDecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new PasswordDecryptionFailedException(
-                        $this->password()
-                    );
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $context->isTypeSeen = true;
@@ -179,12 +183,12 @@ class PasswordDecryptTransform extends AbstractTransform
             $typeData = substr($data, 0, 1);
             $type = ord($typeData);
             if (2 !== $type) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::UNSUPPORTED_TYPE()
+                );
                 $this->finalizeContext($context);
 
-                throw new PasswordDecryptionFailedException(
-                    $this->password(),
-                    new UnsupportedTypeException($type)
-                );
+                return array('', 1, $this->result);
             }
 
             $context->hashBuffer .= $typeData;
@@ -202,14 +206,15 @@ class PasswordDecryptTransform extends AbstractTransform
         if (null === $context->iterations) {
             if ($dataSize < 4) {
                 if ($isEnd) {
+                    $this->result = new PasswordDecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new PasswordDecryptionFailedException(
-                        $this->password()
-                    );
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $context->isIterationsSeen = true;
@@ -233,14 +238,15 @@ class PasswordDecryptTransform extends AbstractTransform
         if (null === $context->key) {
             if ($dataSize < 64) {
                 if ($isEnd) {
+                    $this->result = new PasswordDecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new PasswordDecryptionFailedException(
-                        $this->password()
-                    );
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $salt = substr($data, 0, 64);
@@ -270,14 +276,15 @@ class PasswordDecryptTransform extends AbstractTransform
         if (!$context->isInitialized) {
             if ($dataSize < 16) {
                 if ($isEnd) {
+                    $this->result = new PasswordDecryptionResult(
+                        DecryptionResultType::INSUFFICIENT_DATA()
+                    );
                     $this->finalizeContext($context);
 
-                    throw new PasswordDecryptionFailedException(
-                        $this->password()
-                    );
+                    return array('', $consumed, $this->result);
                 }
 
-                return array('', $consumed);
+                return array('', $consumed, null);
             }
 
             $iv = substr($data, 0, 16);
@@ -308,12 +315,15 @@ class PasswordDecryptTransform extends AbstractTransform
 
         if ($dataSize < $requiredSize) {
             if ($isEnd) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::INSUFFICIENT_DATA()
+                );
                 $this->finalizeContext($context);
 
-                throw new PasswordDecryptionFailedException($this->password());
+                return array('', $consumed, $this->result);
             }
 
-            return array('', $consumed);
+            return array('', $consumed, null);
         }
 
         if ($isEnd) {
@@ -341,9 +351,12 @@ class PasswordDecryptTransform extends AbstractTransform
                     $hash
                 )
             ) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::INVALID_MAC()
+                );
                 $this->finalizeContext($context);
 
-                throw new PasswordDecryptionFailedException($this->password());
+                return array('', $consumed, $this->result);
             }
         }
 
@@ -351,20 +364,25 @@ class PasswordDecryptTransform extends AbstractTransform
 
         if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
-            if (!$isSuccessful) {
+
+            if ($isSuccessful) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::SUCCESS(),
+                    null,
+                    $context->iterations
+                );
+                $this->finalizeContext($context);
+            } else {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::INVALID_PADDING()
+                );
                 $this->finalizeContext($context);
 
-                throw new PasswordDecryptionFailedException(
-                    $this->password(),
-                    new InvalidPaddingException
-                );
+                return array('', $consumed, $this->result);
             }
-
-            $this->iterations = $context->iterations;
-            $this->finalizeContext($context);
         }
 
-        return array($output, $consumed);
+        return array($output, $consumed, null);
     }
 
     private function initializeContext()
@@ -401,5 +419,5 @@ class PasswordDecryptTransform extends AbstractTransform
     private $password;
     private $keyDeriver;
     private $unpadder;
-    private $iterations;
+    private $result;
 }
