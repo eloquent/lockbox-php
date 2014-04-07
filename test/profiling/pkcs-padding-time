@@ -1,0 +1,66 @@
+#!/usr/bin/env php
+<?php
+
+use Eloquent\Lockbox\Padding\PkcsPadding;
+
+require __DIR__ . '/../../vendor/autoload.php';
+
+$iterations = 50000;
+
+$padding = new PkcsPadding(16);
+
+for ($i = 0; $i < 16; $i++) {
+    $padSize = 16 - $i;
+    $data = $padding->pad(str_repeat(' ', $i));
+    $startTime = microtime(true);
+
+    for ($j = 0; $j < $iterations; $j++) {
+        list($isSuccessful) = $padding->unpad($data);
+        if (!$isSuccessful) {
+            throw new RuntimeException('Test is broken.');
+        }
+    }
+
+    printf(
+        'Un-padded %02d characters of   valid padding %d times in %0.4f seconds%s',
+        $padSize,
+        $iterations,
+        microtime(true) - $startTime,
+        PHP_EOL
+    );
+
+    $data = str_repeat(' ', 16);
+    $startTime = microtime(true);
+
+    for ($j = 0; $j < $iterations; $j++) {
+        list($isSuccessful) = $padding->unpad($data);
+        if ($isSuccessful) {
+            throw new RuntimeException('Test is broken.');
+        }
+    }
+
+    printf(
+        'Un-padded %02d characters of invalid padding %d times in %0.4f seconds%s',
+        $padSize,
+        $iterations,
+        microtime(true) - $startTime,
+        PHP_EOL
+    );
+}
+
+for ($i = 0; $i < 16; $i++) {
+    $data = str_repeat(' ', $i);
+    $startTime = microtime(true);
+
+    for ($j = 0; $j < $iterations; $j++) {
+        $data = $padding->pad($data);
+    }
+
+    printf(
+        'Padded %02d characters %d times in %0.4f seconds%s',
+        $i,
+        $iterations,
+        microtime(true) - $startTime,
+        PHP_EOL
+    );
+}

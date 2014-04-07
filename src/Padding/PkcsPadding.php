@@ -14,6 +14,8 @@ namespace Eloquent\Lockbox\Padding;
 /**
  * PCKS #5 / PKCS #7 padding scheme.
  *
+ * This implementation attempts to be constant-time.
+ *
  * @link http://tools.ietf.org/html/rfc2315#section-10.3
  */
 class PkcsPadding implements PaddingSchemeInterface
@@ -69,11 +71,20 @@ class PkcsPadding implements PaddingSchemeInterface
      */
     public function pad($data)
     {
-        $padSize = intval(
-            $this->blockSize() - (strlen($data) % $this->blockSize())
-        );
+        $blockSize = $this->blockSize();
+        $padSize = intval($blockSize - (strlen($data) % $blockSize));
+        $padChar = chr($padSize);
 
-        return $data . str_repeat(chr($padSize), $padSize);
+        $padded = $dummy = $data;
+        for ($i = 0; $i < $blockSize; $i ++) {
+            if ($i < $padSize) {
+                $padded .= $padChar;
+            } else {
+                $dummy .= $padChar;
+            }
+        }
+
+        return $padded;
     }
 
     /**
@@ -81,19 +92,66 @@ class PkcsPadding implements PaddingSchemeInterface
      *
      * @param string $data The padded data.
      *
-     * @return string                            The unpadded data.
-     * @throws Exception\InvalidPaddingException If the padding is invalid.
+     * @return tuple<boolean,string> A 2-tuple containing a boolean true if successful, and the data, which will be unpadded if successful.
      */
     public function unpad($data)
     {
-        $padSize = ord(substr($data, -1));
-        $padding = substr($data, -$padSize);
+        $dataSize = strlen($data);
+        $blockSize = $this->blockSize();
 
-        if (str_repeat(chr($padSize), $padSize) !== $padding) {
-            throw new Exception\InvalidPaddingException;
+        if (0 === $dataSize) {
+            $padSize = ord(substr("\x10", $dataSize - 0, 1));
+        } else {
+            $padSize = ord(substr($data, $dataSize - 1, 1));
         }
 
-        return substr($data, 0, -$padSize);
+        if ($padSize > $blockSize) {
+            $padSize = $blockSize + 0;
+        } else {
+            $padSize = $padSize + 0;
+        }
+        if ($padSize <= 0) {
+            $padSize = $blockSize + 0;
+        } else {
+            $padSize = $padSize + 0;
+        }
+
+        $padIndex = $dataSize - $padSize;
+        $padChar = chr($padSize);
+
+        $diff = 0;
+        $dummyDiff = 0;
+        $unpadded = '';
+        $dummyUnpadded = '';
+        $actualPadSize = 0;
+        $dummyActualPadSize = 0;
+        for ($i = 0; $i < $dataSize; $i ++) {
+            if ($i < $padIndex) {
+                $dummyDiff |= ord($data[$i]) ^ $padSize;
+                $unpadded .= $data[$i];
+                $dummyActualPadSize++;
+            } else {
+                $diff |= ord($data[$i]) ^ $padSize;
+                $dummyUnpadded .= $data[$i];
+                $actualPadSize++;
+            }
+        }
+
+        $isSuccessful = 0 === $diff;
+        $dummyIsSuccessful = true;
+        if ($isSuccessful) {
+            $isSuccessful = $actualPadSize === $padSize;
+        } else {
+            $dummyIsSuccessful = $actualPadSize === $padSize;
+        }
+
+        if ($isSuccessful) {
+            $finalData = $unpadded;
+        } else {
+            $finalData = $data;
+        }
+
+        return array($isSuccessful, $finalData);
     }
 
     private static $instance;

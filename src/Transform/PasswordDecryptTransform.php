@@ -350,14 +350,13 @@ class PasswordDecryptTransform extends AbstractTransform
         $output = mdecrypt_generic($context->mcryptModule, $consumedData);
 
         if ($isEnd) {
-            try {
-                $output = $this->unpadder()->unpad($output);
-            } catch (InvalidPaddingException $e) {
+            list($isSuccessful, $output) = $this->unpadder()->unpad($output);
+            if (!$isSuccessful) {
                 $this->finalizeContext($context);
 
                 throw new PasswordDecryptionFailedException(
                     $this->password(),
-                    $e
+                    new InvalidPaddingException
                 );
             }
 
