@@ -29,4 +29,13 @@ interface DecryptionResultInterface
      * @return boolean True if successful.
      */
     public function isSuccessful();
+
+    /**
+     * Get the decrypted data.
+     *
+     * This method will return null for unsuccessful and/or streaming results.
+     *
+     * @return string|null The data, or null if unavailable.
+     */
+    public function data();
 }

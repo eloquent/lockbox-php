@@ -21,10 +21,11 @@ class DecryptionResultTest extends PHPUnit_Framework_TestCase
 {
     public function testSuccessResult()
     {
-        $result = new DecryptionResult(DecryptionResultType::SUCCESS());
+        $result = new DecryptionResult(DecryptionResultType::SUCCESS(), 'data');
 
         $this->assertSame(DecryptionResultType::SUCCESS(), $result->type());
         $this->assertTrue($result->isSuccessful());
+        $this->assertSame('data', $result->data());
     }
 
     public function testFailureResult()
@@ -33,5 +34,6 @@ class DecryptionResultTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(DecryptionResultType::INVALID_MAC(), $result->type());
         $this->assertFalse($result->isSuccessful());
+        $this->assertNull($result->data());
     }
 }

@@ -21,11 +21,15 @@ class PasswordDecryptionResult extends AbstractDecryptionResult implements
      * Construct a new password decryption result.
      *
      * @param DecryptionResultType $type       The result type.
+     * @param string|null $data The data, or null if unavailable.
      * @param integer|null         $iterations The hash iterations, or null if unsuccessful.
      */
-    public function __construct(DecryptionResultType $type, $iterations = null)
-    {
-        parent::__construct($type);
+    public function __construct(
+        DecryptionResultType $type,
+        $data = null,
+        $iterations = null
+    ) {
+        parent::__construct($type, $data);
 
         $this->iterations = $iterations;
     }
