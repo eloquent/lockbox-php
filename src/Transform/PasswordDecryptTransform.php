@@ -343,6 +343,8 @@ class PasswordDecryptTransform extends AbstractTransform implements
         );
         $context->hashBuffer = '';
 
+        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
+
         if ($isEnd) {
             $context->isHashFinalized = true;
             if (
@@ -358,11 +360,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
 
                 return array('', $consumed, $this->result);
             }
-        }
 
-        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
-
-        if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
 
             if ($isSuccessful) {

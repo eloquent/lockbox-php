@@ -255,6 +255,8 @@ class DecryptTransform extends AbstractTransform implements
 
         hash_update($context->hashContext, $consumedData);
 
+        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
+
         if ($isEnd) {
             $context->isHashFinalized = true;
             if (
@@ -270,11 +272,7 @@ class DecryptTransform extends AbstractTransform implements
 
                 return array('', $consumed, $this->result);
             }
-        }
 
-        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
-
-        if ($isEnd) {
             list($isSuccessful, $output) = $this->unpadder()->unpad($output);
             $this->finalizeContext($context);
 
