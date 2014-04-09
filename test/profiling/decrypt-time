@@ -1,0 +1,122 @@
+#!/usr/bin/env php
+<?php
+
+use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\RawCipher;
+use Eloquent\Lockbox\Result\DecryptionResultType;
+
+require __DIR__ . '/../../vendor/autoload.php';
+
+$iterations = 10000;
+
+$cipher = RawCipher::instance();
+$key = KeyGenerator::instance()->generateKey();
+
+$encrypted = $cipher->encrypt($key, '1234567890123456');
+$size = strlen($encrypted);
+$iv = substr($encrypted, 2, 16);
+
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $encrypted);
+    if (!$result->isSuccessful()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted                        valid ciphertext %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
+$invalidPadding = substr($encrypted, 0, 18);
+$invalidPadding .= aesEncrypt($key, $iv, '1234567890123456');
+$invalidPadding .= authenticate($key, $invalidPadding);
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $invalidPadding);
+    if (DecryptionResultType::INVALID_PADDING() !== $result->type()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted         ciphertext with invalid padding %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
+$partialPadding = substr($encrypted, 0, 18);
+$partialPadding .= aesEncrypt($key, $iv, '1234567890123456');
+$partialPadding .= chr(15) . str_repeat(chr(16), 15);
+$partialPadding .= authenticate($key, $partialPadding);
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $partialPadding);
+    if (DecryptionResultType::INVALID_PADDING() !== $result->type()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted ciphertext with partially valid padding %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
+$badMac = substr($encrypted, 0, 18) . mcrypt_create_iv($size - 50) . substr($encrypted, -32);
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $badMac);
+    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted             ciphertext with invalid MAC %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
+$partialMac = substr($encrypted, 0, 18) . mcrypt_create_iv($size - 50);
+$partialMac .= authenticate($key, $partialMac);
+$partialMac[$size - 1] = chr(~ord($partialMac[$size - 1]));
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $partialMac);
+    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted     ciphertext with partially valid MAC %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
+function authenticate($key, $data) {
+    return hash_hmac('sha256', $data, $key->authenticationSecret(), true);
+}
+
+function aesEncrypt($key, $iv, $data) {
+    return mcrypt_encrypt(
+        MCRYPT_RIJNDAEL_128,
+        $key->encryptionSecret(),
+        $data,
+        MCRYPT_MODE_CBC,
+        $iv
+    );
+}

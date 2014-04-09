@@ -22,7 +22,25 @@ for ($i = 0; $i < 16; $i++) {
     }
 
     printf(
-        'Un-padded %02d characters of   valid padding %d times in %0.4f seconds%s',
+        'Un-padded %02d characters of           valid padding %d times in %0.4f seconds%s',
+        $padSize,
+        $iterations,
+        microtime(true) - $startTime,
+        PHP_EOL
+    );
+
+    $data = chr(15) . str_repeat(chr(16), 15);
+    $startTime = microtime(true);
+
+    for ($j = 0; $j < $iterations; $j++) {
+        list($isSuccessful) = $padding->unpad($data);
+        if ($isSuccessful) {
+            throw new RuntimeException('Test is broken.');
+        }
+    }
+
+    printf(
+        'Un-padded %02d characters of partially valid padding %d times in %0.4f seconds%s',
         $padSize,
         $iterations,
         microtime(true) - $startTime,
@@ -40,7 +58,7 @@ for ($i = 0; $i < 16; $i++) {
     }
 
     printf(
-        'Un-padded %02d characters of invalid padding %d times in %0.4f seconds%s',
+        'Un-padded %02d characters of         invalid padding %d times in %0.4f seconds%s',
         $padSize,
         $iterations,
         microtime(true) - $startTime,
