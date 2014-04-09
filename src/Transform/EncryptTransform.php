@@ -116,12 +116,12 @@ class EncryptTransform extends AbstractTransform
 
         if ($context->encryptBufferSize === $consume) {
             if ($isEnd) {
-                $context->outputBuffer .= mcrypt_generic(
+                $context->ciphertextBuffer .= mcrypt_generic(
                     $context->mcryptModule,
                     $this->padder()->pad($context->encryptBuffer)
                 );
             } else {
-                $context->outputBuffer .= mcrypt_generic(
+                $context->ciphertextBuffer .= mcrypt_generic(
                     $context->mcryptModule,
                     $context->encryptBuffer
                 );
@@ -129,7 +129,7 @@ class EncryptTransform extends AbstractTransform
             $context->encryptBuffer = '';
             $context->encryptBufferSize = 0;
         } else {
-            $context->outputBuffer .= mcrypt_generic(
+            $context->ciphertextBuffer .= mcrypt_generic(
                 $context->mcryptModule,
                 substr($context->encryptBuffer, 0, $consume)
             );
@@ -137,7 +137,22 @@ class EncryptTransform extends AbstractTransform
             $context->encryptBufferSize -= $consume;
         }
 
-        hash_update($context->hashContext, $context->outputBuffer);
+        hash_update($context->hashContext, $context->ciphertextBuffer);
+
+        foreach (str_split($context->ciphertextBuffer) as $block) {
+            $context->outputBuffer .= $block .
+                substr(
+                    hash_hmac(
+                        $context->hashAlgorithm,
+                        $block,
+                        $this->key()->authenticationSecret(),
+                        true
+                    ),
+                    0, 2
+                );
+        }
+
+        $context->ciphertextBuffer = '';
         $output = $context->outputBuffer;
 
         if ($isEnd) {
@@ -167,8 +182,10 @@ class EncryptTransform extends AbstractTransform
             $iv
         );
 
+        $context->hashAlgorithm = 'sha' .
+            $this->key()->authenticationSecretBits();
         $context->hashContext = hash_init(
-            'sha' . $this->key()->authenticationSecretBits(),
+            $context->hashAlgorithm,
             HASH_HMAC,
             $this->key()->authenticationSecret()
         );
