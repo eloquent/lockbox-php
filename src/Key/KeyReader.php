@@ -127,6 +127,20 @@ class KeyReader implements KeyReaderInterface
             throw new Exception\KeyReadException($path);
         }
 
+        return $this->readString($data, $path);
+    }
+
+    /**
+     * Read a key from the supplied string.
+     *
+     * @param string      $data The string to read from.
+     * @param string|null $path The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readString($data, $path = null)
+    {
         $data = json_decode($data);
         if (JSON_ERROR_NONE !== json_last_error()) {
             throw new Exception\KeyReadException($path);

@@ -32,7 +32,7 @@ class KeyReadExceptionTest extends PHPUnit_Framework_TestCase
         $exception = new KeyReadException;
 
         $this->assertNull($exception->path());
-        $this->assertSame("Unable to read key from stream.", $exception->getMessage());
+        $this->assertSame("Unable to read key.", $exception->getMessage());
         $this->assertSame(0, $exception->getCode());
         $this->assertNull($exception->getPrevious());
     }

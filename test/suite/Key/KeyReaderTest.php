@@ -133,7 +133,7 @@ EOD;
     {
         $this->setExpectedException(
             'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key from stream."
+            "Unable to read key."
         );
         $this->reader->readStream(null);
     }
@@ -145,6 +145,44 @@ EOD;
             "Unable to read key from '/path/to/file'."
         );
         $this->reader->readStream(null, '/path/to/file');
+    }
+
+    public function testReadStringFull()
+    {
+        $key = $this->reader->readString($this->jsonDataFull);
+
+        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('name', $key->name());
+        $this->assertSame('description', $key->description());
+    }
+
+    public function testReadStringMinimal()
+    {
+        $key = $this->reader->readString($this->jsonDataMinimal);
+
+        $this->assertSame('1234567890123456', $key->encryptionSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertNull($key->name());
+        $this->assertNull($key->description());
+    }
+
+    public function testReadStringFailureStreamReadWithoutPath()
+    {
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Key\Exception\KeyReadException',
+            "Unable to read key."
+        );
+        $this->reader->readString(null);
+    }
+
+    public function testReadStringFailureStreamReadWithPath()
+    {
+        $this->setExpectedException(
+            'Eloquent\Lockbox\Key\Exception\KeyReadException',
+            "Unable to read key from '/path/to/file'."
+        );
+        $this->reader->readString(null, '/path/to/file');
     }
 
     public function invalidDataData()
@@ -167,29 +205,25 @@ EOD;
     /**
      * @dataProvider invalidDataData
      */
-    public function testReadStreamFailureInvalidDataWithoutPath($jsonData)
+    public function testReadStringFailureInvalidDataWithoutPath($data)
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($jsonData), 'rb');
-
         $this->setExpectedException(
             'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key from stream."
+            "Unable to read key."
         );
-        $this->reader->readStream($stream);
+        $this->reader->readString($data);
     }
 
     /**
      * @dataProvider invalidDataData
      */
-    public function testReadStreamFailureInvalidDataWithPath($jsonData)
+    public function testReadStringFailureInvalidDataWithPath($data)
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($jsonData), 'rb');
-
         $this->setExpectedException(
             'Eloquent\Lockbox\Key\Exception\KeyReadException',
             "Unable to read key from '/path/to/file'."
         );
-        $this->reader->readStream($stream, '/path/to/file');
+        $this->reader->readString($data, '/path/to/file');
     }
 
     public function testInstance()

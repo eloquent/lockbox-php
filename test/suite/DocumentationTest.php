@@ -42,9 +42,9 @@ $keyWriter = new KeyWriter;
 $keyWriter->writeFile($key, $keyPath);
 
         $this->assertRegExp(
-            '/{"type":"lockbox-key","version":1,' .
-            '"encryptionSecret":"[A-Za-z0-9_=-]{43}",' .
-            '"authenticationSecret":"[A-Za-z0-9_=-]{43}"}/',
+            '/{\n    "type": "lockbox-key",\n    "version": 1,\n' .
+            '    "encryptionSecret": "[A-Za-z0-9_=-]{43}",\n' .
+            '    "authenticationSecret": "[A-Za-z0-9_=-]{43}"\n}\n/',
             file_get_contents($keyPath)
         );
     }

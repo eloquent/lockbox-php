@@ -36,4 +36,15 @@ interface KeyReaderInterface
      * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStream($stream, $path = null);
+
+    /**
+     * Read a key from the supplied string.
+     *
+     * @param string      $data The string to read from.
+     * @param string|null $path The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readString($data, $path = null);
 }

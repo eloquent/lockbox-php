@@ -36,4 +36,13 @@ interface KeyWriterInterface
      * @throws Exception\KeyWriteException If the key cannot be written.
      */
     public function writeStream(KeyInterface $key, $stream, $path = null);
+
+    /**
+     * Write a key to a string.
+     *
+     * @param KeyInterface $key The key.
+     *
+     * @return string The key string.
+     */
+    public function writeString(KeyInterface $key);
 }

@@ -15,7 +15,6 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
 use Exception as NativeException;
 use Icecave\Isolator\Isolator;
-use stdClass;
 
 /**
  * Writes encryption keys to files and streams.
@@ -104,38 +103,43 @@ class KeyWriter implements KeyWriterInterface
      */
     public function writeStream(KeyInterface $key, $stream, $path = null)
     {
-        $result = @fwrite($stream, json_encode($this->keyData($key)));
+        $result = @fwrite($stream, $this->writeString($key));
         if (!$result) {
             throw new Exception\KeyWriteException($path);
         }
     }
 
     /**
-     * Create a JSON serializable object from the supplied key.
+     * Write a key to a string.
      *
      * @param KeyInterface $key The key.
      *
-     * @return stdClass The serializable object.
+     * @return string The key string.
      */
-    protected function keyData(KeyInterface $key)
+    public function writeString(KeyInterface $key)
     {
-        $data = new stdClass;
-        $data->type = 'lockbox-key';
-        $data->version = 1;
+        $data = "{\n";
 
         if (null !== $key->name()) {
-            $data->name = $key->name();
+            $data .= '    "name": ' . json_encode($key->name()) . ",\n";
         }
         if (null !== $key->description()) {
-            $data->description = $key->description();
+            $data .= '    "description": ' . json_encode($key->description()) .
+                ",\n";
         }
 
-        $data->encryptionSecret = $this->encoder()
-            ->encode($key->encryptionSecret());
-        $data->authenticationSecret = $this->encoder()
-            ->encode($key->authenticationSecret());
+        $data .= "    \"type\": \"lockbox-key\",\n    \"version\": 1,\n";
 
-        return $data;
+        $data .= '    "encryptionSecret": ' .
+            json_encode($this->encoder()->encode($key->encryptionSecret())) .
+            ",\n";
+        $data .= '    "authenticationSecret": ' .
+            json_encode(
+                $this->encoder()->encode($key->authenticationSecret())
+            ) .
+            "\n";
+
+        return $data . "}\n";
     }
 
     /**

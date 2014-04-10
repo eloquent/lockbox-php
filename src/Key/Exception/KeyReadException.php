@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 
 /**
- * Could not read a key from the specified path or stream.
+ * Could not read a key using the supplied information.
  */
 final class KeyReadException extends Exception
 {
@@ -29,7 +29,7 @@ final class KeyReadException extends Exception
         $this->path = $path;
 
         if (null === $path) {
-            $message = 'Unable to read key from stream.';
+            $message = 'Unable to read key.';
         } else {
             $message = sprintf(
                 'Unable to read key from %s.',

@@ -34,6 +34,27 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
             'description'
         );
         $this->keyMinimal = new Key('1234567890123456', '12345678901234567890123456789013');
+
+        $this->keyFullString = <<<'EOD'
+{
+    "name": "name",
+    "description": "description",
+    "type": "lockbox-key",
+    "version": 1,
+    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
+    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+}
+
+EOD;
+        $this->keyMinimalString = <<<'EOD'
+{
+    "type": "lockbox-key",
+    "version": 1,
+    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
+    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+}
+
+EOD;
     }
 
     protected function tearDown()
@@ -64,15 +85,7 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         Phake::when($this->isolator)->fopen($path, 'wb')->thenReturn($this->stream);
         $this->writer->writeFile($this->keyFull, $path);
 
-        $this->assertSame(
-            '{"type":"lockbox-key",' .
-            '"version":1,' .
-            '"name":"name",' .
-            '"description":"description",' .
-            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",' .
-            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
-            file_get_contents($path)
-        );
+        $this->assertSame($this->keyFullString, file_get_contents($path));
         Phake::verify($this->isolator)->fclose($this->stream);
     }
 
@@ -83,13 +96,7 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         Phake::when($this->isolator)->fopen($path, 'wb')->thenReturn($this->stream);
         $this->writer->writeFile($this->keyMinimal, $path);
 
-        $this->assertSame(
-            '{"type":"lockbox-key",' .
-            '"version":1,' .
-            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng",' .
-            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
-            file_get_contents($path)
-        );
+        $this->assertSame($this->keyMinimalString, file_get_contents($path));
         Phake::verify($this->isolator)->fclose($this->stream);
     }
 
@@ -125,15 +132,7 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->stream = fopen($path, 'wb');
         $this->writer->writeStream($this->keyFull, $this->stream);
 
-        $this->assertSame(
-            '{"type":"lockbox-key",' .
-            '"version":1,' .
-            '"name":"name",' .
-            '"description":"description",' .
-            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",' .
-            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
-            file_get_contents($path)
-        );
+        $this->assertSame($this->keyFullString, file_get_contents($path));
     }
 
     public function testWriteStreamMinimal()
@@ -142,13 +141,7 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->stream = fopen($path, 'wb');
         $this->writer->writeStream($this->keyMinimal, $this->stream);
 
-        $this->assertSame(
-            '{"type":"lockbox-key",' .
-            '"version":1,' .
-            '"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng",' .
-            '"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}',
-            file_get_contents($path)
-        );
+        $this->assertSame($this->keyMinimalString, file_get_contents($path));
     }
 
     public function testWriteStreamFailureWithPath()
@@ -167,6 +160,16 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
             "Unable to write key to stream."
         );
         $this->writer->writeStream($this->keyMinimal, null);
+    }
+
+    public function testWriteStringFull()
+    {
+        $this->assertSame($this->keyFullString, $this->writer->writeString($this->keyFull));
+    }
+
+    public function testWriteStringMinimal()
+    {
+        $this->assertSame($this->keyMinimalString, $this->writer->writeString($this->keyMinimal));
     }
 
     public function testInstance()
