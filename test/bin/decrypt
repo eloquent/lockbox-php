@@ -15,11 +15,29 @@ use Eloquent\Lockbox\Key\KeyReader;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-$key = null;
+$path = null;
 if (isset($_SERVER['argv'][1])) {
-    $key = KeyReader::instance()->readFile($_SERVER['argv'][1]);
+    $path = $_SERVER['argv'][1];
+}
+if (!$path) {
+    throw new RuntimeException('Key must be specified.');
 }
 
-echo Decrypter::instance()
-    ->decrypt($key, trim(stream_get_contents(STDIN))) .
-    PHP_EOL;
+$password = null;
+if (isset($_SERVER['argv'][2])) {
+    $password = $_SERVER['argv'][2];
+}
+
+if (null === $password) {
+    $key = KeyReader::instance()->readFile($path);
+} else {
+    $key = KeyReader::instance()->readFileWithPassword($password, $path);
+}
+
+$result = Decrypter::instance()
+    ->decrypt($key, trim(stream_get_contents(STDIN)));
+if (!$result->isSuccessful()) {
+    throw new RuntimeException('Decryption failed.');
+}
+
+echo $result->data() . PHP_EOL;
