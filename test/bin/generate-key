@@ -35,13 +35,36 @@ if (isset($_SERVER['argv'][4])) {
     $authenticationSecretBits = intval($_SERVER['argv'][4]) ?: null;
 }
 
-KeyWriter::instance()->writeStream(
-    KeyGenerator::instance()->generateKey(
-        $name,
-        $description,
-        $encryptionSecretBits,
-        $authenticationSecretBits
-    ),
-    STDOUT
+$password = null;
+if (isset($_SERVER['argv'][5])) {
+    $password = $_SERVER['argv'][5];
+}
+
+$iterations = null;
+if (isset($_SERVER['argv'][6])) {
+    $iterations = intval($_SERVER['argv'][6]) ?: null;
+}
+
+if (null !== $password && !$iterations) {
+    throw new RuntimeException('Iterations must be specified.');
+}
+
+$key = KeyGenerator::instance()->generateKey(
+    $name,
+    $description,
+    $encryptionSecretBits,
+    $authenticationSecretBits
 );
+
+if (null === $password) {
+    KeyWriter::instance()->writeStream($key, STDOUT);
+} else {
+    KeyWriter::instance()->writeStreamWithPassword(
+        $password,
+        $iterations,
+        $key,
+        STDOUT
+    );
+}
+
 echo PHP_EOL;

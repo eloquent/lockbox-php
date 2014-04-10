@@ -215,11 +215,16 @@ class KeyWriter implements EncryptedKeyWriterInterface
         $iterations,
         KeyInterface $key
     ) {
-        return $this->encrypter()->encrypt(
-            $password,
-            $iterations,
-            $this->writeString($key)
-        ) . "\n";
+        return
+            chunk_split(
+                $this->encrypter()->encrypt(
+                    $password,
+                    $iterations,
+                    $this->writeString($key)
+                ),
+                64,
+                "\n"
+            );
     }
 
     /**

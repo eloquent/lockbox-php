@@ -1,0 +1,63 @@
+#!/usr/bin/env php
+<?php
+
+/*
+ * This file is part of the Lockbox package.
+ *
+ * Copyright © 2014 Erin Millard
+ *
+ * For the full copyright and license information, please view the LICENSE file
+ * that was distributed with this source code.
+ */
+
+require __DIR__ . '/../../vendor/autoload.php';
+
+$targetSeconds = null;
+if (isset($_SERVER['argv'][1])) {
+    $targetSeconds = floatval($_SERVER['argv'][1]);
+}
+$targetSeconds = $targetSeconds ?: 0.1;
+
+$granularity = 1000;
+
+$startTime = microtime(true);
+$iterations = 0;
+while (microtime(true) - $startTime < $targetSeconds) {
+    $iterations += $granularity;
+
+    hash_pbkdf2(
+        'sha512',
+        'password',
+        '1234567890123456789012345678901234567890123456789012345678901234',
+        $granularity,
+        64,
+        true
+    );
+}
+
+printf(
+    "Based on current hardware, with a target time of %0.3f seconds, " .
+    "an iteration count of %d is suggested.\n",
+    $targetSeconds,
+    $iterations
+);
+
+$iterations = 1000 * pow(2, (intval(date('Y')) - 2000) / 2);
+$startTime = microtime(true);
+hash_pbkdf2(
+    'sha512',
+    'password',
+    '1234567890123456789012345678901234567890123456789012345678901234',
+    $iterations,
+    64,
+    true
+);
+$elapsed = microtime(true) - $startTime;
+
+printf(
+    "Based on Moore's law and suggested best practices, " .
+    "a minimum iteration count of %d is suggested. " .
+    "Based on current hardware, this would take ~%0.3f seconds.\n",
+    $iterations,
+    $elapsed
+);
