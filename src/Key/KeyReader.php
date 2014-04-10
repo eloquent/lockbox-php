@@ -14,13 +14,15 @@ namespace Eloquent\Lockbox\Key;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
-use Exception as NativeException;
+use Eloquent\Lockbox\Comparator\SlowStringComparator;
+use Eloquent\Lockbox\Password\PasswordDecrypter;
+use Eloquent\Lockbox\Password\PasswordDecrypterInterface;
 use Icecave\Isolator\Isolator;
 
 /**
  * Reads encryption keys from files and streams.
  */
-class KeyReader implements KeyReaderInterface
+class KeyReader implements EncryptedKeyReaderInterface
 {
     /**
      * Get the static instance of this reader.
@@ -39,25 +41,32 @@ class KeyReader implements KeyReaderInterface
     /**
      * Construct a new key reader.
      *
-     * @param KeyFactoryInterface|null $factory  The factory to use.
-     * @param DecoderInterface|null    $decoder  The decoder to use.
-     * @param Isolator|null            $isolator The isolator to use.
+     * @param KeyFactoryInterface|null        $factory   The factory to use.
+     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
+     * @param DecoderInterface|null           $decoder   The decoder to use.
+     * @param Isolator|null                   $isolator  The isolator to use.
      */
     public function __construct(
         KeyFactoryInterface $factory = null,
+        PasswordDecrypterInterface $decrypter = null,
         DecoderInterface $decoder = null,
         Isolator $isolator = null
     ) {
         if (null === $factory) {
             $factory = KeyFactory::instance();
         }
+        if (null === $decrypter) {
+            $decrypter = PasswordDecrypter::instance();
+        }
         if (null === $decoder) {
             $decoder = Base64Url::instance();
         }
 
         $this->factory = $factory;
+        $this->decrypter = $decrypter;
         $this->decoder = $decoder;
         $this->isolator = Isolator::get($isolator);
+        $this->encryptedHeader = chr(1) . chr(2);
     }
 
     /**
@@ -68,6 +77,16 @@ class KeyReader implements KeyReaderInterface
     public function factory()
     {
         return $this->factory;
+    }
+
+    /**
+     * Get the decrypter.
+     *
+     * @return PasswordDecrypterInterface The decrypter.
+     */
+    public function decrypter()
+    {
+        return $this->decrypter;
     }
 
     /**
@@ -90,25 +109,50 @@ class KeyReader implements KeyReaderInterface
      */
     public function readFile($path)
     {
-        $stream = $this->isolator()->fopen($path, 'rb');
-        if (false === $stream) {
+        if (!$data = $this->isolator()->file_get_contents($path)) {
             throw new Exception\KeyReadException($path);
         }
 
-        $e = null;
-        try {
-            $key = $this->readStream($stream, $path);
-        } catch (NativeException $e) {
-            // re-thrown after cleanup
+        return $this->readString($data, $path);
+    }
+
+    /**
+     * Read a key from the supplied path, and decrypt with a password.
+     *
+     * @param string $password The password.
+     * @param string $path     The path to read from.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readFileWithPassword($password, $path)
+    {
+        if (!$data = $this->isolator()->file_get_contents($path)) {
+            throw new Exception\KeyReadException($path);
         }
 
-        $this->isolator()->fclose($stream);
+        return $this->readStringWithPassword($password, $data, $path);
+    }
 
-        if ($e) {
-            throw $e;
+    /**
+     * Read a key from the supplied path, and decrypt with an optional password.
+     *
+     * If a password is required to read the key, it will be acquired by
+     * executing the callback.
+     *
+     * @param callable $callback The password callback.
+     * @param string   $path     The path to read from.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readFileWithPasswordCallback($callback, $path)
+    {
+        if (!$data = $this->isolator()->file_get_contents($path)) {
+            throw new Exception\KeyReadException($path);
         }
 
-        return $key;
+        return $this->readStringWithPasswordCallback($callback, $data, $path);
     }
 
     /**
@@ -122,12 +166,56 @@ class KeyReader implements KeyReaderInterface
      */
     public function readStream($stream, $path = null)
     {
-        $data = @stream_get_contents($stream);
-        if (!$data) {
+        if (!$data = @stream_get_contents($stream)) {
             throw new Exception\KeyReadException($path);
         }
 
         return $this->readString($data, $path);
+    }
+
+    /**
+     * Read a key from the supplied stream, and decrypt with a password.
+     *
+     * @param string      $password The password.
+     * @param stream      $stream   The stream to read from.
+     * @param string|null $path     The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readStreamWithPassword($password, $stream, $path = null)
+    {
+        if (!$data = @stream_get_contents($stream)) {
+            throw new Exception\KeyReadException($path);
+        }
+
+        return $this->readStringWithPassword($password, $data, $path);
+    }
+
+    /**
+     * Read a key from the supplied stream, and decrypt with an optional
+     * password.
+     *
+     * If a password is required to read the key, it will be acquired by
+     * executing the callback.
+     *
+     * @param callable    $callback The password callback.
+     * @param stream      $stream   The stream to read from.
+     * @param string|null $path     The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readStreamWithPasswordCallback(
+        $callback,
+        $stream,
+        $path = null
+    ) {
+        if (!$data = @stream_get_contents($stream)) {
+            throw new Exception\KeyReadException($path);
+        }
+
+        return $this->readStringWithPasswordCallback($callback, $data, $path);
     }
 
     /**
@@ -213,6 +301,50 @@ class KeyReader implements KeyReaderInterface
     }
 
     /**
+     * Read a key from the supplied string, and decrypt with a password.
+     *
+     * @param string      $password The password.
+     * @param string      $data     The string to read from.
+     * @param string|null $path     The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readStringWithPassword($password, $data, $path = null)
+    {
+        $result = $this->decrypter()->decrypt($password, trim($data));
+        if (!$result->isSuccessful()) {
+            throw new Exception\KeyReadException($path);
+        }
+
+        return $this->readString($result->data(), $path);
+    }
+
+    /**
+     * Read a key from the supplied string, and decrypt with a password.
+     *
+     * @param callable    $callback The password callback.
+     * @param string      $data     The string to read from.
+     * @param string|null $path     The path, if known.
+     *
+     * @return KeyInterface               The key.
+     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     */
+    public function readStringWithPasswordCallback(
+        $callback,
+        $data,
+        $path = null
+    ) {
+        $data = trim($data);
+
+        if ($this->isEncryptedData($data)) {
+            return $this->readStringWithPassword($callback(), $data, $path);
+        }
+
+        return $this->readString($data, $path);
+    }
+
+    /**
      * Get the isolator.
      *
      * @return Isolator The isolator.
@@ -222,8 +354,32 @@ class KeyReader implements KeyReaderInterface
         return $this->isolator;
     }
 
+    /**
+     * Returns true if the supplied data appears to be a password encrypted
+     * packet.
+     *
+     * @param string $data The data to check for encryption.
+     *
+     * @return boolean True if the data appears to be encrypted.
+     */
+    protected function isEncryptedData($data)
+    {
+        try {
+            $data = $this->decoder()->decode($data);
+        } catch (EncodingExceptionInterface $e) {
+            return false;
+        }
+
+        return SlowStringComparator::isEqual(
+            $this->encryptedHeader,
+            substr($data, 0, 2)
+        );
+    }
+
     private static $instance;
     private $factory;
+    private $decrypter;
     private $decoder;
     private $isolator;
+    private $encryptedHeader;
 }
