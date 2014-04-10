@@ -93,36 +93,30 @@ class RawDecrypter implements DecrypterInterface
         );
         hash_update($hashContext, substr($data, 0, 18));
 
+        $blockMacs = '';
+        $actualBlockMacs = '';
         foreach (str_split($ciphertext, 18) as $block) {
             list($block, $blockMac) = str_split($block, 16);
 
-            if (
-                !SlowStringComparator::isEqual(
-                    substr(
-                        hash_hmac(
-                            $hashAlgorithm,
-                            $block,
-                            $key->authenticationSecret(),
-                            true
-                        ),
-                        0,
-                        2
-                    ),
-                    $blockMac
-                )
-            ) {
-                return new DecryptionResult(
-                    DecryptionResultType::INVALID_MAC()
-                );
-            }
+            $blockMacs .= $blockMac;
+            $actualBlockMacs .= substr(
+                hash_hmac(
+                    $hashAlgorithm,
+                    $block,
+                    $key->authenticationSecret(),
+                    true
+                ),
+                0,
+                2
+            );
 
             hash_update($hashContext, $block);
         }
 
         if (
             !SlowStringComparator::isEqual(
-                substr($data, $ciphertextSize + 18),
-                hash_final($hashContext, true)
+                substr($data, $ciphertextSize + 18) . $blockMacs,
+                hash_final($hashContext, true) . $actualBlockMacs
             )
         ) {
             return new DecryptionResult(DecryptionResultType::INVALID_MAC());

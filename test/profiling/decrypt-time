@@ -14,7 +14,18 @@ $key = KeyGenerator::instance()->generateKey();
 
 $encrypted = $cipher->encrypt($key, '1234567890123456');
 $size = strlen($encrypted);
+$header = substr($encrypted, 0, 18);
 $iv = substr($encrypted, 2, 16);
+$ciphertext = aesEncrypt($key, $iv, '1234567890123456');
+$block0 = substr($ciphertext, 0, 16);
+$block0Mac = authenticate($key, $block0, 2);
+$block1 = str_repeat(chr(16), 16);
+$block1Mac = authenticate($key, $block1, 2);
+$ciphertextUnpadded = aesEncrypt($key, $iv, '12345678901234567890123456789012');
+$block0Unpadded = substr($ciphertextUnpadded, 0, 16);
+$block0UnpaddedMac = authenticate($key, $block0Unpadded, 2);
+$block1Unpadded = substr($ciphertextUnpadded, 16);
+$block1UnpaddedMac = authenticate($key, $block1Unpadded, 2);
 
 
 $startTime = microtime(true);
@@ -32,9 +43,10 @@ printf(
 );
 
 
-$invalidPadding = substr($encrypted, 0, 18);
-$invalidPadding .= aesEncrypt($key, $iv, '1234567890123456');
-$invalidPadding .= authenticate($key, $invalidPadding);
+$invalidPadding = $header;
+$invalidPadding .= $block0Unpadded . $block0UnpaddedMac;
+$invalidPadding .= $block1Unpadded . $block1UnpaddedMac;
+$invalidPadding .= authenticate($key, $header . $block0Unpadded . $block1Unpadded);
 
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
@@ -51,10 +63,11 @@ printf(
 );
 
 
-$partialPadding = substr($encrypted, 0, 18);
-$partialPadding .= aesEncrypt($key, $iv, '1234567890123456');
+$partialPadding = $header;
+$partialPadding .= $block0 . $block0Mac;
 $partialPadding .= chr(15) . str_repeat(chr(16), 15);
-$partialPadding .= authenticate($key, $partialPadding);
+$partialPadding .= authenticate($key, chr(15) . str_repeat(chr(16), 15), 2);
+$partialPadding .= authenticate($key, $header . $block0 . chr(15) . str_repeat(chr(16), 15));
 
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
@@ -88,6 +101,23 @@ printf(
 );
 
 
+$badBlockMac = substr($encrypted, 0, 34) . '  ' . substr($encrypted, 36);
+
+$startTime = microtime(true);
+for ($i = 0; $i < $iterations; $i++) {
+    $result = $cipher->decrypt($key, $badBlockMac);
+    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+        throw new RuntimeException('Test is broken.');
+    }
+}
+printf(
+    'Decrypted       ciphertext with invalid block MAC %d times in %0.4f seconds%s',
+    $iterations,
+    microtime(true) - $startTime,
+    PHP_EOL
+);
+
+
 $partialMac = substr($encrypted, 0, 18) . mcrypt_create_iv($size - 50);
 $partialMac .= authenticate($key, $partialMac);
 $partialMac[$size - 1] = chr(~ord($partialMac[$size - 1]));
@@ -107,8 +137,14 @@ printf(
 );
 
 
-function authenticate($key, $data) {
-    return hash_hmac('sha256', $data, $key->authenticationSecret(), true);
+function authenticate($key, $data, $size = null) {
+    $mac = hash_hmac('sha256', $data, $key->authenticationSecret(), true);
+
+    if (null !== $size) {
+        $mac = substr($mac, 0, $size);
+    }
+
+    return $mac;
 }
 
 function aesEncrypt($key, $iv, $data) {
