@@ -260,8 +260,8 @@ class PasswordDecryptTransform extends AbstractTransform implements
                 HASH_HMAC,
                 $context->key->authenticationSecret()
             );
-
-            $context->hashBuffer .= $salt;
+            hash_update($context->hashContext, $context->hashBuffer . $salt);
+            $context->hashBuffer = '';
 
             if (64 === $dataSize) {
                 $data = '';
@@ -294,7 +294,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
                 $iv
             );
 
-            $context->hashBuffer .= $iv;
+            hash_update($context->hashContext, $iv);
             $context->isInitialized = true;
 
             if (16 === $dataSize) {
@@ -308,9 +308,9 @@ class PasswordDecryptTransform extends AbstractTransform implements
         }
 
         if ($isEnd) {
-            $requiredSize = 48;
+            $requiredSize = 50;
         } else {
-            $requiredSize = 64;
+            $requiredSize = 68;
         }
 
         if ($dataSize < $requiredSize) {
@@ -328,22 +328,55 @@ class PasswordDecryptTransform extends AbstractTransform implements
 
         if ($isEnd) {
             $consume = $dataSize - 32;
+
+            if (0 !== $consume % 18) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::INVALID_SIZE()
+                );
+                $this->finalizeContext($context);
+
+                return array('', $consumed, $this->result);
+            }
+
             $hash = substr($data, $consume);
             $consumedData = substr($data, 0, $consume);
             $consumed += $dataSize;
         } else {
-            $consume = $this->blocksSize($dataSize - 48, 16, $isEnd);
+            $consume = $this->blocksSize($dataSize - 48, 18, $isEnd);
             $consumed += $consume;
             $consumedData = substr($data, 0, $consume);
         }
 
-        hash_update(
-            $context->hashContext,
-            $context->hashBuffer . $consumedData
-        );
-        $context->hashBuffer = '';
+        $output = '';
+        foreach (str_split($consumedData, 18) as $block) {
+            list($block, $blockMac) = str_split($block, 16);
 
-        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
+            if (
+                !SlowStringComparator::isEqual(
+                    substr(
+                        hash_hmac(
+                            'sha256',
+                            $block,
+                            $context->key->authenticationSecret(),
+                            true
+                        ),
+                        0,
+                        2
+                    ),
+                    $blockMac
+                )
+            ) {
+                $this->result = new PasswordDecryptionResult(
+                    DecryptionResultType::INVALID_MAC()
+                );
+                $this->finalizeContext($context);
+
+                return array('', $consumed, $this->result);
+            }
+
+            hash_update($context->hashContext, $block);
+            $output .= mdecrypt_generic($context->mcryptModule, $block);
+        }
 
         if ($isEnd) {
             $context->isHashFinalized = true;

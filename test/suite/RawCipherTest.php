@@ -285,7 +285,7 @@ class RawCipherTest extends PHPUnit_Framework_TestCase
     protected function authenticate($data, $size = null)
     {
         $mac = hash_hmac(
-            'sha' . strlen($this->key->authenticationSecret()) * 8,
+            'sha' . $this->key->authenticationSecretBits(),
             $data,
             $this->key->authenticationSecret(),
             true

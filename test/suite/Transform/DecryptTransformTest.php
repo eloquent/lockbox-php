@@ -135,7 +135,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported version' => array(
-                chr(111) . '12345678901234567' . '123456789012345678' .
+                chr(111) . $this->type . $this->iv . '123456789012345678' .
                 $this->authenticate(chr(111) . '12345678901234567' . '1234567890123456'),
                 'UNSUPPORTED_VERSION',
             ),
@@ -144,7 +144,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported type' => array(
-                $this->version . chr(111) . '1234567890123456' . '123456789012345678' .
+                $this->version . chr(111) . $this->iv . '123456789012345678' .
                 $this->authenticate($this->version . chr(111) . '1234567890123456' . '1234567890123456'),
                 'UNSUPPORTED_TYPE',
             ),
@@ -176,15 +176,6 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 '1234567890123456789012345678',
                 'INVALID_SIZE',
             ),
-            'Bad MAC' => array(
-                $this->version . $this->type . $this->iv .
-                substr($this->encryptAndPadAes('1234567890123456'), 0, 16) .
-                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 0, 16), 2) .
-                substr($this->encryptAndPadAes('1234567890123456'), 16) .
-                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 16), 2) .
-                '1234567890123456789012345678',
-                'INVALID_MAC',
-            ),
             'Bad block MAC' => array(
                 $this->version . $this->type . $this->iv .
                 substr($this->encryptAndPadAes('1234567890123456'), 0, 16) .
@@ -194,10 +185,18 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 '1234567890123456789012345678',
                 'INVALID_MAC',
             ),
+            'Bad MAC' => array(
+                $this->version . $this->type . $this->iv .
+                substr($this->encryptAndPadAes('1234567890123456'), 0, 16) .
+                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 0, 16), 2) .
+                substr($this->encryptAndPadAes('1234567890123456'), 16) .
+                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 16), 2) .
+                '1234567890123456789012345678',
+                'INVALID_MAC',
+            ),
             'Bad AES data' => array(
                 $this->version . $this->type . $this->iv .
-                'foobarbazquxdoom' .
-                $this->authenticate('foobarbazquxdoom', 2) .
+                'foobarbazquxdoom' . $this->authenticate('foobarbazquxdoom', 2) .
                 $this->authenticate($this->version . $this->type . $this->iv .'foobarbazquxdoom'),
                 'INVALID_PADDING',
             ),
@@ -321,7 +320,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
     protected function authenticate($data, $size = null)
     {
         $mac = hash_hmac(
-            'sha' . strlen($this->key->authenticationSecret()) * 8,
+            'sha' . $this->key->authenticationSecretBits(),
             $data,
             $this->key->authenticationSecret(),
             true

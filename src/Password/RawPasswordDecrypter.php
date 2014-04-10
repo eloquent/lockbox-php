@@ -111,7 +111,9 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
     public function decrypt($password, $data)
     {
         $size = strlen($data);
-        if ($size < 118) {
+        $ciphertextSize = $size - 118;
+
+        if ($ciphertextSize < 18 || 0 !== $ciphertextSize % 18) {
             return new PasswordDecryptionResult(
                 DecryptionResultType::INVALID_SIZE()
             );
@@ -140,17 +142,42 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
             substr($data, 6, 64)
         );
 
-        $hash = hash_hmac(
-            'sha' . $key->authenticationSecretBits(),
-            substr($data, 0, $size - $key->authenticationSecretBytes()),
-            $key->authenticationSecret(),
-            true
+        $hashContext = hash_init(
+            'sha256',
+            HASH_HMAC,
+            $key->authenticationSecret()
         );
+        hash_update($hashContext, substr($data, 0, 86));
+
+        $ciphertext = substr($data, 86, $ciphertextSize);
+
+        $blocks = '';
+        $expectedBlockMacs = '';
+        $actualBlockMacs = '';
+        foreach (str_split($ciphertext, 18) as $block) {
+            list($block, $blockMac) = str_split($block, 16);
+
+            $blocks .= $block;
+
+            $expectedBlockMacs .= $blockMac;
+            $actualBlockMacs .= substr(
+                hash_hmac(
+                    'sha256',
+                    $block,
+                    $key->authenticationSecret(),
+                    true
+                ),
+                0,
+                2
+            );
+
+            hash_update($hashContext, $block);
+        }
 
         if (
             !SlowStringComparator::isEqual(
-                substr($data, $size - $key->authenticationSecretBytes()),
-                $hash
+                substr($data, $ciphertextSize + 86) . $expectedBlockMacs,
+                hash_final($hashContext, true) . $actualBlockMacs
             )
         ) {
             return new PasswordDecryptionResult(
@@ -161,7 +188,7 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
         $data = mcrypt_decrypt(
             MCRYPT_RIJNDAEL_128,
             $key->encryptionSecret(),
-            substr($data, 86, $size - 118),
+            $blocks,
             MCRYPT_MODE_CBC,
             substr($data, 70, 16)
         );

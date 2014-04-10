@@ -229,12 +229,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTbKO-iACmwcdh00' .
-                'okIG4I0km7UcGenLttXSOhf-wascYwpY' .
-                'joQQcMwCK-qo2NhdE8Q',
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTbKO-iACmwcdh00okIG4I0kdhCbtRwZ6cu21dI6F_7BqxxjCliOhBBwzAIr6qjY2F0TxA',
             ),
 
             'Test vector 2' => array(
@@ -245,12 +240,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTYe6N-KqDbnBK8h' .
-                'qAyTEA2G3_bLsGUbsQ0pfSkbpLX4lc5R' .
-                'HdolslukKcErjsxh1HI',
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTYe6N-KqDbnBK8hqAyTEA2GsI_f9suwZRuxDSl9KRuktfiVzlEd2iWyW6QpwSuOzGHUcg',
             ),
 
             'Test vector 3' => array(
@@ -261,13 +251,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTb-18_f5tw1j9gu' .
-                'UZtvGVYPUTdVy72UWvs-tjgpu5ZxsDOZ' .
-                'BCv2YrpgIAd6XX-hqEAga0iM6DFwhEnD' .
-                'Rq-23O1A',
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTb-18_f5tw1j9guUZtvGVYPVslRN1XLvZRa-z62OCm7lnGwKtkzmQQr9mK6YCAHel1_oahAIGtIjOgxcIRJw0avttztQA',
             ),
 
             'Test vector 4' => array(
@@ -278,13 +262,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTa94Xlqf2aIeVQp' .
-                'rx_9arAgo4zah8CILCNrLWvNH9FT1bcL' .
-                '_g_eKEXVJe_g6Kej2swgoB12ILDdSmme' .
-                '873foyY2',
+                'AQIAAAPoMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTa94Xlqf2aIeVQprx_9arAgqeCjjNqHwIgsI2sta80f0VPVX7S3C_4P3ihF1SXv4Oino9rMIKAddiCw3UppnvO936MmNg',
             ),
 
             'Test vector 5' => array(
@@ -295,13 +273,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAAABMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTb9vjKl34mezWUW' .
-                'St8xkFJolZmUjryWvu3UUzZBNmbeVnL8' .
-                'OLm4DXcibx9vN6uymKOeUqBgoVDHN-hS' .
-                'M2wLrHcF',
+                'AQIAAAABMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTb9vjKl34mezWUWSt8xkFJoeiGVmZSOvJa-7dRTNkE2Zt5Ws-Vy_Di5uA13Im8fbzerspijnlKgYKFQxzfoUjNsC6x3BQ',
             ),
 
             'Test vector 6' => array(
@@ -312,13 +284,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
                     '34567890123456789012345678901234',
                 '1234567890123456',
 
-                'AQIAAYagMTIzNDU2Nzg5MDEyMzQ1Njc4' .
-                'OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy' .
-                'MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEy' .
-                'MzQ1Njc4OTAxMjM0NTZXSSXsZAg0Ah7i' .
-                'ns7upI60Dca-caOFRYQ0d0J4EyCY1FIU' .
-                'CKDyWUyUcD-zC3GyLj6z75S9jbzhnOuq' .
-                'uby8sFTW',
+                'AQIAAYagMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZXSSXsZAg0Ah7ins7upI6063wNxr5xo4VFhDR3QngTIJjUUjZSFAig8llMlHA_swtxsi4-s--UvY284Zzrqrm8vLBU1g',
             ),
         );
     }

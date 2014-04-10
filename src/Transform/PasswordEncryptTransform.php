@@ -147,12 +147,12 @@ class PasswordEncryptTransform extends AbstractTransform
 
         if ($context->encryptBufferSize === $consume) {
             if ($isEnd) {
-                $context->outputBuffer .= mcrypt_generic(
+                $context->ciphertextBuffer .= mcrypt_generic(
                     $context->mcryptModule,
                     $this->padder()->pad($context->encryptBuffer)
                 );
             } else {
-                $context->outputBuffer .= mcrypt_generic(
+                $context->ciphertextBuffer .= mcrypt_generic(
                     $context->mcryptModule,
                     $context->encryptBuffer
                 );
@@ -160,7 +160,7 @@ class PasswordEncryptTransform extends AbstractTransform
             $context->encryptBuffer = '';
             $context->encryptBufferSize = 0;
         } else {
-            $context->outputBuffer .= mcrypt_generic(
+            $context->ciphertextBuffer .= mcrypt_generic(
                 $context->mcryptModule,
                 substr($context->encryptBuffer, 0, $consume)
             );
@@ -168,7 +168,23 @@ class PasswordEncryptTransform extends AbstractTransform
             $context->encryptBufferSize -= $consume;
         }
 
-        hash_update($context->hashContext, $context->outputBuffer);
+        hash_update($context->hashContext, $context->ciphertextBuffer);
+
+        foreach (str_split($context->ciphertextBuffer, 16) as $block) {
+            $context->outputBuffer .= $block .
+                substr(
+                    hash_hmac(
+                        'sha256',
+                        $block,
+                        $context->key->authenticationSecret(),
+                        true
+                    ),
+                    0,
+                    2
+                );
+        }
+
+        $context->ciphertextBuffer = '';
         $output = $context->outputBuffer;
 
         if ($isEnd) {
@@ -182,9 +198,9 @@ class PasswordEncryptTransform extends AbstractTransform
 
     private function initializeContext()
     {
-        $context = new EncryptTransformContext;
+        $context = new PasswordEncryptTransformContext;
 
-        list($key, $salt) = $this->keyDeriver()->deriveKeyFromPassword(
+        list($context->key, $salt) = $this->keyDeriver()->deriveKeyFromPassword(
             $this->password(),
             $this->iterations()
         );
@@ -199,23 +215,24 @@ class PasswordEncryptTransform extends AbstractTransform
         $iv = $this->randomSource()->generate(16);
         mcrypt_generic_init(
             $context->mcryptModule,
-            $key->encryptionSecret(),
+            $context->key->encryptionSecret(),
             $iv
         );
 
         $context->hashContext = hash_init(
             'sha256',
             HASH_HMAC,
-            $key->authenticationSecret()
+            $context->key->authenticationSecret()
         );
 
         $context->outputBuffer = $this->version . $this->type .
             pack('N', $this->iterations()) . $salt . $iv;
+        hash_update($context->hashContext, $context->outputBuffer);
 
         return $context;
     }
 
-    private function finalizeContext(EncryptTransformContext &$context)
+    private function finalizeContext(PasswordEncryptTransformContext &$context)
     {
         mcrypt_generic_deinit($context->mcryptModule);
         mcrypt_module_close($context->mcryptModule);

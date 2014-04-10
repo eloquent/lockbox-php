@@ -77,13 +77,11 @@ class RawDecrypter implements DecrypterInterface
         $size = strlen($data);
         $ciphertextSize = $size - $key->authenticationSecretBytes() - 18;
 
-        if ($ciphertextSize < 0 || 0 !== $ciphertextSize % 18) {
+        if ($ciphertextSize < 18 || 0 !== $ciphertextSize % 18) {
             return new DecryptionResult(
                 DecryptionResultType::INVALID_SIZE()
             );
         }
-
-        $ciphertext = substr($data, 18, $ciphertextSize);
 
         $hashAlgorithm = 'sha' . $key->authenticationSecretBits();
         $hashContext = hash_init(
@@ -93,12 +91,14 @@ class RawDecrypter implements DecrypterInterface
         );
         hash_update($hashContext, substr($data, 0, 18));
 
-        $blockMacs = '';
+        $ciphertext = substr($data, 18, $ciphertextSize);
+
+        $expectedBlockMacs = '';
         $actualBlockMacs = '';
         foreach (str_split($ciphertext, 18) as $block) {
             list($block, $blockMac) = str_split($block, 16);
 
-            $blockMacs .= $blockMac;
+            $expectedBlockMacs .= $blockMac;
             $actualBlockMacs .= substr(
                 hash_hmac(
                     $hashAlgorithm,
@@ -115,7 +115,7 @@ class RawDecrypter implements DecrypterInterface
 
         if (
             !SlowStringComparator::isEqual(
-                substr($data, $ciphertextSize + 18) . $blockMacs,
+                substr($data, $ciphertextSize + 18) . $expectedBlockMacs,
                 hash_final($hashContext, true) . $actualBlockMacs
             )
         ) {

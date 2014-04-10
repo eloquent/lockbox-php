@@ -16,12 +16,12 @@ $encrypted = $cipher->encrypt($key, '1234567890123456');
 $size = strlen($encrypted);
 $header = substr($encrypted, 0, 18);
 $iv = substr($encrypted, 2, 16);
-$ciphertext = aesEncrypt($key, $iv, '1234567890123456');
+$ciphertext = encryptAes($key, $iv, '1234567890123456');
 $block0 = substr($ciphertext, 0, 16);
 $block0Mac = authenticate($key, $block0, 2);
 $block1 = str_repeat(chr(16), 16);
 $block1Mac = authenticate($key, $block1, 2);
-$ciphertextUnpadded = aesEncrypt($key, $iv, '12345678901234567890123456789012');
+$ciphertextUnpadded = encryptAes($key, $iv, '12345678901234567890123456789012');
 $block0Unpadded = substr($ciphertextUnpadded, 0, 16);
 $block0UnpaddedMac = authenticate($key, $block0Unpadded, 2);
 $block1Unpadded = substr($ciphertextUnpadded, 16);
@@ -147,7 +147,7 @@ function authenticate($key, $data, $size = null) {
     return $mac;
 }
 
-function aesEncrypt($key, $iv, $data) {
+function encryptAes($key, $iv, $data) {
     return mcrypt_encrypt(
         MCRYPT_RIJNDAEL_128,
         $key->encryptionSecret(),
