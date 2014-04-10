@@ -17,8 +17,10 @@ namespace Eloquent\Lockbox\Transform;
 class EncryptTransformContext
 {
     public $mcryptModule;
+    public $hashAlgorithm;
     public $hashContext;
     public $encryptBuffer = '';
     public $encryptBufferSize = 0;
+    public $ciphertextBuffer = '';
     public $outputBuffer = '';
 }

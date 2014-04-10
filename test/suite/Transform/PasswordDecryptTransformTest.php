@@ -118,19 +118,19 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $input = 'foobarbazquxdoomfoobarbazquxdoomfoobarbazquxdoom';
         $encrypted = $this->encrypter->encrypt($input);
 
-        $this->assertSame(182, strlen($encrypted));
+        $this->assertSame(190, strlen($encrypted));
 
         list($output, $buffer, $context, $error) = $this->feedTransform(
             substr($encrypted, 0, 1),    // version
             substr($encrypted, 1, 1),    // type
             substr($encrypted, 2, 4),    // iterations
             substr($encrypted, 6, 64),   // salt
-            substr($encrypted, 70, 16),  // IV
-            substr($encrypted, 86, 16),  // block 0
-            substr($encrypted, 102, 16), // block 1
-            substr($encrypted, 118, 16), // block 2
-            substr($encrypted, 134, 16), // padding block
-            substr($encrypted, 150)      // MAC
+            substr($encrypted, 70, 18),  // IV
+            substr($encrypted, 88, 18),  // block 0
+            substr($encrypted, 106, 18), // block 1
+            substr($encrypted, 124, 18), // block 2
+            substr($encrypted, 142, 18), // padding block
+            substr($encrypted, 160)      // MAC
         );
         $result = $this->transform->result();
 
@@ -160,82 +160,100 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         return array(
             'Empty' => array(
                 '',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Unsupported version' => array(
-                chr(111),
+                chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv .
+                $this->encryptAndPadAes('1234567890123456') .
+                '12345678901234567890123456789012',
                 'UNSUPPORTED_VERSION',
             ),
             'Empty type' => array(
                 $this->version,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Unsupported type' => array(
-                $this->version . chr(111),
+                $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv .
+                $this->encryptAndPadAes('1234567890123456') .
+                '12345678901234567890123456789012',
                 'UNSUPPORTED_TYPE',
             ),
             'Empty iterations' => array(
                 $this->version . $this->type,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial iterations' => array(
                 $this->version . $this->type . '123',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty salt' => array(
                 $this->version . $this->type . $this->iterationsData,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial salt' => array(
                 $this->version . $this->type . $this->iterationsData . '123456789012345678901234567890123456789012345678901234567890123',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . '123456789012345',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty data and MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty data' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 '123456789012345678901234567',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Not enough data for MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $this->encryptAndPadAes('1234567890123456') . '123456789012345678901234567',
-                'INVALID_MAC',
+                'INVALID_SIZE',
             ),
             'Invalid data length' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
-                $this->encryptAes('1234567890123456') .
-                substr($this->encryptAndPadAes('1234567890123456'), 0, 15) .
-                '1234567890123456789012345678',
+                $this->encryptAes('1234567890123456') . '12' .
+                substr($this->encryptAndPadAes('1234567890123456'), 0, 15) . '12' .
+                '12345678901234567890123456789012',
+                'INVALID_SIZE',
+            ),
+            'Bad block MAC' => array(
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+                substr($this->encryptAndPadAes('1234567890123456'), 0, 16) .
+                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 0, 16), 2) .
+                substr($this->encryptAndPadAes('1234567890123456'), 16) .
+                '12' .
+                '12345678901234567890123456789012',
                 'INVALID_MAC',
             ),
             'Bad MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
-                $this->encryptAndPadAes('1234567890123456') .
-                '1234567890123456789012345678',
+                substr($this->encryptAndPadAes('1234567890123456'), 0, 16) .
+                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 0, 16), 2) .
+                substr($this->encryptAndPadAes('1234567890123456'), 16) .
+                $this->authenticate(substr($this->encryptAndPadAes('1234567890123456'), 16), 2) .
+                '12345678901234567890123456789012',
                 'INVALID_MAC',
             ),
             'Bad AES data' => array(
-                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '1234567890123457' .
-                $this->authenticationCode(
-                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '1234567890123457'
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+                'foobarbazquxdoom' . $this->authenticate('foobarbazquxdoom', 2) .
+                $this->authenticate(
+                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . 'foobarbazquxdoom'
                 ),
                 'INVALID_PADDING',
             ),
             'Bad padding' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $this->encryptAes('1234567890123456') .
-                $this->authenticationCode(
+                $this->authenticate($this->encryptAes('1234567890123456'), 2) .
+                $this->authenticate(
                     $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                     $this->encryptAes('1234567890123456')
                 ),
@@ -265,18 +283,16 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 
     public function testTransformFailureAfterSuccessfulBlocks()
     {
+        $block = $this->encryptAes('1234567890123456');
         list($output, $buffer, $context, $error) = $this->feedTransform(
             $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
-                $this->encryptAes('1234567890123456') .
-                $this->encryptAes('1234567890123456') .
-                $this->encryptAes('1234567890123456') .
-                $this->encryptAes('1234567890123456'),
-            $this->authenticationCode(
+            $block . $this->authenticate($block, 2) .
+            $block . $this->authenticate($block, 2) .
+            $block . $this->authenticate($block, 2) .
+            $block . $this->authenticate($block, 2),
+            $this->authenticate(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
-                    $this->encryptAes('1234567890123456') .
-                    $this->encryptAes('1234567890123456') .
-                    $this->encryptAes('1234567890123456') .
-                    $this->encryptAes('1234567890123456')
+                $block . $block . $block . $block
             )
         );
         $result = $this->transform->result();
@@ -358,13 +374,19 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         return $data . str_repeat(chr($padSize), $padSize);
     }
 
-    protected function authenticationCode($data)
+    protected function authenticate($data, $size = null)
     {
-        return hash_hmac(
+        $mac = hash_hmac(
             'sha256',
             $data,
             $this->key->authenticationSecret(),
             true
         );
+
+        if (null !== $size) {
+            $mac = substr($mac, 0, $size);
+        }
+
+        return $mac;
     }
 }

@@ -12,16 +12,15 @@
 namespace Eloquent\Lockbox\Transform;
 
 /**
- * A data structure for the decrypt transform's context.
+ * A data structure for the password encrypt transform's context.
  */
-class DecryptTransformContext
+class PasswordEncryptTransformContext
 {
+    public $key;
     public $mcryptModule;
-    public $hashAlgorithm;
     public $hashContext;
-    public $hashSize;
-    public $isVersionSeen = false;
-    public $isTypeSeen = false;
-    public $isInitialized = false;
-    public $isHashFinalized = false;
+    public $encryptBuffer = '';
+    public $encryptBufferSize = 0;
+    public $ciphertextBuffer = '';
+    public $outputBuffer = '';
 }

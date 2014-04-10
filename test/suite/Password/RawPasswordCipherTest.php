@@ -32,12 +32,24 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->encrypter = new RawPasswordEncrypter(new PasswordEncryptTransformFactory($this->keyDeriver));
-        $this->decrypter = new RawPasswordDecrypter;
+        $this->decryptTransformFactory = Phake::partialMock(
+            'Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface'
+        );
+        $this->decrypter = new RawPasswordDecrypter($this->decryptTransformFactory);
         $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
+
+        $this->password = 'foobar';
+        $this->decryptTransform = Phake::partialMock(
+            'Eloquent\Lockbox\Transform\PasswordDecryptTransform',
+            $this->password,
+            $this->keyDeriver
+        );
+
+        Phake::when($this->decryptTransformFactory)->createTransform($this->password)
+            ->thenReturn($this->decryptTransform);
 
         $this->version = chr(1);
         $this->type = chr(2);
-        $this->password = 'foobar';
         $this->iterations = 10;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
@@ -78,13 +90,15 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($dataSize)
     {
+        $this->decrypter = new RawPasswordDecrypter;
+        $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
         $data = str_repeat('A', $dataSize);
         $encrypted = $this->cipher->encrypt($this->password, $this->iterations, $data);
-        $decryptionResult = $this->cipher->decrypt($this->password, $encrypted);
+        $result = $this->cipher->decrypt($this->password, $encrypted);
 
-        $this->assertTrue($decryptionResult->isSuccessful());
-        $this->assertSame($data, $decryptionResult->data());
-        $this->assertSame($this->iterations, $decryptionResult->iterations());
+        $this->assertTrue($result->isSuccessful());
+        $this->assertSame($data, $result->data());
+        $this->assertSame($this->iterations, $result->iterations());
     }
 
     /**
@@ -92,6 +106,8 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($dataSize)
     {
+        $this->decrypter = new RawPasswordDecrypter;
+        $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
         $encryptStream = $this->cipher->createEncryptStream($this->password, $this->iterations);
         $decryptStream = $this->cipher->createDecryptStream($this->password);
         $encryptStream->pipe($decryptStream);
@@ -115,19 +131,21 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureEmptyVersion()
     {
         $data = '';
-        $data .= $this->authenticationCode($data);
-        $result = $this->cipher->decrypt($this->password, $data);
+        $data .= $this->authenticate($data);
+        $result = $this->cipher->decrypt($this->key, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureUnsupportedVersion()
     {
-        $data = ord(111) . str_pad('', 200, '1234567890');
-        $data .= $this->authenticationCode($data);
+        $header = chr(111) . str_pad('', 85, '1234567890');
+        $block = str_pad('', 16, '1234567890');
+        $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
@@ -139,19 +157,21 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureEmptyType()
     {
         $data = $this->version;
-        $data .= $this->authenticationCode($data);
+        $data .= $this->authenticate($data);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptUnsupportedType()
     {
-        $data = $this->version . ord(111) . str_pad('', 200, '1234567890');
-        $data .= $this->authenticationCode($data);
+        $header = $this->version . chr(111) . str_pad('', 84, '1234567890');
+        $block = str_pad('', 16, '1234567890');
+        $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
@@ -163,37 +183,40 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureEmptyIterations()
     {
         $data = $this->version . $this->type;
-        $data .= $this->authenticationCode($data);
+        $data .= $this->authenticate($data);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptySalt()
     {
         $data = $this->version . $this->type . $this->iterationsData;
-        $data .= $this->authenticationCode($data);
+        $data .= $this->authenticate($data);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptyIv()
     {
         $data = $this->version . $this->type . $this->iterationsData . $this->salt;
-        $data .= $this->authenticationCode($data);
+        $data .= $this->authenticate($data);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureShortMac()
@@ -203,51 +226,58 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptyCiphertext()
     {
         $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
-        $data .= $this->authenticationCode($data);
+        $data .= $this->authenticate($data);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INVALID_PADDING', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
-    public function testDecryptFailureBadMac()
+    public function testDecryptFailureBadBlockMac()
     {
-        $decryptTransformFactory = Phake::partialMock(
-            'Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface'
-        );
-        $decryptTransform = Phake::partialMock(
-            'Eloquent\Lockbox\Transform\PasswordDecryptTransform',
-            $this->password,
-            $this->keyDeriver
-        );
-        $this->decrypter = new RawPasswordDecrypter($decryptTransformFactory);
-        $this->cipher = new RawPasswordCipher($this->encrypter, $this->decrypter);
-        Phake::when($decryptTransformFactory)->createTransform($this->password)->thenReturn($decryptTransform);
-        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
-            'foobar1234567890123456789012345678';
+        $header = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
+        $block = 'foobarbazquxdoom';
+        $data = $header . $block . '12' . $this->authenticate($header . $block);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_MAC', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($decryptTransform, Phake::never())->transform(Phake::anyParameters());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
+    }
+
+    public function testDecryptFailureBadMac()
+    {
+        $header = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
+        $block = 'foobarbazquxdoom';
+        $data = $header . $block . $this->authenticate($block, 2) . '12345678901234567890123456789012';
+        $result = $this->cipher->decrypt($this->password, $data);
+
+        $this->assertFalse($result->isSuccessful());
+        $this->assertSame('INVALID_MAC', $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertNull($result->iterations());
+        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureBadAesData()
     {
-        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . 'foobarbazquxdoom';
-        $data .= $this->authenticationCode($data);
+        $header = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
+        $block = 'foobarbazquxdoom';
+        $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
@@ -258,15 +288,15 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureBadPadding()
     {
-        $ciphertext = mcrypt_encrypt(
+        $header = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
+        $block = mcrypt_encrypt(
             MCRYPT_RIJNDAEL_128,
             $this->key->encryptionSecret(),
             'foobar',
             MCRYPT_MODE_CBC,
             $this->iv
         );
-        $data = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $ciphertext;
-        $data .= $this->authenticationCode($data);
+        $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
@@ -292,13 +322,19 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         return $data . str_repeat(chr($padSize), $padSize);
     }
 
-    protected function authenticationCode($data)
+    protected function authenticate($data, $size = null)
     {
-        return hash_hmac(
+        $mac = hash_hmac(
             'sha256',
             $data,
             $this->key->authenticationSecret(),
             true
         );
+
+        if (null !== $size) {
+            $mac = substr($mac, 0, $size);
+        }
+
+        return $mac;
     }
 }

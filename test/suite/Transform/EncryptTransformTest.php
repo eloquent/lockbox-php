@@ -54,7 +54,7 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
         $expected = $this->base64Url->decode(
-            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlCbtqOEJ61oMBFXpM6v7kDmoMeEZJHMgZRCj5T4F148Oz_6MtFLxThEKZSPK'
+            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
 
         $this->assertSameCiphertext($expected, $output);
@@ -67,8 +67,7 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
     {
         list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
         $expected = $this->base64Url->decode(
-            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlNPwZN3D1x7C4IHaBSz5' .
-            '5cGl3-VffoOLPey_a_qwiwCZuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
+            'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARu0_Bk3cPXHsLggdoFLPnlwR29pd_lX36Diz3sv2v6sIsAmdbSuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
         );
 
         $this->assertSameCiphertext($expected, $output);

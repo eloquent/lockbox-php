@@ -54,7 +54,7 @@ $keyWriter->writeFile($key, $keyPath);
     public function testEncryptingData()
     {
         $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
-        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{110}$/');
+        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{115}$/');
 
 // $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
@@ -69,7 +69,7 @@ echo $encrypter->encrypt($key, 'Super secret data.');
     public function testEncryptingMultipleData()
     {
         $keyPath = $this->fixturePath . '/key-256-256.lockbox.key';
-        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{330}$/');
+        $this->expectOutputRegex('/^[A-Za-z0-9_=-]{345}$/');
 
 // $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
@@ -96,8 +96,7 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new Decrypter;
 
 $encrypted =
-    'AQHJqPyMjO0oNSwu1HctzQp9_OQe2tmuQyMWWnetqT-N6vdB9O27NcCyfErbywGh' .
-    'I04N0Cr5CcFiOLHkpn3yTvGravUE8RsvesmvldJU8iIZYw';
+    'AQF_VjJS9sAL75uuUP_HTu9Do_3itIDaHLLXmh_JLOBRqQeZ_hnDwht4WtEkz3ioiW0WIHb3lANyKqpShyiPcVdj_DbfYiIPEWab8e3vqwEUvoqFFNo';
 
 $result = $decrypter->decrypt($key, $encrypted);
 if ($result->isSuccessful()) {
@@ -121,12 +120,9 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new BoundDecrypter($key);
 
 $encrypted = array(
-    'AQHJqPyMjO0oNSwu1HctzQp9_OQe2tmuQyMWWnetqT-N6vdB9O27NcCyfErbywGh' .
-    'I04N0Cr5CcFiOLHkpn3yTvGravUE8RsvesmvldJU8iIZYw',
-    'AQHXJbA8N8xITOTGVb7kUVLX0LDIHi4WHIpfOjtGiTvRYOmuXjGdUw7kFAaCrq_N' .
-    'D_HwU69xTYUJTBFpgwHr5hh1jt4AWPLlkGfROKovD6ZoMQ',
-    'AQHBx7LoNSXeswYbDzkqE7qoexOOXS-Lu87YERVsggufJ-LItt7ZzU-Lro8gsme9' .
-    'oCDXaduwwM6mKv0vROftOFb-W1fhd7xoIixC7EUC07gIdg',
+    'AQF_VjJS9sAL75uuUP_HTu9Do_3itIDaHLLXmh_JLOBRqQeZ_hnDwht4WtEkz3ioiW0WIHb3lANyKqpShyiPcVdj_DbfYiIPEWab8e3vqwEUvoqFFNo',
+    'AQH44yTs7va1cDoBpX0xVLqIRow5fs8Jj5-DYDJ1R3YY9udBCexmvDs9BH1qJDjCRSqcGriKi_UkL5per1WHwdxWuPq8QsYiBqeC9e9zypl0Xi1QT3s',
+    'AQGg0MsYtH0Rboyqssivssupb_GKlBotCpdFtc6WpnMaji8_ZvmGUTRu2DKkxFhAdk_s0FWZ7NYFjSDt1puIrr7MlB7owNuR5KhUIj04Can0zDCYjJY',
 );
 
 foreach ($encrypted as $string) {

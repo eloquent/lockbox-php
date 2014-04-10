@@ -35,7 +35,7 @@ final class DecryptionResultType extends AbstractMultiton
     {
         new static('SUCCESS', true);
 
-        new static('INSUFFICIENT_DATA', false);
+        new static('INVALID_SIZE', false);
         new static('INVALID_ENCODING', false);
         new static('INVALID_MAC', false);
         new static('UNSUPPORTED_VERSION', false);
