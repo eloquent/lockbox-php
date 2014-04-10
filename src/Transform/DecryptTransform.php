@@ -111,7 +111,7 @@ class DecryptTransform extends AbstractTransform implements
             if ($dataSize < 1) {
                 if ($isEnd) {
                     $this->result = new DecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -150,7 +150,7 @@ class DecryptTransform extends AbstractTransform implements
             if ($dataSize < 1) {
                 if ($isEnd) {
                     $this->result = new DecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -189,7 +189,7 @@ class DecryptTransform extends AbstractTransform implements
             if ($dataSize < 16) {
                 if ($isEnd) {
                     $this->result = new DecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -220,15 +220,15 @@ class DecryptTransform extends AbstractTransform implements
         }
 
         if ($isEnd) {
-            $requiredSize = 16 + $context->hashSize;
+            $requiredSize = 18 + $context->hashSize;
         } else {
-            $requiredSize = 32 + $context->hashSize;
+            $requiredSize = 36 + $context->hashSize;
         }
 
         if ($dataSize < $requiredSize) {
             if ($isEnd) {
                 $this->result = new DecryptionResult(
-                    DecryptionResultType::INSUFFICIENT_DATA()
+                    DecryptionResultType::INVALID_SIZE()
                 );
                 $this->finalizeContext($context);
 
@@ -240,22 +240,59 @@ class DecryptTransform extends AbstractTransform implements
 
         if ($isEnd) {
             $consume = $dataSize - $context->hashSize;
+
+            if (0 !== $consume % 18) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::INVALID_SIZE()
+                );
+                $this->finalizeContext($context);
+
+                return array('', $consumed, $this->result);
+            }
+
             $hash = substr($data, $consume);
             $consumedData = substr($data, 0, $consume);
             $consumed += $dataSize;
         } else {
             $consume = $this->blocksSize(
-                $dataSize - 16 - $context->hashSize,
-                16,
+                $dataSize - 18 - $context->hashSize,
+                18,
                 $isEnd
             );
             $consumed += $consume;
             $consumedData = substr($data, 0, $consume);
         }
 
-        hash_update($context->hashContext, $consumedData);
+        $output = '';
+        foreach (str_split($consumedData, 18) as $block) {
+            list($block, $blockMac) = str_split($block, 16);
 
-        $output = mdecrypt_generic($context->mcryptModule, $consumedData);
+            if (
+                !SlowStringComparator::isEqual(
+                    substr(
+                        hash_hmac(
+                            $context->hashAlgorithm,
+                            $block,
+                            $this->key()->authenticationSecret(),
+                            true
+                        ),
+                        0,
+                        2
+                    ),
+                    $blockMac
+                )
+            ) {
+                $this->result = new DecryptionResult(
+                    DecryptionResultType::INVALID_MAC()
+                );
+                $this->finalizeContext($context);
+
+                return array('', $consumed, $this->result);
+            }
+
+            hash_update($context->hashContext, $block);
+            $output .= mdecrypt_generic($context->mcryptModule, $block);
+        }
 
         if ($isEnd) {
             $context->isHashFinalized = true;
@@ -303,8 +340,10 @@ class DecryptTransform extends AbstractTransform implements
             ''
         );
 
+        $context->hashAlgorithm = 'sha' .
+            $this->key()->authenticationSecretBits();
         $context->hashContext = hash_init(
-            'sha' . $this->key()->authenticationSecretBits(),
+            $context->hashAlgorithm,
             HASH_HMAC,
             $this->key()->authenticationSecret()
         );

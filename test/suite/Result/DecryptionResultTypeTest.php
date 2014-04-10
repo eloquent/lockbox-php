@@ -29,7 +29,7 @@ class DecryptionResultTypeTest extends PHPUnit_Framework_TestCase
         return array(
             'Success'             => array('SUCCESS',             true),
 
-            'Insufficient data'   => array('INSUFFICIENT_DATA',   false),
+            'Insufficient data'   => array('INVALID_SIZE',   false),
             'Invalid MAC'         => array('INVALID_MAC',         false),
             'Unsupported version' => array('UNSUPPORTED_VERSION', false),
             'Unsupported type'    => array('UNSUPPORTED_TYPE',    false),

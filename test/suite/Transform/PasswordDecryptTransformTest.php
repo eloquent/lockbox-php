@@ -160,7 +160,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         return array(
             'Empty' => array(
                 '',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Unsupported version' => array(
                 chr(111),
@@ -168,7 +168,7 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
             ),
             'Empty type' => array(
                 $this->version,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Unsupported type' => array(
                 $this->version . chr(111),
@@ -176,36 +176,36 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
             ),
             'Empty iterations' => array(
                 $this->version . $this->type,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial iterations' => array(
                 $this->version . $this->type . '123',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty salt' => array(
                 $this->version . $this->type . $this->iterationsData,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial salt' => array(
                 $this->version . $this->type . $this->iterationsData . '123456789012345678901234567890123456789012345678901234567890123',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Partial IV' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . '123456789012345',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty data and MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv,
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Empty data' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 '123456789012345678901234567',
-                'INSUFFICIENT_DATA',
+                'INVALID_SIZE',
             ),
             'Not enough data for MAC' => array(
                 $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .

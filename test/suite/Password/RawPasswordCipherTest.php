@@ -119,7 +119,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }
@@ -143,7 +143,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }
@@ -167,7 +167,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }
@@ -179,7 +179,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }
@@ -191,7 +191,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }
@@ -203,7 +203,7 @@ class RawPasswordCipherTest extends PHPUnit_Framework_TestCase
         $result = $this->cipher->decrypt($this->password, $data);
 
         $this->assertFalse($result->isSuccessful());
-        $this->assertSame('INSUFFICIENT_DATA', $result->type()->key());
+        $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
     }

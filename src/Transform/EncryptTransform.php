@@ -139,7 +139,7 @@ class EncryptTransform extends AbstractTransform
 
         hash_update($context->hashContext, $context->ciphertextBuffer);
 
-        foreach (str_split($context->ciphertextBuffer) as $block) {
+        foreach (str_split($context->ciphertextBuffer, 16) as $block) {
             $context->outputBuffer .= $block .
                 substr(
                     hash_hmac(
@@ -148,7 +148,8 @@ class EncryptTransform extends AbstractTransform
                         $this->key()->authenticationSecret(),
                         true
                     ),
-                    0, 2
+                    0,
+                    2
                 );
         }
 
@@ -191,6 +192,7 @@ class EncryptTransform extends AbstractTransform
         );
 
         $context->outputBuffer = $this->version . $this->type . $iv;
+        hash_update($context->hashContext, $context->outputBuffer);
 
         return $context;
     }

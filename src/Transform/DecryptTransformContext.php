@@ -17,6 +17,7 @@ namespace Eloquent\Lockbox\Transform;
 class DecryptTransformContext
 {
     public $mcryptModule;
+    public $hashAlgorithm;
     public $hashContext;
     public $hashSize;
     public $isVersionSeen = false;

@@ -75,17 +75,54 @@ class RawDecrypter implements DecrypterInterface
     public function decrypt(Key\KeyInterface $key, $data)
     {
         $size = strlen($data);
-        $hash = hash_hmac(
-            'sha' . $key->authenticationSecretBits(),
-            substr($data, 0, $size - $key->authenticationSecretBytes()),
-            $key->authenticationSecret(),
-            true
+        $ciphertextSize = $size - $key->authenticationSecretBytes() - 18;
+
+        if ($ciphertextSize < 0 || 0 !== $ciphertextSize % 18) {
+            return new DecryptionResult(
+                DecryptionResultType::INVALID_SIZE()
+            );
+        }
+
+        $ciphertext = substr($data, 18, $ciphertextSize);
+
+        $hashAlgorithm = 'sha' . $key->authenticationSecretBits();
+        $hashContext = hash_init(
+            $hashAlgorithm,
+            HASH_HMAC,
+            $key->authenticationSecret()
         );
+        hash_update($hashContext, substr($data, 0, 18));
+
+        foreach (str_split($ciphertext, 18) as $block) {
+            list($block, $blockMac) = str_split($block, 16);
+
+            if (
+                !SlowStringComparator::isEqual(
+                    substr(
+                        hash_hmac(
+                            $hashAlgorithm,
+                            $block,
+                            $key->authenticationSecret(),
+                            true
+                        ),
+                        0,
+                        2
+                    ),
+                    $blockMac
+                )
+            ) {
+                return new DecryptionResult(
+                    DecryptionResultType::INVALID_MAC()
+                );
+            }
+
+            hash_update($hashContext, $block);
+        }
 
         if (
             !SlowStringComparator::isEqual(
-                substr($data, $size - $key->authenticationSecretBytes()),
-                $hash
+                substr($data, $ciphertextSize + 18),
+                hash_final($hashContext, true)
             )
         ) {
             return new DecryptionResult(DecryptionResultType::INVALID_MAC());

@@ -113,7 +113,7 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
         $size = strlen($data);
         if ($size < 118) {
             return new PasswordDecryptionResult(
-                DecryptionResultType::INSUFFICIENT_DATA()
+                DecryptionResultType::INVALID_SIZE()
             );
         }
 

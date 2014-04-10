@@ -129,7 +129,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
             if ($dataSize < 1) {
                 if ($isEnd) {
                     $this->result = new PasswordDecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -168,7 +168,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
             if ($dataSize < 1) {
                 if ($isEnd) {
                     $this->result = new PasswordDecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -207,7 +207,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
             if ($dataSize < 4) {
                 if ($isEnd) {
                     $this->result = new PasswordDecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -239,7 +239,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
             if ($dataSize < 64) {
                 if ($isEnd) {
                     $this->result = new PasswordDecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -277,7 +277,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
             if ($dataSize < 16) {
                 if ($isEnd) {
                     $this->result = new PasswordDecryptionResult(
-                        DecryptionResultType::INSUFFICIENT_DATA()
+                        DecryptionResultType::INVALID_SIZE()
                     );
                     $this->finalizeContext($context);
 
@@ -316,7 +316,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
         if ($dataSize < $requiredSize) {
             if ($isEnd) {
                 $this->result = new PasswordDecryptionResult(
-                    DecryptionResultType::INSUFFICIENT_DATA()
+                    DecryptionResultType::INVALID_SIZE()
                 );
                 $this->finalizeContext($context);
 
