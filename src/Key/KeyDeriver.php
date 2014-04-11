@@ -15,7 +15,7 @@ use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
- * The interface implemented by encryption key derivers.
+ * Derives keys from various data sources.
  */
 class KeyDeriver implements KeyDeriverInterface
 {
