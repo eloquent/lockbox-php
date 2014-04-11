@@ -159,11 +159,11 @@ class Key implements KeyInterface
     }
 
     private $encryptionSecret;
-    private $encryptionSecretBits;
     private $encryptionSecretBytes;
+    private $encryptionSecretBits;
     private $authenticationSecret;
-    private $authenticationSecretBits;
     private $authenticationSecretBytes;
+    private $authenticationSecretBits;
     private $name;
     private $description;
 }

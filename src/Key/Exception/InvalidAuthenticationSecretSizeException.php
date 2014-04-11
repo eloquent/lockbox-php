@@ -32,7 +32,7 @@ final class InvalidAuthenticationSecretSizeException extends Exception implement
         parent::__construct(
             sprintf(
                 'Invalid authentication secret size %d. ' .
-                'Authentication secret must be 256 bits.',
+                'Authentication secret must be 224, 256, 384, or 512 bits.',
                 $size
             ),
             0,
