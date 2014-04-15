@@ -90,10 +90,9 @@ class KeyWriter implements EncryptedKeyWriterInterface
      */
     public function writeFile(KeyInterface $key, $path)
     {
-        if (
-            !$this->isolator()
-                ->file_put_contents($path, $this->writeString($key))
-        ) {
+        $keyString = $this->writeString($key);
+
+        if (@!$this->isolator()->file_put_contents($path, $keyString)) {
             throw new Exception\KeyWriteException($path);
         }
     }
@@ -114,12 +113,13 @@ class KeyWriter implements EncryptedKeyWriterInterface
         KeyInterface $key,
         $path
     ) {
-        if (
-            !$this->isolator()->file_put_contents(
-                $path,
-                $this->writeStringWithPassword($password, $iterations, $key)
-            )
-        ) {
+        $keyString = $this->writeStringWithPassword(
+            $password,
+            $iterations,
+            $key
+        );
+
+        if (@!$this->isolator()->file_put_contents($path, $keyString)) {
             throw new Exception\KeyWriteException($path);
         }
     }

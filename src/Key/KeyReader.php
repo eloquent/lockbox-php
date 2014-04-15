@@ -109,7 +109,7 @@ class KeyReader implements EncryptedKeyReaderInterface
      */
     public function readFile($path)
     {
-        if (!$data = $this->isolator()->file_get_contents($path)) {
+        if (!$data = @$this->isolator()->file_get_contents($path)) {
             throw new Exception\KeyReadException($path);
         }
 
@@ -127,7 +127,7 @@ class KeyReader implements EncryptedKeyReaderInterface
      */
     public function readFileWithPassword($password, $path)
     {
-        if (!$data = $this->isolator()->file_get_contents($path)) {
+        if (!$data = @$this->isolator()->file_get_contents($path)) {
             throw new Exception\KeyReadException($path);
         }
 
@@ -148,7 +148,7 @@ class KeyReader implements EncryptedKeyReaderInterface
      */
     public function readFileWithPasswordCallback($callback, $path)
     {
-        if (!$data = $this->isolator()->file_get_contents($path)) {
+        if (!$data = @$this->isolator()->file_get_contents($path)) {
             throw new Exception\KeyReadException($path);
         }
 

@@ -15,6 +15,8 @@ use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
+use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Key\KeyWriter;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
@@ -38,6 +40,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->keyGenerator = new KeyGenerator;
         $this->keyDeriver = new KeyDeriver;
+
+        $this->keyWriter = new KeyWriter;
+        $this->keyReader = new KeyReader;
 
         $this->base64Url = Base64Url::instance();
     }
@@ -482,5 +487,41 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($expectedEncryptionSecret, $this->base64Url->encode($key->encryptionSecret()));
         $this->assertSame($expectedAuthenticationSecret, $this->base64Url->encode($key->authenticationSecret()));
+    }
+
+    public function testRealKeyReadWrite()
+    {
+        $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
+        $key = $this->keyReader->readFile(__DIR__ . '/../fixture/key/key-256-256.lockbox.key');
+        $this->keyWriter->writeFile($key, $path);
+        $actual = $this->keyReader->readFile($path);
+        unlink($path);
+
+        $this->assertEquals($key, $actual);
+    }
+
+    public function testRealKeyReadWriteEncrypted()
+    {
+        $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
+        $key = $this->keyReader->readFileWithPassword('password', __DIR__ . '/../fixture/key/key-256-256-encrypted.lockbox.key');
+        $this->keyWriter->writeFileWithPassword('password', 10, $key, $path);
+        $actual = $this->keyReader->readFileWithPassword('password', $path);
+        unlink($path);
+
+        $this->assertEquals($key, $actual);
+    }
+
+    public function testRealKeyReadFailure()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException');
+        $this->keyReader->readFile('/path/to/nonexistant');
+    }
+
+    public function testRealKeyWriteFailure()
+    {
+        $key = $this->keyReader->readFile(__DIR__ . '/../fixture/key/key-256-256.lockbox.key');
+
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyWriteException');
+        $this->keyWriter->writeFile($key, '/path/to/nonexistant');
     }
 }
