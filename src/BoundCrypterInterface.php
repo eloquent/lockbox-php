@@ -12,8 +12,10 @@
 namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by ciphers.
+ * The interface implemented by bound crypters.
  */
-interface CipherInterface extends EncrypterInterface, DecrypterInterface
+interface BoundCrypterInterface extends
+    BoundEncrypterInterface,
+    BoundDecrypterInterface
 {
 }

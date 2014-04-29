@@ -18,12 +18,12 @@ use PHPUnit_Framework_TestCase;
 use Phake;
 
 /**
- * @covers \Eloquent\Lockbox\Password\PasswordCipher
- * @covers \Eloquent\Lockbox\Password\AbstractPasswordCipher
+ * @covers \Eloquent\Lockbox\Password\PasswordCrypter
+ * @covers \Eloquent\Lockbox\Password\AbstractPasswordCrypter
  * @covers \Eloquent\Lockbox\Password\PasswordEncrypter
  * @covers \Eloquent\Lockbox\Password\PasswordDecrypter
  */
-class PasswordCipherTest extends PHPUnit_Framework_TestCase
+class PasswordCrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -33,7 +33,7 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->encrypter = new PasswordEncrypter(new PasswordEncryptTransformFactory($this->keyDeriver));
         $this->decrypter = new PasswordDecrypter;
-        $this->cipher = new PasswordCipher($this->encrypter, $this->decrypter);
+        $this->crypter = new PasswordCrypter($this->encrypter, $this->decrypter);
 
         $this->version = chr(1);
         $this->type = chr(2);
@@ -51,16 +51,16 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->encrypter, $this->cipher->encrypter());
-        $this->assertSame($this->decrypter, $this->cipher->decrypter());
+        $this->assertSame($this->encrypter, $this->crypter->encrypter());
+        $this->assertSame($this->decrypter, $this->crypter->decrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new PasswordCipher;
+        $this->crypter = new PasswordCrypter;
 
-        $this->assertSame(PasswordEncrypter::instance(), $this->cipher->encrypter());
-        $this->assertSame(PasswordDecrypter::instance(), $this->cipher->decrypter());
+        $this->assertSame(PasswordEncrypter::instance(), $this->crypter->encrypter());
+        $this->assertSame(PasswordDecrypter::instance(), $this->crypter->decrypter());
     }
 
     public function encryptionData()
@@ -79,8 +79,8 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecrypt($dataSize)
     {
         $data = str_repeat('A', $dataSize);
-        $encrypted = $this->cipher->encrypt($this->password, $this->iterations, $data);
-        $decryptionResult = $this->cipher->decrypt($this->password, $encrypted);
+        $encrypted = $this->crypter->encrypt($this->password, $this->iterations, $data);
+        $decryptionResult = $this->crypter->decrypt($this->password, $encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -92,8 +92,8 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($dataSize)
     {
-        $encryptStream = $this->cipher->createEncryptStream($this->password, $this->iterations);
-        $decryptStream = $this->cipher->createDecryptStream($this->password);
+        $encryptStream = $this->crypter->createEncryptStream($this->password, $this->iterations);
+        $decryptStream = $this->crypter->createDecryptStream($this->password);
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
@@ -114,7 +114,7 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureNotBase64Url()
     {
-        $result = $this->cipher->decrypt($this->password, str_repeat('!', 100));
+        $result = $this->crypter->decrypt($this->password, str_repeat('!', 100));
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_ENCODING', $result->type()->key());
@@ -124,7 +124,7 @@ class PasswordCipherTest extends PHPUnit_Framework_TestCase
 
     public function testInstance()
     {
-        $className = get_class($this->cipher);
+        $className = get_class($this->crypter);
         Liberator::liberateClass($className)->instance = null;
         $instance = $className::instance();
 

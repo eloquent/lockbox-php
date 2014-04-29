@@ -9,17 +9,17 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Password;
+namespace Eloquent\Lockbox;
 
 /**
- * Encrypts and decrypts encoded data using passwords.
+ * Encrypts and decrypts encoded data using keys.
  */
-class PasswordCipher extends AbstractPasswordCipher
+class Crypter extends AbstractCrypter
 {
     /**
-     * Get the static instance of this cipher.
+     * Get the static instance of this crypter.
      *
-     * @return PasswordCipherInterface The static cipher.
+     * @return CrypterInterface The static crypter.
      */
     public static function instance()
     {
@@ -31,20 +31,20 @@ class PasswordCipher extends AbstractPasswordCipher
     }
 
     /**
-     * Construct a new password cipher.
+     * Construct a new crypter.
      *
-     * @param PasswordEncrypterInterface|null $encrypter The encrypter to use.
-     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
+     * @param EncrypterInterface|null $encrypter The encrypter to use.
+     * @param DecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
-        PasswordEncrypterInterface $encrypter = null,
-        PasswordDecrypterInterface $decrypter = null
+        EncrypterInterface $encrypter = null,
+        DecrypterInterface $decrypter = null
     ) {
         if (null === $encrypter) {
-            $encrypter = PasswordEncrypter::instance();
+            $encrypter = Encrypter::instance();
         }
         if (null === $decrypter) {
-            $decrypter = PasswordDecrypter::instance();
+            $decrypter = Decrypter::instance();
         }
 
         parent::__construct($encrypter, $decrypter);

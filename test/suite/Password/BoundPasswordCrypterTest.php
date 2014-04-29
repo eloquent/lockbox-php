@@ -13,28 +13,28 @@ namespace Eloquent\Lockbox\Password;
 
 use PHPUnit_Framework_TestCase;
 
-class BoundPasswordCipherTest extends PHPUnit_Framework_TestCase
+class BoundPasswordCrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->innerCipher = new PasswordCipher;
-        $this->cipher = new BoundPasswordCipher('password', 10, $this->innerCipher);
+        $this->innerCrypter = new PasswordCrypter;
+        $this->crypter = new BoundPasswordCrypter('password', 10, $this->innerCrypter);
     }
 
     public function testConstructor()
     {
-        $this->assertSame('password', $this->cipher->password());
-        $this->assertSame(10, $this->cipher->iterations());
-        $this->assertSame($this->innerCipher, $this->cipher->cipher());
+        $this->assertSame('password', $this->crypter->password());
+        $this->assertSame(10, $this->crypter->iterations());
+        $this->assertSame($this->innerCrypter, $this->crypter->crypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundPasswordCipher('password', 10);
+        $this->crypter = new BoundPasswordCrypter('password', 10);
 
-        $this->assertSame(PasswordCipher::instance(), $this->cipher->cipher());
+        $this->assertSame(PasswordCrypter::instance(), $this->crypter->crypter());
     }
 
     public function encryptionData()
@@ -51,8 +51,8 @@ class BoundPasswordCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($data)
     {
-        $encrypted = $this->cipher->encrypt($data);
-        $decryptionResult = $this->cipher->decrypt($encrypted);
+        $encrypted = $this->crypter->encrypt($data);
+        $decryptionResult = $this->crypter->decrypt($encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -64,8 +64,8 @@ class BoundPasswordCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($data)
     {
-        $encryptStream = $this->cipher->createEncryptStream();
-        $decryptStream = $this->cipher->createDecryptStream();
+        $encryptStream = $this->crypter->createEncryptStream();
+        $decryptStream = $this->crypter->createDecryptStream();
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(

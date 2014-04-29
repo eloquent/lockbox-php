@@ -16,12 +16,12 @@ use Eloquent\Liberator\Liberator;
 use PHPUnit_Framework_TestCase;
 
 /**
- * @covers \Eloquent\Lockbox\Cipher
- * @covers \Eloquent\Lockbox\AbstractCipher
+ * @covers \Eloquent\Lockbox\Crypter
+ * @covers \Eloquent\Lockbox\AbstractCrypter
  * @covers \Eloquent\Lockbox\Encrypter
  * @covers \Eloquent\Lockbox\Decrypter
  */
-class CipherTest extends PHPUnit_Framework_TestCase
+class CrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -29,7 +29,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
         $this->encrypter = new Encrypter;
         $this->decrypter = new Decrypter;
-        $this->cipher = new Cipher($this->encrypter, $this->decrypter);
+        $this->crypter = new Crypter($this->encrypter, $this->decrypter);
 
         $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
         $this->base64Url = Base64Url::instance();
@@ -37,16 +37,16 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->encrypter, $this->cipher->encrypter());
-        $this->assertSame($this->decrypter, $this->cipher->decrypter());
+        $this->assertSame($this->encrypter, $this->crypter->encrypter());
+        $this->assertSame($this->decrypter, $this->crypter->decrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new Cipher;
+        $this->crypter = new Crypter;
 
-        $this->assertSame(Encrypter::instance(), $this->cipher->encrypter());
-        $this->assertSame(Decrypter::instance(), $this->cipher->decrypter());
+        $this->assertSame(Encrypter::instance(), $this->crypter->encrypter());
+        $this->assertSame(Decrypter::instance(), $this->crypter->decrypter());
     }
 
     public function encryptionData()
@@ -81,8 +81,8 @@ class CipherTest extends PHPUnit_Framework_TestCase
     {
         $data = str_repeat('A', $dataSize);
         $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encrypted = $this->cipher->encrypt($this->key, $data);
-        $decryptionResult = $this->cipher->decrypt($this->key, $encrypted);
+        $encrypted = $this->crypter->encrypt($this->key, $data);
+        $decryptionResult = $this->crypter->decrypt($this->key, $encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -94,8 +94,8 @@ class CipherTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
     {
         $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encryptStream = $this->cipher->createEncryptStream($this->key);
-        $decryptStream = $this->cipher->createDecryptStream($this->key);
+        $encryptStream = $this->crypter->createEncryptStream($this->key);
+        $decryptStream = $this->crypter->createDecryptStream($this->key);
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
@@ -116,7 +116,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureNotBase64Url()
     {
-        $result = $this->cipher->decrypt($this->key, str_repeat('!', 100));
+        $result = $this->crypter->decrypt($this->key, str_repeat('!', 100));
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_ENCODING', $result->type()->key());
@@ -125,7 +125,7 @@ class CipherTest extends PHPUnit_Framework_TestCase
 
     public function testInstance()
     {
-        $className = get_class($this->cipher);
+        $className = get_class($this->crypter);
         Liberator::liberateClass($className)->instance = null;
         $instance = $className::instance();
 

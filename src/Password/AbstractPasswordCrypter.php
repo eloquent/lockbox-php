@@ -15,12 +15,12 @@ use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
 
 /**
- * An abstract base class for implementing password ciphers.
+ * An abstract base class for implementing password crypters.
  */
-abstract class AbstractPasswordCipher implements PasswordCipherInterface
+abstract class AbstractPasswordCrypter implements PasswordCrypterInterface
 {
     /**
-     * Construct a new password cipher.
+     * Construct a new password crypter.
      *
      * @param PasswordEncrypterInterface $encrypter The encrypter to use.
      * @param PasswordDecrypterInterface $decrypter The decrypter to use.

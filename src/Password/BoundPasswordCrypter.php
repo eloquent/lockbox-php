@@ -12,33 +12,33 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\BoundCipherInterface;
+use Eloquent\Lockbox\BoundCrypterInterface;
 use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
 
 /**
- * Binds a password to a cipher.
+ * Binds a password to a crypter.
  */
-class BoundPasswordCipher implements BoundCipherInterface
+class BoundPasswordCrypter implements BoundCrypterInterface
 {
     /**
-     * Construct a new bound password cipher.
+     * Construct a new bound password crypter.
      *
-     * @param string                       $password   The password to use.
-     * @param integer                      $iterations The number of hash iterations to use.
-     * @param PasswordCipherInterface|null $cipher     The cipher to use.
+     * @param string                        $password   The password to use.
+     * @param integer                       $iterations The number of hash iterations to use.
+     * @param PasswordCrypterInterface|null $crypter    The crypter to use.
      */
     public function __construct(
         $password,
         $iterations,
-        PasswordCipherInterface $cipher = null
+        PasswordCrypterInterface $crypter = null
     ) {
-        if (null === $cipher) {
-            $cipher = PasswordCipher::instance();
+        if (null === $crypter) {
+            $crypter = PasswordCrypter::instance();
         }
 
         $this->password = $password;
         $this->iterations = $iterations;
-        $this->cipher = $cipher;
+        $this->crypter = $crypter;
     }
 
     /**
@@ -62,13 +62,13 @@ class BoundPasswordCipher implements BoundCipherInterface
     }
 
     /**
-     * Get the cipher.
+     * Get the crypter.
      *
-     * @return PasswordCipherInterface The cipher.
+     * @return PasswordCrypterInterface The crypter.
      */
-    public function cipher()
+    public function crypter()
     {
-        return $this->cipher;
+        return $this->crypter;
     }
 
     /**
@@ -80,7 +80,7 @@ class BoundPasswordCipher implements BoundCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->cipher()
+        return $this->crypter()
             ->encrypt($this->password(), $this->iterations(), $data);
     }
 
@@ -93,7 +93,7 @@ class BoundPasswordCipher implements BoundCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->cipher()->decrypt($this->password(), $data);
+        return $this->crypter()->decrypt($this->password(), $data);
     }
 
     /**
@@ -103,7 +103,7 @@ class BoundPasswordCipher implements BoundCipherInterface
      */
     public function createEncryptStream()
     {
-        return $this->cipher()
+        return $this->crypter()
             ->createEncryptStream($this->password(), $this->iterations());
     }
 
@@ -114,10 +114,10 @@ class BoundPasswordCipher implements BoundCipherInterface
      */
     public function createDecryptStream()
     {
-        return $this->cipher()->createDecryptStream($this->password());
+        return $this->crypter()->createDecryptStream($this->password());
     }
 
     private $password;
     private $iterations;
-    private $cipher;
+    private $crypter;
 }

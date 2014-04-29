@@ -15,26 +15,26 @@ use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Result\DecryptionResultInterface;
 
 /**
- * Binds a key to a cipher.
+ * Binds a key to a crypter.
  */
-class BoundCipher implements BoundCipherInterface
+class BoundCrypter implements BoundCrypterInterface
 {
     /**
-     * Construct a new bound cipher.
+     * Construct a new bound crypter.
      *
-     * @param Key\KeyInterface     $key    The key to use.
-     * @param CipherInterface|null $cipher The cipher to use.
+     * @param Key\KeyInterface      $key     The key to use.
+     * @param CrypterInterface|null $crypter The crypter to use.
      */
     public function __construct(
         Key\KeyInterface $key,
-        CipherInterface $cipher = null
+        CrypterInterface $crypter = null
     ) {
-        if (null === $cipher) {
-            $cipher = Cipher::instance();
+        if (null === $crypter) {
+            $crypter = Crypter::instance();
         }
 
         $this->key = $key;
-        $this->cipher = $cipher;
+        $this->crypter = $crypter;
     }
 
     /**
@@ -48,13 +48,13 @@ class BoundCipher implements BoundCipherInterface
     }
 
     /**
-     * Get the cipher.
+     * Get the crypter.
      *
-     * @return CipherInterface The cipher.
+     * @return CrypterInterface The crypter.
      */
-    public function cipher()
+    public function crypter()
     {
-        return $this->cipher;
+        return $this->crypter;
     }
 
     /**
@@ -66,7 +66,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function encrypt($data)
     {
-        return $this->cipher()->encrypt($this->key(), $data);
+        return $this->crypter()->encrypt($this->key(), $data);
     }
 
     /**
@@ -78,7 +78,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function decrypt($data)
     {
-        return $this->cipher()->decrypt($this->key(), $data);
+        return $this->crypter()->decrypt($this->key(), $data);
     }
 
     /**
@@ -88,7 +88,7 @@ class BoundCipher implements BoundCipherInterface
      */
     public function createEncryptStream()
     {
-        return $this->cipher()->createEncryptStream($this->key());
+        return $this->crypter()->createEncryptStream($this->key());
     }
 
     /**
@@ -98,9 +98,9 @@ class BoundCipher implements BoundCipherInterface
      */
     public function createDecryptStream()
     {
-        return $this->cipher()->createDecryptStream($this->key());
+        return $this->crypter()->createDecryptStream($this->key());
     }
 
     private $key;
-    private $cipher;
+    private $crypter;
 }

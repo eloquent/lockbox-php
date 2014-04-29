@@ -9,12 +9,11 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Password;
+namespace Eloquent\Lockbox;
 
 /**
- * The interface implemented by password ciphers.
+ * The interface implemented by encrypter/decrypters.
  */
-interface PasswordCipherInterface extends PasswordEncrypterInterface,
-    PasswordDecrypterInterface
+interface CrypterInterface extends EncrypterInterface, DecrypterInterface
 {
 }

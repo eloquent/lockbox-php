@@ -14,12 +14,12 @@ namespace Eloquent\Lockbox;
 /**
  * Encrypts and decrypts raw data using keys.
  */
-class RawCipher extends AbstractCipher
+class RawCrypter extends AbstractCrypter
 {
     /**
-     * Get the static instance of this cipher.
+     * Get the static instance of this crypter.
      *
-     * @return CipherInterface The static cipher.
+     * @return CrypterInterface The static crypter.
      */
     public static function instance()
     {
@@ -31,7 +31,7 @@ class RawCipher extends AbstractCipher
     }
 
     /**
-     * Construct a new cipher.
+     * Construct a new crypter.
      *
      * @param EncrypterInterface|null $encrypter The encrypter to use.
      * @param DecrypterInterface|null $decrypter The decrypter to use.

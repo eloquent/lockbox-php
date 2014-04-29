@@ -14,12 +14,12 @@ namespace Eloquent\Lockbox\Password;
 /**
  * Encrypts and decrypts raw data using passwords.
  */
-class RawPasswordCipher extends AbstractPasswordCipher
+class RawPasswordCrypter extends AbstractPasswordCrypter
 {
     /**
-     * Get the static instance of this cipher.
+     * Get the static instance of this crypter.
      *
-     * @return PasswordCipherInterface The static cipher.
+     * @return PasswordCrypterInterface The static crypter.
      */
     public static function instance()
     {
@@ -31,7 +31,7 @@ class RawPasswordCipher extends AbstractPasswordCipher
     }
 
     /**
-     * Construct a new password cipher.
+     * Construct a new password crypter.
      *
      * @param PasswordEncrypterInterface|null $encrypter The encrypter to use.
      * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.

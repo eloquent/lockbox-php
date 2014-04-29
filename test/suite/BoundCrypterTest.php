@@ -13,28 +13,28 @@ namespace Eloquent\Lockbox;
 
 use PHPUnit_Framework_TestCase;
 
-class BoundCipherTest extends PHPUnit_Framework_TestCase
+class BoundCrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
         $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
-        $this->innerCipher = new Cipher;
-        $this->cipher = new BoundCipher($this->key, $this->innerCipher);
+        $this->innerCrypter = new Crypter;
+        $this->crypter = new BoundCrypter($this->key, $this->innerCrypter);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->cipher->key());
-        $this->assertSame($this->innerCipher, $this->cipher->cipher());
+        $this->assertSame($this->key, $this->crypter->key());
+        $this->assertSame($this->innerCrypter, $this->crypter->crypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new BoundCipher($this->key);
+        $this->crypter = new BoundCrypter($this->key);
 
-        $this->assertSame(Cipher::instance(), $this->cipher->cipher());
+        $this->assertSame(Crypter::instance(), $this->crypter->crypter());
     }
 
     public function encryptionData()
@@ -51,8 +51,8 @@ class BoundCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecrypt($data)
     {
-        $encrypted = $this->cipher->encrypt($data);
-        $decryptionResult = $this->cipher->decrypt($encrypted);
+        $encrypted = $this->crypter->encrypt($data);
+        $decryptionResult = $this->crypter->decrypt($encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -63,8 +63,8 @@ class BoundCipherTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($data)
     {
-        $encryptStream = $this->cipher->createEncryptStream();
-        $decryptStream = $this->cipher->createDecryptStream();
+        $encryptStream = $this->crypter->createEncryptStream();
+        $decryptStream = $this->crypter->createDecryptStream();
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
