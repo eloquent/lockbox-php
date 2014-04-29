@@ -54,7 +54,7 @@ class EncryptionCipher implements CipherInterface
         );
 
         $this->hashAlgorithm = 'sha' . $key->authenticationSecretBits();
-        $this->authenticationSecret = $key->authenticationSecret;
+        $this->authenticationSecret = $key->authenticationSecret();
         $this->hashContext = hash_init(
             $this->hashAlgorithm,
             HASH_HMAC,
@@ -93,9 +93,19 @@ class EncryptionCipher implements CipherInterface
         $this->buffer .= $input;
         $size = strlen($this->buffer);
         $consume = $size - ($size % 16);
-        list($input, $this->buffer) = str_split($this->buffer, $consume);
 
-        return $this->handleHeader() .
+        if (!$consume) {
+            return $output;
+        }
+
+        if ($consume === $size) {
+            $input = $this->buffer;
+            $this->buffer = '';
+        } else {
+            list($input, $this->buffer) = str_split($this->buffer, $consume);
+        }
+
+        return $output .
             $this->authenticateBlocks(
                 mcrypt_generic($this->mcryptModule, $input)
             );
@@ -115,7 +125,10 @@ class EncryptionCipher implements CipherInterface
 
         $output = $this->handleHeader() .
             $this->authenticateBlocks(
-                mcrypt_generic($this->mcryptModule, $this->buffer)
+                mcrypt_generic(
+                    $this->mcryptModule,
+                    $this->padder->pad($this->buffer)
+                )
             ) .
             hash_final($this->hashContext, true);
 
