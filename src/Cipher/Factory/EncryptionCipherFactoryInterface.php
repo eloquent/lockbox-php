@@ -22,7 +22,7 @@ interface EncryptionCipherFactoryInterface
      * Create a new encryption cipher.
      *
      * @param KeyInterface $key The key to encrypt with.
-     * @param string       $iv  The initialization vector to use.
+     * @param string|null  $iv  The initialization vector to use, or null to generate one.
      */
-    public function createEncryptionCipher(KeyInterface $key, $iv);
+    public function createEncryptionCipher(KeyInterface $key, $iv = null);
 }

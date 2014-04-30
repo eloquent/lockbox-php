@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 
 use Eloquent\Lockbox\Cipher\EncryptionCipher;
 use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
  * Creates encryption ciphers.
@@ -34,15 +36,44 @@ class EncryptionCipherFactory implements EncryptionCipherFactoryInterface
     }
 
     /**
+     * Construct a new encryption cipher factory.
+     *
+     * @param RandomSourceInterface|null $randomSource The random source to use.
+     */
+    public function __construct(RandomSourceInterface $randomSource = null)
+    {
+        if (null === $randomSource) {
+            $randomSource = DevUrandom::instance();
+        }
+
+        $this->randomSource = $randomSource;
+    }
+
+    /**
+     * Get the random source.
+     *
+     * @return RandomSourceInterface The random source.
+     */
+    public function randomSource()
+    {
+        return $this->randomSource;
+    }
+
+    /**
      * Create a new encryption cipher.
      *
      * @param KeyInterface $key The key to encrypt with.
-     * @param string       $iv  The initialization vector to use.
+     * @param string|null  $iv  The initialization vector to use, or null to generate one.
      */
-    public function createEncryptionCipher(KeyInterface $key, $iv)
+    public function createEncryptionCipher(KeyInterface $key, $iv = null)
     {
+        if (null === $iv) {
+            $iv = $this->randomSource()->generate(16);
+        }
+
         return new EncryptionCipher($key, $iv);
     }
 
     private static $instance;
+    private $randomSource;
 }
