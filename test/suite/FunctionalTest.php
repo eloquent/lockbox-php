@@ -10,6 +10,7 @@
  */
 
 use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
 use Eloquent\Lockbox\Key\Key;
@@ -30,7 +31,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
 
-        $this->encrypter = new Encrypter(new EncryptTransformFactory($this->randomSource));
+        $this->encrypter = new Encrypter(new EncryptTransformFactory(new EncryptCipherFactory($this->randomSource)));
         $this->decrypter = new Decrypter;
 
         $this->passwordEncrypter = new PasswordEncrypter(

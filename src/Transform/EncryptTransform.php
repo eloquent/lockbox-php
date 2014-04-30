@@ -12,11 +12,7 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
-use Eloquent\Lockbox\Key\KeyInterface;
-use Eloquent\Lockbox\Padding\PadderInterface;
-use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
+use Eloquent\Lockbox\Cipher\CipherInterface;
 
 /**
  * A data transform for encryption of streaming data.
@@ -26,56 +22,21 @@ class EncryptTransform extends AbstractTransform
     /**
      * Construct a new encrypt data transform.
      *
-     * @param KeyInterface               $key          The key to encrypt with.
-     * @param RandomSourceInterface|null $randomSource The random source to use.
-     * @param PadderInterface|null       $padder       The padder to use.
+     * @param CipherInterface $cipher The cipher to use.
      */
-    public function __construct(
-        KeyInterface $key,
-        RandomSourceInterface $randomSource = null,
-        PadderInterface $padder = null
-    ) {
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
-        }
-        if (null === $padder) {
-            $padder = PkcsPadding::instance();
-        }
-
-        $this->key = $key;
-        $this->randomSource = $randomSource;
-        $this->padder = $padder;
-        $this->version = $this->type = chr(1);
+    public function __construct(CipherInterface $cipher)
+    {
+        $this->cipher = $cipher;
     }
 
     /**
-     * Get the key.
+     * Get the cipher.
      *
-     * @return KeyInterface The key.
+     * @return CipherInterface The cipher.
      */
-    public function key()
+    public function cipher()
     {
-        return $this->key;
-    }
-
-    /**
-     * Get the random source.
-     *
-     * @return RandomSourceInterface The random source.
-     */
-    public function randomSource()
-    {
-        return $this->randomSource;
-    }
-
-    /**
-     * Get the padder.
-     *
-     * @return PadderInterface The padder.
-     */
-    public function padder()
-    {
-        return $this->padder;
+        return $this->cipher;
     }
 
     /**
@@ -101,115 +62,22 @@ class EncryptTransform extends AbstractTransform
      */
     public function transform($data, &$context, $isEnd = false)
     {
-        if (null === $context) {
-            $context = $this->initializeContext();
-        }
+        $size = strlen($data);
 
-        $dataSize = strlen($data);
-        if (!$isEnd && $dataSize < 16) {
-            return array('', 0, null);
-        }
-
-        $context->encryptBuffer .= $data;
-        $context->encryptBufferSize += $dataSize;
-        $consume = $this->blocksSize($context->encryptBufferSize, 16, $isEnd);
-
-        if ($context->encryptBufferSize === $consume) {
-            if ($isEnd) {
-                $context->ciphertextBuffer .= mcrypt_generic(
-                    $context->mcryptModule,
-                    $this->padder()->pad($context->encryptBuffer)
-                );
-            } else {
-                $context->ciphertextBuffer .= mcrypt_generic(
-                    $context->mcryptModule,
-                    $context->encryptBuffer
-                );
-            }
-            $context->encryptBuffer = '';
-            $context->encryptBufferSize = 0;
-        } else {
-            $context->ciphertextBuffer .= mcrypt_generic(
-                $context->mcryptModule,
-                substr($context->encryptBuffer, 0, $consume)
-            );
-            $context->encryptBuffer = substr($context->encryptBuffer, $consume);
-            $context->encryptBufferSize -= $consume;
-        }
-
-        hash_update($context->hashContext, $context->ciphertextBuffer);
-
-        foreach (str_split($context->ciphertextBuffer, 16) as $block) {
-            $context->outputBuffer .= $block .
-                substr(
-                    hash_hmac(
-                        $context->hashAlgorithm,
-                        $block,
-                        $this->key()->authenticationSecret(),
-                        true
-                    ),
-                    0,
-                    2
-                );
-        }
-
-        $context->ciphertextBuffer = '';
-        $output = $context->outputBuffer;
-
+        $data = $this->cipher->process($data);
         if ($isEnd) {
-            $output .= $this->finalizeContext($context);
-        } else {
-            $context->outputBuffer = '';
+            $data .= $this->cipher->finalize();
         }
 
-        return array($output, $dataSize, null);
+        $result = $this->cipher->result();
+        if ($result && !$result->isSuccessful()) {
+            $error = $result;
+        } else {
+            $error = null;
+        }
+
+        return array($data, $size, $error);
     }
 
-    private function initializeContext()
-    {
-        $context = new EncryptTransformContext;
-
-        $context->mcryptModule = mcrypt_module_open(
-            MCRYPT_RIJNDAEL_128,
-            '',
-            MCRYPT_MODE_CBC,
-            ''
-        );
-
-        $iv = $this->randomSource()->generate(16);
-        mcrypt_generic_init(
-            $context->mcryptModule,
-            $this->key()->encryptionSecret(),
-            $iv
-        );
-
-        $context->hashAlgorithm = 'sha' .
-            $this->key()->authenticationSecretBits();
-        $context->hashContext = hash_init(
-            $context->hashAlgorithm,
-            HASH_HMAC,
-            $this->key()->authenticationSecret()
-        );
-
-        $context->outputBuffer = $this->version . $this->type . $iv;
-        hash_update($context->hashContext, $context->outputBuffer);
-
-        return $context;
-    }
-
-    private function finalizeContext(EncryptTransformContext &$context)
-    {
-        mcrypt_generic_deinit($context->mcryptModule);
-        mcrypt_module_close($context->mcryptModule);
-        $hash = hash_final($context->hashContext, true);
-        $context = null;
-
-        return $hash;
-    }
-
-    private $key;
-    private $randomSource;
-    private $padder;
-    private $version;
-    private $type;
+    private $cipher;
 }

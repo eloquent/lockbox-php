@@ -12,9 +12,9 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
+use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactoryInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 
 /**
@@ -39,25 +39,26 @@ class EncryptTransformFactory implements KeyTransformFactoryInterface
     /**
      * Construct a new encrypt transform factory.
      *
-     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param EncryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(RandomSourceInterface $randomSource = null)
-    {
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
+    public function __construct(
+        EncryptCipherFactoryInterface $cipherFactory = null
+    ) {
+        if (null === $cipherFactory) {
+            $cipherFactory = EncryptCipherFactory::instance();
         }
 
-        $this->randomSource = $randomSource;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the random source.
+     * Get the cipher factory.
      *
-     * @return RandomSourceInterface The random source.
+     * @return EncryptCipherFactoryInterface The cipher factory.
      */
-    public function randomSource()
+    public function cipherFactory()
     {
-        return $this->randomSource;
+        return $this->cipherFactory;
     }
 
     /**
@@ -69,9 +70,11 @@ class EncryptTransformFactory implements KeyTransformFactoryInterface
      */
     public function createTransform(KeyInterface $key)
     {
-        return new EncryptTransform($key, $this->randomSource());
+        return new EncryptTransform(
+            $this->cipherFactory()->createEncryptCipher($key)
+        );
     }
 
     private static $instance;
-    private $randomSource;
+    private $cipherFactory;
 }

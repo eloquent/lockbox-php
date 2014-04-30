@@ -12,10 +12,13 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Cipher\EncryptCipher;
+use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class EncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
 {
@@ -23,27 +26,31 @@ class EncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->randomSource = new DevUrandom;
-        $this->factory = new EncryptTransformFactory($this->randomSource);
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->cipherFactory = new EncryptCipherFactory($this->randomSource);
+        $this->factory = new EncryptTransformFactory($this->cipherFactory);
+
+        $this->iv = '1234567890123456';
+        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->randomSource, $this->factory->randomSource());
+        $this->assertSame($this->cipherFactory, $this->factory->cipherFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->factory = new EncryptTransformFactory;
 
-        $this->assertSame(DevUrandom::instance(), $this->factory->randomSource());
+        $this->assertSame(EncryptCipherFactory::instance(), $this->factory->cipherFactory());
     }
 
     public function testCreateTransform()
     {
         $key = new Key('1234567890123456', '1234567890123456789012345678');
 
-        $this->assertEquals(new EncryptTransform($key, $this->randomSource), $this->factory->createTransform($key));
+        $this->assertInstanceOf('Eloquent\Lockbox\Transform\EncryptTransform', $this->factory->createTransform($key));
     }
 
     public function testInstance()
