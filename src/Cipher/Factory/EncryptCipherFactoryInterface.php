@@ -14,15 +14,15 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
- * The interface implemented by encryption cipher factories.
+ * The interface implemented by encrypt cipher factories.
  */
-interface EncryptionCipherFactoryInterface
+interface EncryptCipherFactoryInterface
 {
     /**
-     * Create a new encryption cipher.
+     * Create a new encrypt cipher.
      *
      * @param KeyInterface $key The key to encrypt with.
      * @param string|null  $iv  The initialization vector to use, or null to generate one.
      */
-    public function createEncryptionCipher(KeyInterface $key, $iv = null);
+    public function createEncryptCipher(KeyInterface $key, $iv = null);
 }

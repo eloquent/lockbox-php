@@ -18,10 +18,10 @@ use Eloquent\Lockbox\Padding\PkcsPadding;
 /**
  * Encrypts data with a key.
  */
-class EncryptionCipher implements CipherInterface
+class EncryptCipher implements CipherInterface
 {
     /**
-     * Construct a new encryption cipher.
+     * Construct a new encrypt cipher.
      *
      * @param KeyInterface         $key    The key to encrypt with.
      * @param string               $iv     The initialization vector to use.

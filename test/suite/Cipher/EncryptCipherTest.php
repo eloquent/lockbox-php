@@ -17,7 +17,7 @@ use Eloquent\Lockbox\Padding\PkcsPadding;
 use Exception;
 use PHPUnit_Framework_TestCase;
 
-class EncryptionCipherTest extends PHPUnit_Framework_TestCase
+class EncryptCipherTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -26,7 +26,7 @@ class EncryptionCipherTest extends PHPUnit_Framework_TestCase
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->iv = '1234567890123456';
         $this->padder = new PkcsPadding;
-        $this->cipher = new EncryptionCipher($this->key, $this->iv, $this->padder);
+        $this->cipher = new EncryptCipher($this->key, $this->iv, $this->padder);
 
         $this->base64Url = Base64Url::instance();
     }
@@ -38,7 +38,7 @@ class EncryptionCipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new EncryptionCipher($this->key, $this->iv);
+        $this->cipher = new EncryptCipher($this->key, $this->iv);
 
         $this->assertSame(PkcsPadding::instance(), $this->cipher->padder());
     }

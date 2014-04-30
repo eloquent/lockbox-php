@@ -11,20 +11,20 @@
 
 namespace Eloquent\Lockbox\Cipher\Factory;
 
-use Eloquent\Lockbox\Cipher\EncryptionCipher;
+use Eloquent\Lockbox\Cipher\EncryptCipher;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
- * Creates encryption ciphers.
+ * Creates encrypt ciphers.
  */
-class EncryptionCipherFactory implements EncryptionCipherFactoryInterface
+class EncryptCipherFactory implements EncryptCipherFactoryInterface
 {
     /**
      * Get the static instance of this factory.
      *
-     * @return EncryptionCipherFactoryInterface The static factory.
+     * @return EncryptCipherFactoryInterface The static factory.
      */
     public static function instance()
     {
@@ -36,7 +36,7 @@ class EncryptionCipherFactory implements EncryptionCipherFactoryInterface
     }
 
     /**
-     * Construct a new encryption cipher factory.
+     * Construct a new encrypt cipher factory.
      *
      * @param RandomSourceInterface|null $randomSource The random source to use.
      */
@@ -60,18 +60,18 @@ class EncryptionCipherFactory implements EncryptionCipherFactoryInterface
     }
 
     /**
-     * Create a new encryption cipher.
+     * Create a new encrypt cipher.
      *
      * @param KeyInterface $key The key to encrypt with.
      * @param string|null  $iv  The initialization vector to use, or null to generate one.
      */
-    public function createEncryptionCipher(KeyInterface $key, $iv = null)
+    public function createEncryptCipher(KeyInterface $key, $iv = null)
     {
         if (null === $iv) {
             $iv = $this->randomSource()->generate(16);
         }
 
-        return new EncryptionCipher($key, $iv);
+        return new EncryptCipher($key, $iv);
     }
 
     private static $instance;
