@@ -12,6 +12,9 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
+use Eloquent\Lockbox\Cipher\DecryptCipher;
+use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactoryInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Transform\DecryptTransform;
 
@@ -35,6 +38,31 @@ class DecryptTransformFactory implements KeyTransformFactoryInterface
     }
 
     /**
+     * Construct a new decrypt transform factory.
+     *
+     * @param DecryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     */
+    public function __construct(
+        DecryptCipherFactoryInterface $cipherFactory = null
+    ) {
+        if (null === $cipherFactory) {
+            $cipherFactory = DecryptCipherFactory::instance();
+        }
+
+        $this->cipherFactory = $cipherFactory;
+    }
+
+    /**
+     * Get the cipher factory.
+     *
+     * @return DecryptCipherFactoryInterface The cipher factory.
+     */
+    public function cipherFactory()
+    {
+        return $this->cipherFactory;
+    }
+
+    /**
      * Create a new transform for the supplied key.
      *
      * @param KeyInterface $key The key to use.
@@ -43,8 +71,9 @@ class DecryptTransformFactory implements KeyTransformFactoryInterface
      */
     public function createTransform(KeyInterface $key)
     {
-        return new DecryptTransform($key);
+        return new DecryptTransform(new DecryptCipher($key));
     }
 
     private static $instance;
+    private $cipherFactory;
 }

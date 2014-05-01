@@ -9,15 +9,14 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Cipher;
+namespace Eloquent\Lockbox\Cipher\Result;
 
 use Eloquent\Enumeration\AbstractMultiton;
 
 /**
- * An enumeration of possible cipher results.
+ * An enumeration of possible cipher result types.
  */
-final class CipherResult extends AbstractMultiton implements
-    CipherResultInterface
+final class CipherResultType extends AbstractMultiton
 {
     /**
      * Returns true if this result type indicates a successful result.

@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Cipher;
 
+use Eloquent\Lockbox\Cipher\Result\CipherResult;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
@@ -36,30 +39,11 @@ class EncryptCipher implements CipherInterface
             $padder = PkcsPadding::instance();
         }
 
+        $this->key = $key;
         $this->iv = $iv;
         $this->padder = $padder;
         $this->buffer = '';
-        $this->isHeaderSent = $this->isFinalized = false;
-
-        $this->mcryptModule = mcrypt_module_open(
-            MCRYPT_RIJNDAEL_128,
-            '',
-            MCRYPT_MODE_CBC,
-            ''
-        );
-        mcrypt_generic_init(
-            $this->mcryptModule,
-            $key->encryptionSecret(),
-            $iv
-        );
-
-        $this->hashAlgorithm = 'sha' . $key->authenticationSecretBits();
-        $this->authenticationSecret = $key->authenticationSecret();
-        $this->hashContext = hash_init(
-            $this->hashAlgorithm,
-            HASH_HMAC,
-            $this->authenticationSecret
-        );
+        $this->isInitialized = $this->isFinalized = false;
     }
 
     /**
@@ -88,7 +72,7 @@ class EncryptCipher implements CipherInterface
             throw new Exception\CipherFinalizedException;
         }
 
-        $output = $this->handleHeader();
+        $output = $this->initialize();
 
         $this->buffer .= $input;
         $size = strlen($this->buffer);
@@ -114,16 +98,25 @@ class EncryptCipher implements CipherInterface
     /**
      * Finalize processing and return any remaining output.
      *
+     * @param string|null $input Any remaining data to process.
+     *
      * @return string                             Any output produced.
      * @throws Exception\CipherFinalizedException If this cipher is already finalized.
      */
-    public function finalize()
+    public function finalize($input = null)
     {
         if ($this->isFinalized) {
             throw new Exception\CipherFinalizedException;
         }
 
-        $output = $this->handleHeader() .
+        $this->isFinalized = true;
+
+        if (null !== $input) {
+            $this->buffer .= $input;
+        }
+        $input = null;
+
+        $output = $this->initialize() .
             $this->authenticateBlocks(
                 mcrypt_generic(
                     $this->mcryptModule,
@@ -136,8 +129,7 @@ class EncryptCipher implements CipherInterface
         mcrypt_generic_deinit($this->mcryptModule);
         mcrypt_module_close($this->mcryptModule);
 
-        $this->isFinalized = true;
-        $this->result = CipherResult::SUCCESS();
+        $this->result = new CipherResult(CipherResultType::SUCCESS());
 
         return $output;
     }
@@ -172,13 +164,32 @@ class EncryptCipher implements CipherInterface
         return $this->result;
     }
 
-    private function handleHeader()
+    private function initialize()
     {
-        if ($this->isHeaderSent) {
+        if ($this->isInitialized) {
             return '';
         }
 
-        $this->isHeaderSent = true;
+        $this->isInitialized = true;
+
+        $this->mcryptModule = mcrypt_module_open(
+            MCRYPT_RIJNDAEL_128,
+            '',
+            MCRYPT_MODE_CBC,
+            ''
+        );
+        mcrypt_generic_init(
+            $this->mcryptModule,
+            $this->key->encryptionSecret(),
+            $this->iv
+        );
+
+        $this->hashContext = hash_init(
+            'sha' . $this->key->authenticationSecretBits(),
+            HASH_HMAC,
+            $this->key->authenticationSecret()
+        );
+
         $header = chr(1) . chr(1) . $this->iv;
         hash_update($this->hashContext, $header);
 
@@ -195,9 +206,9 @@ class EncryptCipher implements CipherInterface
                 $block .
                 substr(
                     hash_hmac(
-                        $this->hashAlgorithm,
+                        'sha' . $this->key->authenticationSecretBits(),
                         $block,
-                        $this->authenticationSecret,
+                        $this->key->authenticationSecret(),
                         true
                     ),
                     0,
@@ -208,14 +219,13 @@ class EncryptCipher implements CipherInterface
         return $authenticated;
     }
 
+    private $key;
+    private $iv;
     private $padder;
     private $buffer;
-    private $mcryptModule;
-    private $hashAlgorithm;
-    private $authenticationSecret;
-    private $hashContext;
-    private $iv;
-    private $isHeaderSent;
+    private $isInitialized;
     private $isFinalized;
+    private $mcryptModule;
+    private $hashContext;
     private $result;
 }

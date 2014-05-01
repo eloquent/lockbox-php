@@ -14,11 +14,8 @@ namespace Eloquent\Lockbox\Transform;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Cipher\EncryptCipher;
 use Eloquent\Lockbox\Key\Key;
-use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Random\DevUrandom;
 use Exception;
 use PHPUnit_Framework_TestCase;
-use Phake;
 
 class EncryptTransformTest extends PHPUnit_Framework_TestCase
 {

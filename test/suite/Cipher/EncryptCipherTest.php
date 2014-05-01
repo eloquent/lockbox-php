@@ -60,7 +60,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertSame(CipherResult::SUCCESS(), $this->cipher->result());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
     public function testCipherExactBlockSizes()
@@ -76,14 +76,12 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertSame(CipherResult::SUCCESS(), $this->cipher->result());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
     public function testCipherEmpty()
     {
-        $output = '';
-        $output .= $this->cipher->process('');
-        $output .= $this->cipher->finalize();
+        $output = $this->cipher->finalize('');
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2BsV8no6a9yLYUT6rbu2PdNC4LItQ9m-F9dQ65M-pun4OnZkLrHT8zDDw0sE4Dg'
         );
@@ -91,7 +89,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertSame(CipherResult::SUCCESS(), $this->cipher->result());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
     public function testCipherFinalizeOnly()
@@ -104,7 +102,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertSame(CipherResult::SUCCESS(), $this->cipher->result());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
     public function testProcessFailureFinalized()

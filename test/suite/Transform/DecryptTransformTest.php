@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Lockbox\BoundEncrypter;
+use Eloquent\Lockbox\Cipher\DecryptCipher;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Padding\PkcsPadding;
@@ -28,7 +29,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->unpadder = new PkcsPadding;
-        $this->transform = new DecryptTransform($this->key, $this->unpadder);
+        $this->cipher = new DecryptCipher($this->key, $this->unpadder);
+        $this->transform = new DecryptTransform($this->cipher);
 
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
@@ -43,15 +45,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->transform->key());
-        $this->assertSame($this->unpadder, $this->transform->unpadder());
-    }
-
-    public function testConstructorDefaults()
-    {
-        $this->transform = new DecryptTransform($this->key);
-
-        $this->assertSame(PkcsPadding::instance(), $this->transform->unpadder());
+        $this->assertSame($this->cipher, $this->transform->cipher());
     }
 
     public function transformData()
@@ -132,6 +126,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
+        $this->block = '1234567890123456';
+        $this->blockWithMac = $this->block . $this->authenticate($this->block, 2);
 
         return array(
             'Empty' => array(
@@ -139,8 +135,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported version' => array(
-                chr(111) . $this->type . $this->iv . '123456789012345678' .
-                $this->authenticate(chr(111) . '12345678901234567' . '1234567890123456'),
+                chr(111) . $this->type . $this->iv . $this->blockWithMac .
+                $this->authenticate(chr(111) . $this->type . $this->iv . $this->block),
                 'UNSUPPORTED_VERSION',
             ),
             'Empty type' => array(
@@ -148,8 +144,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported type' => array(
-                $this->version . chr(111) . $this->iv . '123456789012345678' .
-                $this->authenticate($this->version . chr(111) . '1234567890123456' . '1234567890123456'),
+                $this->version . chr(111) . $this->iv . $this->blockWithMac .
+                $this->authenticate($this->version . chr(111) . $this->iv . $this->block),
                 'UNSUPPORTED_TYPE',
             ),
             'Empty IV' => array(
@@ -253,16 +249,6 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_PADDING', $error);
         $this->assertSame('1234567890123456', $output);
         $this->assertNull($context);
-    }
-
-    public function testTransformAfterFailure()
-    {
-        $this->transform->transform(str_repeat(' ', 200), $context);
-        list($data, $consumed, $error) = $this->transform->transform('', $context, true);
-
-        $this->assertSame('', $data);
-        $this->assertSame(0, $consumed);
-        $this->assertNull($error);
     }
 
     protected function feedTransform($packets)

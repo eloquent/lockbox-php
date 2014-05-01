@@ -12,12 +12,7 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
-use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Key\KeyInterface;
-use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Result\DecryptionResult;
-use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Cipher\CipherInterface;
 
 /**
  * A data transform for decryption of streaming data.
@@ -28,49 +23,21 @@ class DecryptTransform extends AbstractTransform implements
     /**
      * Construct a new decrypt data transform.
      *
-     * @param KeyInterface           $key      The key to decrypt with.
-     * @param UnpadderInterface|null $unpadder The unpadder to use.
+     * @param CipherInterface $cipher The cipher to use.
      */
-    public function __construct(
-        KeyInterface $key,
-        UnpadderInterface $unpadder = null
-    ) {
-        if (null === $unpadder) {
-            $unpadder = PkcsPadding::instance();
-        }
-
-        $this->key = $key;
-        $this->unpadder = $unpadder;
+    public function __construct(CipherInterface $cipher)
+    {
+        $this->cipher = $cipher;
     }
 
     /**
-     * Get the key.
+     * Get the cipher.
      *
-     * @return KeyInterface The key.
+     * @return CipherInterface The cipher.
      */
-    public function key()
+    public function cipher()
     {
-        return $this->key;
-    }
-
-    /**
-     * Get the unpadder.
-     *
-     * @return UnpadderInterface The unpadder.
-     */
-    public function unpadder()
-    {
-        return $this->unpadder;
-    }
-
-    /**
-     * Get the decryption result.
-     *
-     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
-     */
-    public function result()
-    {
-        return $this->result;
+        return $this->cipher;
     }
 
     /**
@@ -96,280 +63,33 @@ class DecryptTransform extends AbstractTransform implements
      */
     public function transform($data, &$context, $isEnd = false)
     {
-        if ($this->result) {
-            return array('', 0, null);
-        }
-
-        if (null === $context) {
-            $context = $this->initializeContext();
-        }
-
-        $dataSize = strlen($data);
-        $consumed = 0;
-
-        if (!$context->isVersionSeen) {
-            if ($dataSize < 1) {
-                if ($isEnd) {
-                    $this->result = new DecryptionResult(
-                        DecryptionResultType::INVALID_SIZE()
-                    );
-                    $this->finalizeContext($context);
-
-                    return array('', $consumed, $this->result);
-                }
-
-                return array('', $consumed, null);
-            }
-
-            $context->isVersionSeen = true;
-
-            $versionData = substr($data, 0, 1);
-            $version = ord($versionData);
-            if (1 !== $version) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::UNSUPPORTED_VERSION()
-                );
-                $this->finalizeContext($context);
-
-                return array('', 1, $this->result);
-            }
-
-            hash_update($context->hashContext, $versionData);
-
-            if (1 === $dataSize) {
-                $data = '';
-            } else {
-                $data = substr($data, 1);
-            }
-
-            $dataSize -= 1;
-            $consumed += 1;
-        }
-
-        if (!$context->isTypeSeen) {
-            if ($dataSize < 1) {
-                if ($isEnd) {
-                    $this->result = new DecryptionResult(
-                        DecryptionResultType::INVALID_SIZE()
-                    );
-                    $this->finalizeContext($context);
-
-                    return array('', $consumed, $this->result);
-                }
-
-                return array('', $consumed, null);
-            }
-
-            $context->isTypeSeen = true;
-
-            $typeData = substr($data, 0, 1);
-            $type = ord($typeData);
-            if (1 !== $type) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::UNSUPPORTED_TYPE()
-                );
-                $this->finalizeContext($context);
-
-                return array('', 1, $this->result);
-            }
-
-            hash_update($context->hashContext, $typeData);
-
-            if (1 === $dataSize) {
-                $data = '';
-            } else {
-                $data = substr($data, 1);
-            }
-
-            $dataSize -= 1;
-            $consumed += 1;
-        }
-
-        if (!$context->isInitialized) {
-            if ($dataSize < 16) {
-                if ($isEnd) {
-                    $this->result = new DecryptionResult(
-                        DecryptionResultType::INVALID_SIZE()
-                    );
-                    $this->finalizeContext($context);
-
-                    return array('', $consumed, $this->result);
-                }
-
-                return array('', $consumed, null);
-            }
-
-            $iv = substr($data, 0, 16);
-            mcrypt_generic_init(
-                $context->mcryptModule,
-                $this->key()->encryptionSecret(),
-                $iv
-            );
-
-            hash_update($context->hashContext, $iv);
-            $context->isInitialized = true;
-
-            if (16 === $dataSize) {
-                $data = '';
-            } else {
-                $data = substr($data, 16);
-            }
-
-            $dataSize -= 16;
-            $consumed += 16;
-        }
+        $size = strlen($data);
 
         if ($isEnd) {
-            $requiredSize = 18 + $context->hashSize;
+            $data = $this->cipher->finalize($data);
         } else {
-            $requiredSize = 36 + $context->hashSize;
+            $data = $this->cipher->process($data);
         }
 
-        if ($dataSize < $requiredSize) {
-            if ($isEnd) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::INVALID_SIZE()
-                );
-                $this->finalizeContext($context);
-
-                return array('', $consumed, $this->result);
-            }
-
-            return array('', $consumed, null);
-        }
-
-        if ($isEnd) {
-            $consume = $dataSize - $context->hashSize;
-
-            if (0 !== $consume % 18) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::INVALID_SIZE()
-                );
-                $this->finalizeContext($context);
-
-                return array('', $consumed, $this->result);
-            }
-
-            $hash = substr($data, $consume);
-            $consumedData = substr($data, 0, $consume);
-            $consumed += $dataSize;
+        $result = $this->cipher->result();
+        if ($result && !$result->isSuccessful()) {
+            $error = $result;
         } else {
-            $consume = $this->blocksSize(
-                $dataSize - 18 - $context->hashSize,
-                18,
-                $isEnd
-            );
-            $consumed += $consume;
-            $consumedData = substr($data, 0, $consume);
+            $error = null;
         }
 
-        $output = '';
-        foreach (str_split($consumedData, 18) as $block) {
-            list($block, $blockMac) = str_split($block, 16);
-
-            if (
-                !SlowStringComparator::isEqual(
-                    substr(
-                        hash_hmac(
-                            $context->hashAlgorithm,
-                            $block,
-                            $this->key()->authenticationSecret(),
-                            true
-                        ),
-                        0,
-                        2
-                    ),
-                    $blockMac
-                )
-            ) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::INVALID_MAC()
-                );
-                $this->finalizeContext($context);
-
-                return array('', $consumed, $this->result);
-            }
-
-            hash_update($context->hashContext, $block);
-            $output .= mdecrypt_generic($context->mcryptModule, $block);
-        }
-
-        if ($isEnd) {
-            $context->isHashFinalized = true;
-            if (
-                !SlowStringComparator::isEqual(
-                    hash_final($context->hashContext, true),
-                    $hash
-                )
-            ) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::INVALID_MAC()
-                );
-                $this->finalizeContext($context);
-
-                return array('', $consumed, $this->result);
-            }
-
-            list($isSuccessful, $output) = $this->unpadder()->unpad($output);
-            $this->finalizeContext($context);
-
-            if ($isSuccessful) {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::SUCCESS()
-                );
-            } else {
-                $this->result = new DecryptionResult(
-                    DecryptionResultType::INVALID_PADDING()
-                );
-
-                return array('', $consumed, $this->result);
-            }
-        }
-
-        return array($output, $consumed, null);
+        return array($data, $size, $error);
     }
 
-    private function initializeContext()
+    /**
+     * Get the decryption result.
+     *
+     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
+     */
+    public function result()
     {
-        $context = new DecryptTransformContext;
-
-        $context->mcryptModule = mcrypt_module_open(
-            MCRYPT_RIJNDAEL_128,
-            '',
-            MCRYPT_MODE_CBC,
-            ''
-        );
-
-        $context->hashAlgorithm = 'sha' .
-            $this->key()->authenticationSecretBits();
-        $context->hashContext = hash_init(
-            $context->hashAlgorithm,
-            HASH_HMAC,
-            $this->key()->authenticationSecret()
-        );
-        $context->hashSize = $this->key()->authenticationSecretBytes();
-
-        return $context;
+        return $this->cipher()->result();
     }
 
-    private function finalizeContext(DecryptTransformContext &$context)
-    {
-        if (null !== $context->mcryptModule) {
-            if ($context->isInitialized) {
-                mcrypt_generic_deinit($context->mcryptModule);
-            }
-
-            mcrypt_module_close($context->mcryptModule);
-        }
-
-        if (!$context->isHashFinalized) {
-            hash_final($context->hashContext);
-        }
-
-        $context = null;
-    }
-
-    private $key;
-    private $unpadder;
-    private $result;
+    private $cipher;
 }

@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Cipher;
 
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+
 /**
  * The interface implemented by ciphers.
  */
@@ -31,10 +33,12 @@ interface CipherInterface
     /**
      * Finalize processing and return any remaining output.
      *
+     * @param string|null $input Any remaining data to process.
+     *
      * @return string                             Any output produced.
      * @throws Exception\CipherFinalizedException If this cipher is already finalized.
      */
-    public function finalize();
+    public function finalize($input = null);
 
     /**
      * Returns true if this cipher is finalized.

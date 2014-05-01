@@ -64,9 +64,10 @@ class EncryptTransform extends AbstractTransform
     {
         $size = strlen($data);
 
-        $data = $this->cipher->process($data);
         if ($isEnd) {
-            $data .= $this->cipher->finalize();
+            $data = $this->cipher->finalize($data);
+        } else {
+            $data = $this->cipher->process($data);
         }
 
         $result = $this->cipher->result();

@@ -15,7 +15,6 @@ use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\EncryptCipher;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
-use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -50,7 +49,10 @@ class EncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     {
         $key = new Key('1234567890123456', '1234567890123456789012345678');
 
-        $this->assertInstanceOf('Eloquent\Lockbox\Transform\EncryptTransform', $this->factory->createTransform($key));
+        $this->assertEquals(
+            new EncryptTransform(new EncryptCipher($key, $this->iv)),
+            $this->factory->createTransform($key)
+        );
     }
 
     public function testInstance()
