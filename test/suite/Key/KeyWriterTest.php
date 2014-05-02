@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
 use Icecave\Isolator\Isolator;
@@ -93,16 +94,17 @@ EOD;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->transform = new PasswordEncryptTransform(
-            $this->password,
-            $this->iterations,
-            $this->keyDeriver,
-            $this->randomSource
+            new PasswordEncryptCipher(
+                $this->password,
+                $this->iterations,
+                $this->salt,
+                $this->iv,
+                $this->keyDeriver
+            )
         );
 
         Phake::when($this->transformFactory)->createTransform($this->password, $this->iterations)
             ->thenReturn($this->transform);
-        Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
-        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
     }
 
     protected function tearDown()

@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Cipher\Factory;
 
+use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
@@ -36,6 +37,8 @@ class DecryptCipherFactory implements DecryptCipherFactoryInterface
      * Create a new decrypt cipher.
      *
      * @param KeyInterface $key The key to decrypt with.
+     *
+     * @return CipherInterface The newly created cipher.
      */
     public function createDecryptCipher(KeyInterface $key)
     {

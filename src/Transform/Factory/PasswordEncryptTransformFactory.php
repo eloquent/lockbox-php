@@ -12,10 +12,8 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
-use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Key\KeyDeriverInterface;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactoryInterface;
 use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
 
 /**
@@ -39,44 +37,28 @@ class PasswordEncryptTransformFactory implements
     }
 
     /**
-     * Construct a new password encrypt transform factory.
+     * Construct a new encrypt transform factory.
      *
-     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
-     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PasswordEncryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
     public function __construct(
-        KeyDeriverInterface $keyDeriver = null,
-        RandomSourceInterface $randomSource = null
+        PasswordEncryptCipherFactoryInterface $cipherFactory = null
     ) {
-        if (null === $keyDeriver) {
-            $keyDeriver = KeyDeriver::instance();
-        }
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
 
-        $this->keyDeriver = $keyDeriver;
-        $this->randomSource = $randomSource;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the key deriver.
+     * Get the cipher factory.
      *
-     * @return KeyDeriverInterface The key deriver.
+     * @return PasswordEncryptCipherFactoryInterface The cipher factory.
      */
-    public function keyDeriver()
+    public function cipherFactory()
     {
-        return $this->keyDeriver;
-    }
-
-    /**
-     * Get the random source.
-     *
-     * @return RandomSourceInterface The random source.
-     */
-    public function randomSource()
-    {
-        return $this->randomSource;
+        return $this->cipherFactory;
     }
 
     /**
@@ -90,14 +72,11 @@ class PasswordEncryptTransformFactory implements
     public function createTransform($password, $iterations)
     {
         return new PasswordEncryptTransform(
-            $password,
-            $iterations,
-            $this->keyDeriver(),
-            $this->randomSource()
+            $this->cipherFactory()
+                ->createPasswordEncryptCipher($password, $iterations)
         );
     }
 
     private static $instance;
-    private $keyDeriver;
-    private $randomSource;
+    private $cipherFactory;
 }

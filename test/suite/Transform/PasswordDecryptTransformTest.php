@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox\Transform;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\BoundPasswordEncrypter;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
@@ -40,7 +41,11 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->encrypter = new BoundPasswordEncrypter(
             $this->password,
             $this->iterations,
-            new RawPasswordEncrypter(new PasswordEncryptTransformFactory($this->keyDeriver, $this->randomSource))
+            new RawPasswordEncrypter(
+                new PasswordEncryptTransformFactory(
+                    new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource)
+                )
+            )
         );
 
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);

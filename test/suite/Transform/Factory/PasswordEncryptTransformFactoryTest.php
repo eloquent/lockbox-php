@@ -13,9 +13,11 @@ namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class PasswordEncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
 {
@@ -24,28 +26,41 @@ class PasswordEncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->keyDeriver = new KeyDeriver;
-        $this->randomSource = new DevUrandom;
-        $this->factory = new PasswordEncryptTransformFactory($this->keyDeriver, $this->randomSource);
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->cipherFactory = new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource);
+        $this->factory = new PasswordEncryptTransformFactory($this->cipherFactory);
+
+        $this->iv = '1234567890123456';
+        $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
+
+        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
+        Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->keyDeriver, $this->factory->keyDeriver());
-        $this->assertSame($this->randomSource, $this->factory->randomSource());
+        $this->assertSame($this->cipherFactory, $this->factory->cipherFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->factory = new PasswordEncryptTransformFactory;
 
-        $this->assertSame(KeyDeriver::instance(), $this->factory->keyDeriver());
-        $this->assertSame(DevUrandom::instance(), $this->factory->randomSource());
+        $this->assertSame(PasswordEncryptCipherFactory::instance(), $this->factory->cipherFactory());
     }
 
     public function testCreateTransform()
     {
         $this->assertEquals(
-            new PasswordEncryptTransform('password', 111, $this->keyDeriver, $this->randomSource),
+            new PasswordEncryptTransform(
+                new PasswordEncryptCipher(
+                    'password',
+                    111,
+                    $this->salt,
+                    $this->iv,
+                    $this->keyDeriver
+                )
+            ),
             $this->factory->createTransform('password', 111)
         );
     }

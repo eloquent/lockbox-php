@@ -9,16 +9,15 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Transform;
+namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Exception;
 use PHPUnit_Framework_TestCase;
 
-class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
+class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
@@ -38,72 +37,100 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
             $this->keyDeriver,
             $this->padder
         );
-        $this->transform = new PasswordEncryptTransform($this->cipher);
 
         $this->base64Url = Base64Url::instance();
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->cipher, $this->transform->cipher());
+        $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
+        $this->assertSame($this->padder, $this->cipher->padder());
     }
 
-    public function testTransform()
+    public function testConstructorDefaults()
     {
-        list($output, $buffer, $context, $error) = $this->feedTransform('foo', 'bar', 'baz', 'qux', 'dooms', 'plat');
+        $this->cipher = new PasswordEncryptCipher($this->password, $this->iterations, $this->salt, $this->iv);
+
+        $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
+        $this->assertSame(PkcsPadding::instance(), $this->cipher->padder());
+    }
+
+    public function testCipher()
+    {
+        $output = '';
+        $output .= $this->cipher->process('foo');
+        $output .= $this->cipher->process('bar');
+        $output .= $this->cipher->process('baz');
+        $output .= $this->cipher->process('qux');
+        $output .= $this->cipher->process('dooms');
+        $output .= $this->cipher->process('plat');
+        $output .= $this->cipher->finalize();
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
         );
 
         $this->assertSameCiphertext($expected, $output);
-        $this->assertSame('', $buffer);
-        $this->assertNull($context);
-        $this->assertNull($error);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
-    public function testTransformExactBlockSizes()
+    public function testCipherExactBlockSizes()
     {
-        list($output, $buffer, $context, $error) = $this->feedTransform('foobarbazquxdoom', 'foobarbazquxdoom');
+        $output = '';
+        $output .= $this->cipher->process('foobarbazquxdoom');
+        $output .= $this->cipher->process('foobarbazquxdoom');
+        $output .= $this->cipher->finalize();
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsu2ffZKp7Pmx2I5cv5SR6lGDvJRncw789DXdwVAOOAh8OIzaHaMtOz4vKJAcX6tX5AQx7EjgnCyLfLpbLURpxf1q3ueA'
         );
 
         $this->assertSameCiphertext($expected, $output);
-        $this->assertSame('', $buffer);
-        $this->assertNull($context);
-        $this->assertNull($error);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
     }
 
-    protected function feedTransform($packets)
+    public function testCipherEmpty()
     {
-        if (!is_array($packets)) {
-            $packets = func_get_args();
-        }
+        $output = $this->cipher->finalize('');
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
+        );
 
-        $output = '';
-        $buffer = '';
-        $lastIndex = count($packets) - 1;
-        $error = null;
-        foreach ($packets as $index => $data) {
-            $buffer .= $data;
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
+    }
 
-            try {
-                list($thisOutput, $consumed) = $this->transform->transform($buffer, $context, $index === $lastIndex);
-            } catch (Exception $error) {
-                $error = strval($error);
-                $thisOutput = '';
-                $consumed = 0;
-            }
+    public function testCipherFinalizeOnly()
+    {
+        $output = $this->cipher->finalize();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
+        );
 
-            $output .= $thisOutput;
-            if (strlen($buffer) === $consumed) {
-                $buffer = '';
-            } else {
-                $buffer = substr($buffer, $consumed);
-            }
-        }
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertTrue($this->cipher->result()->isSuccessful());
+    }
 
-        return array($output, $buffer, $context, $error);
+    public function testProcessFailureFinalized()
+    {
+        $this->cipher->finalize();
+        $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException');
+
+        $this->cipher->process('');
+    }
+
+    public function testFinalizeFailureFinalized()
+    {
+        $this->cipher->finalize();
+        $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException');
+
+        $this->cipher->finalize();
     }
 
     protected function assertSameCiphertext($expected, $actual)

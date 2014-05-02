@@ -15,7 +15,7 @@ use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Cipher\CipherInterface;
 
 /**
- * A data transform for encryption of streaming data.
+ * A data transform for encryption of streaming data with a key.
  */
 class EncryptTransform extends AbstractTransform
 {

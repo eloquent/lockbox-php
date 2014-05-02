@@ -18,6 +18,7 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
 use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
@@ -35,7 +36,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new Decrypter;
 
         $this->passwordEncrypter = new PasswordEncrypter(
-            new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            new PasswordEncryptTransformFactory(
+                new PasswordEncryptCipherFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            )
         );
         $this->passwordDecrypter = new PasswordDecrypter;
 
@@ -300,8 +303,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsEncryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         $actual = $this->passwordEncrypter->encrypt($password, $iterations, $data);
 
         $this->assertSame($encrypted, $actual);
@@ -312,8 +315,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsEncryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
+        Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
         $stream = $this->passwordEncrypter->createEncryptStream($password, $iterations);
         $actual = '';
         $stream->on(

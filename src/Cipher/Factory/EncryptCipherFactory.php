@@ -64,6 +64,8 @@ class EncryptCipherFactory implements EncryptCipherFactoryInterface
      *
      * @param KeyInterface $key The key to encrypt with.
      * @param string|null  $iv  The initialization vector to use, or null to generate one.
+     *
+     * @return CipherInterface The newly created cipher.
      */
     public function createEncryptCipher(KeyInterface $key, $iv = null)
     {
