@@ -11,20 +11,15 @@
 
 namespace Eloquent\Lockbox\Password\Cipher;
 
-use Eloquent\Lockbox\Cipher\CipherInterface;
-use Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException;
-use Eloquent\Lockbox\Cipher\Result\CipherResult;
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Cipher\AbstractEncryptCipher;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
-use Eloquent\Lockbox\Padding\PkcsPadding;
 
 /**
  * Encrypts data with a password.
  */
-class PasswordEncryptCipher implements CipherInterface
+class PasswordEncryptCipher extends AbstractEncryptCipher
 {
     /**
      * Construct a new password encrypt data transform.
@@ -47,18 +42,13 @@ class PasswordEncryptCipher implements CipherInterface
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
-        if (null === $padder) {
-            $padder = PkcsPadding::instance();
-        }
+
+        parent::__construct($iv, $padder);
 
         $this->password = $password;
         $this->iterations = $iterations;
         $this->salt = $salt;
-        $this->iv = $iv;
         $this->keyDeriver = $keyDeriver;
-        $this->padder = $padder;
-        $this->buffer = '';
-        $this->isInitialized = $this->isFinalized = false;
     }
 
     /**
@@ -72,196 +62,36 @@ class PasswordEncryptCipher implements CipherInterface
     }
 
     /**
-     * Get the padder.
+     * Produce the key to use.
      *
-     * @return PadderInterface The padder.
+     * @return KeyInterface The key.
      */
-    public function padder()
+    protected function produceKey()
     {
-        return $this->padder;
-    }
-
-    /**
-     * Process the supplied input data.
-     *
-     * This method may be called repeatedly with additional data.
-     *
-     * @param string $input The data to process.
-     *
-     * @return string                   Any output produced.
-     * @throws CipherFinalizedException If this cipher is already finalized.
-     */
-    public function process($input)
-    {
-        if ($this->isFinalized) {
-            throw new CipherFinalizedException;
-        }
-
-        $output = $this->initialize();
-
-        $this->buffer .= $input;
-        $size = strlen($this->buffer);
-        $consume = $size - ($size % 16);
-
-        if (!$consume) {
-            return $output;
-        }
-
-        if ($consume === $size) {
-            $input = $this->buffer;
-            $this->buffer = '';
-        } else {
-            list($input, $this->buffer) = str_split($this->buffer, $consume);
-        }
-
-        return $output .
-            $this->authenticateBlocks(
-                mcrypt_generic($this->mcryptModule, $input)
-            );
-    }
-
-    /**
-     * Finalize processing and return any remaining output.
-     *
-     * @param string|null $input Any remaining data to process.
-     *
-     * @return string                   Any output produced.
-     * @throws CipherFinalizedException If this cipher is already finalized.
-     */
-    public function finalize($input = null)
-    {
-        if ($this->isFinalized) {
-            throw new CipherFinalizedException;
-        }
-
-        $this->isFinalized = true;
-
-        if (null !== $input) {
-            $this->buffer .= $input;
-        }
-        $input = null;
-
-        $output = $this->initialize() .
-            $this->authenticateBlocks(
-                mcrypt_generic(
-                    $this->mcryptModule,
-                    $this->padder->pad($this->buffer)
-                )
-            ) .
-            hash_final($this->hashContext, true);
-
-        $this->buffer = $this->authenticationSecret = $this->iv = null;
-        mcrypt_generic_deinit($this->mcryptModule);
-        mcrypt_module_close($this->mcryptModule);
-
-        $this->result = new CipherResult(CipherResultType::SUCCESS());
-
-        return $output;
-    }
-
-    /**
-     * Returns true if this cipher is finalized.
-     *
-     * @return boolean True if finalized.
-     */
-    public function isFinalized()
-    {
-        return $this->isFinalized;
-    }
-
-    /**
-     * Returns true if this cipher has produced a result.
-     *
-     * @return boolean True if a result is available.
-     */
-    public function hasResult()
-    {
-        return null !== $this->result;
-    }
-
-    /**
-     * Returns true if this cipher has produced a result.
-     *
-     * @return CipherResultInterface|null The result, if available.
-     */
-    public function result()
-    {
-        return $this->result;
-    }
-
-    private function initialize()
-    {
-        if ($this->isInitialized) {
-            return '';
-        }
-
-        $this->isInitialized = true;
-
-        list($this->key) = $this->keyDeriver()->deriveKeyFromPassword(
+        list($key) = $this->keyDeriver()->deriveKeyFromPassword(
             $this->password,
             $this->iterations,
             $this->salt
         );
 
-        $this->mcryptModule = mcrypt_module_open(
-            MCRYPT_RIJNDAEL_128,
-            '',
-            MCRYPT_MODE_CBC,
-            ''
-        );
-        mcrypt_generic_init(
-            $this->mcryptModule,
-            $this->key->encryptionSecret(),
-            $this->iv
-        );
-
-        $this->hashContext = hash_init(
-            'sha' . $this->key->authenticationSecretBits(),
-            HASH_HMAC,
-            $this->key->authenticationSecret()
-        );
-
-        $header = chr(1) . chr(2) . pack('N', $this->iterations) . $this->salt .
-            $this->iv;
-        hash_update($this->hashContext, $header);
-
-        return $header;
+        return $key;
     }
 
-    private function authenticateBlocks($output)
+    /**
+     * Get the encryption header.
+     *
+     * @param string $iv The initialization vector.
+     *
+     * @return string The header.
+     */
+    protected function header($iv)
     {
-        $authenticated = '';
-        foreach (str_split($output, 16) as $block) {
-            hash_update($this->hashContext, $block);
-
-            $authenticated .=
-                $block .
-                substr(
-                    hash_hmac(
-                        'sha' . $this->key->authenticationSecretBits(),
-                        $block,
-                        $this->key->authenticationSecret(),
-                        true
-                    ),
-                    0,
-                    2
-                );
-        }
-
-        return $authenticated;
+        return chr(1) . chr(2) . pack('N', $this->iterations) . $this->salt .
+            $iv;
     }
 
     private $password;
     private $iterations;
-    private $key;
-    private $iv;
     private $salt;
     private $keyDeriver;
-    private $padder;
-    private $buffer;
-    private $isInitialized;
-    private $isFinalized;
-    private $mcryptModule;
-    private $hashContext;
-    private $result;
 }
