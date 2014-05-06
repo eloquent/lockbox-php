@@ -13,7 +13,8 @@ namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactoryInterface;
 use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
 
 /**
@@ -39,25 +40,26 @@ class PasswordDecryptTransformFactory implements
     /**
      * Construct a new password decrypt transform factory.
      *
-     * @param KeyDeriverInterface|null $keyDeriver The key deriver to use.
+     * @param PasswordDecryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(KeyDeriverInterface $keyDeriver = null)
-    {
-        if (null === $keyDeriver) {
-            $keyDeriver = KeyDeriver::instance();
+    public function __construct(
+        PasswordDecryptCipherFactoryInterface $cipherFactory = null
+    ) {
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordDecryptCipherFactory::instance();
         }
 
-        $this->keyDeriver = $keyDeriver;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the key deriver.
+     * Get the cipher factory.
      *
-     * @return KeyDeriverInterface The key deriver.
+     * @return PasswordDecryptCipherFactoryInterface The cipher factory.
      */
-    public function keyDeriver()
+    public function cipherFactory()
     {
-        return $this->keyDeriver;
+        return $this->cipherFactory;
     }
 
     /**
@@ -69,10 +71,12 @@ class PasswordDecryptTransformFactory implements
      */
     public function createTransform($password)
     {
-        return new PasswordDecryptTransform($password, $this->keyDeriver());
+        return new PasswordDecryptTransform(
+            $this->cipherFactory()->createPasswordDecryptCipher($password)
+        );
     }
 
     private static $instance;
+    private $cipherFactory;
     private $keyDeriver;
-    private $randomSource;
 }

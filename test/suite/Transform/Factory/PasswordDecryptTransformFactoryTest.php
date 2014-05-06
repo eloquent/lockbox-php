@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
 use PHPUnit_Framework_TestCase;
 
@@ -23,25 +25,26 @@ class PasswordDecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->keyDeriver = new KeyDeriver;
-        $this->factory = new PasswordDecryptTransformFactory($this->keyDeriver);
+        $this->cipherFactory = new PasswordDecryptCipherFactory($this->keyDeriver);
+        $this->factory = new PasswordDecryptTransformFactory($this->cipherFactory);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->keyDeriver, $this->factory->keyDeriver());
+        $this->assertSame($this->cipherFactory, $this->factory->cipherFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->factory = new PasswordDecryptTransformFactory;
 
-        $this->assertSame(KeyDeriver::instance(), $this->factory->keyDeriver());
+        $this->assertSame(PasswordDecryptCipherFactory::instance(), $this->factory->cipherFactory());
     }
 
     public function testCreateTransform()
     {
         $this->assertEquals(
-            new PasswordDecryptTransform('password', $this->keyDeriver),
+            new PasswordDecryptTransform(new PasswordDecryptCipher('password', $this->keyDeriver)),
             $this->factory->createTransform('password')
         );
     }

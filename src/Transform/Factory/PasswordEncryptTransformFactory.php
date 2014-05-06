@@ -37,7 +37,7 @@ class PasswordEncryptTransformFactory implements
     }
 
     /**
-     * Construct a new encrypt transform factory.
+     * Construct a new password encrypt transform factory.
      *
      * @param PasswordEncryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */

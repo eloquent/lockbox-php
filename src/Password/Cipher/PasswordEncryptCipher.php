@@ -22,7 +22,7 @@ use Eloquent\Lockbox\Padding\PadderInterface;
 class PasswordEncryptCipher extends AbstractEncryptCipher
 {
     /**
-     * Construct a new password encrypt data transform.
+     * Construct a new password encrypt cipher.
      *
      * @param string                   $password   The password to encrypt with.
      * @param integer                  $iterations The number of hash iterations to use.

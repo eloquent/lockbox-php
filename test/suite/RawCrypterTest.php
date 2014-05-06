@@ -12,10 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Cipher\DecryptCipher;
-use Eloquent\Lockbox\Transform\DecryptTransform;
 use PHPUnit_Framework_TestCase;
-use Phake;
 
 /**
  * @covers \Eloquent\Lockbox\RawCrypter
@@ -30,17 +27,10 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->encrypter = new RawEncrypter;
-        $this->decryptTransformFactory = Phake::partialMock(
-            'Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface'
-        );
-        $this->decrypter = new RawDecrypter($this->decryptTransformFactory);
+        $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
 
         $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
-        $this->decryptCipher = new DecryptCipher($this->key);
-        $this->decryptTransform = new DecryptTransform($this->decryptCipher);
-
-        Phake::when($this->decryptTransformFactory)->createTransform($this->key)->thenReturn($this->decryptTransform);
 
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';

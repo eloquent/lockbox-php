@@ -33,24 +33,14 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->encrypter = new RawPasswordEncrypter(
-            new PasswordEncryptTransformFactory(new PasswordEncryptCipherFactory($this->keyDeriver))
+            new PasswordEncryptTransformFactory(
+                new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource)
+            )
         );
-        $this->decryptTransformFactory = Phake::partialMock(
-            'Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface'
-        );
-        $this->decrypter = new RawPasswordDecrypter($this->decryptTransformFactory);
+        $this->decrypter = new RawPasswordDecrypter;
         $this->crypter = new RawPasswordCrypter($this->encrypter, $this->decrypter);
 
         $this->password = 'foobar';
-        $this->decryptTransform = Phake::partialMock(
-            'Eloquent\Lockbox\Transform\PasswordDecryptTransform',
-            $this->password,
-            $this->keyDeriver
-        );
-
-        Phake::when($this->decryptTransformFactory)->createTransform($this->password)
-            ->thenReturn($this->decryptTransform);
-
         $this->version = chr(1);
         $this->type = chr(2);
         $this->iterations = 10;
@@ -141,12 +131,11 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureUnsupportedVersion()
     {
-        $header = chr(111) . str_pad('', 85, '1234567890');
+        $header = chr(111) . $this->type . $this->iterationsData .$this->salt . $this->iv;
         $block = str_pad('', 16, '1234567890');
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->crypter->decrypt($this->password, $data);
@@ -167,12 +156,11 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptUnsupportedType()
     {
-        $header = $this->version . chr(111) . str_pad('', 84, '1234567890');
+        $header = $this->version . chr(111) . $this->iterationsData .$this->salt . $this->iv;
         $block = str_pad('', 16, '1234567890');
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->crypter->decrypt($this->password, $data);
@@ -193,7 +181,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptySalt()
@@ -206,7 +193,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptyIv()
@@ -219,7 +205,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureShortMac()
@@ -232,7 +217,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureEmptyCiphertext()
@@ -245,7 +229,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_SIZE', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureBadBlockMac()
@@ -259,7 +242,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_MAC', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureBadMac()
@@ -273,7 +255,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->assertSame('INVALID_MAC', $result->type()->key());
         $this->assertNull($result->data());
         $this->assertNull($result->iterations());
-        Phake::verify($this->decryptTransform, Phake::never())->transform(Phake::anyParameters());
     }
 
     public function testDecryptFailureBadAesData()

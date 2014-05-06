@@ -12,13 +12,6 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Key\KeyDeriverInterface;
-use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Result\DecryptionResultType;
-use Eloquent\Lockbox\Result\PasswordDecryptionResult;
 use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
 use Eloquent\Lockbox\Stream\RawDecryptStream;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
@@ -47,27 +40,15 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      * Construct a new raw password decrypter.
      *
      * @param PasswordDecryptTransformFactoryInterface|null $transformFactory The transform factory to use.
-     * @param KeyDeriverInterface|null                      $keyDeriver       The key deriver to use.
-     * @param UnpadderInterface|null                        $unpadder         The unpadder to use.
      */
     public function __construct(
-        PasswordDecryptTransformFactoryInterface $transformFactory = null,
-        KeyDeriverInterface $keyDeriver = null,
-        UnpadderInterface $unpadder = null
+        PasswordDecryptTransformFactoryInterface $transformFactory = null
     ) {
         if (null === $transformFactory) {
             $transformFactory = PasswordDecryptTransformFactory::instance();
         }
-        if (null === $keyDeriver) {
-            $keyDeriver = KeyDeriver::instance();
-        }
-        if (null === $unpadder) {
-            $unpadder = PkcsPadding::instance();
-        }
 
         $this->transformFactory = $transformFactory;
-        $this->keyDeriver = $keyDeriver;
-        $this->unpadder = $unpadder;
     }
 
     /**
@@ -81,26 +62,6 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
     }
 
     /**
-     * Get the key deriver.
-     *
-     * @return KeyDeriverInterface The key deriver.
-     */
-    public function keyDeriver()
-    {
-        return $this->keyDeriver;
-    }
-
-    /**
-     * Get the unpadder.
-     *
-     * @return UnpadderInterface The unpadder.
-     */
-    public function unpadder()
-    {
-        return $this->unpadder;
-    }
-
-    /**
      * Decrypt a data packet.
      *
      * @param string $password The password to decrypt with.
@@ -110,101 +71,15 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      */
     public function decrypt($password, $data)
     {
-        $size = strlen($data);
-        $ciphertextSize = $size - 118;
+        $transform = $this->transformFactory()->createTransform($password);
 
-        if ($ciphertextSize < 18 || 0 !== $ciphertextSize % 18) {
-            return new PasswordDecryptionResult(
-                DecryptionResultType::INVALID_SIZE()
-            );
+        list($data) = $transform->transform($data, $context, true);
+        $result = $transform->result();
+        if ($result->isSuccessful()) {
+            $result->setData($data);
         }
 
-        $version = ord(substr($data, 0, 1));
-        if (1 !== $version) {
-            return new PasswordDecryptionResult(
-                DecryptionResultType::UNSUPPORTED_VERSION()
-            );
-        }
-
-        $type = ord(substr($data, 1, 1));
-        if (2 !== $type) {
-            return new PasswordDecryptionResult(
-                DecryptionResultType::UNSUPPORTED_TYPE()
-            );
-        }
-
-        $iterations = unpack('N', substr($data, 2, 4));
-        $iterations = array_shift($iterations);
-
-        list($key) = $this->keyDeriver()->deriveKeyFromPassword(
-            $password,
-            $iterations,
-            substr($data, 6, 64)
-        );
-
-        $hashContext = hash_init(
-            'sha256',
-            HASH_HMAC,
-            $key->authenticationSecret()
-        );
-        hash_update($hashContext, substr($data, 0, 86));
-
-        $ciphertext = substr($data, 86, $ciphertextSize);
-
-        $blocks = '';
-        $expectedBlockMacs = '';
-        $actualBlockMacs = '';
-        foreach (str_split($ciphertext, 18) as $block) {
-            list($block, $blockMac) = str_split($block, 16);
-
-            $blocks .= $block;
-
-            $expectedBlockMacs .= $blockMac;
-            $actualBlockMacs .= substr(
-                hash_hmac(
-                    'sha256',
-                    $block,
-                    $key->authenticationSecret(),
-                    true
-                ),
-                0,
-                2
-            );
-
-            hash_update($hashContext, $block);
-        }
-
-        if (
-            !SlowStringComparator::isEqual(
-                substr($data, $ciphertextSize + 86) . $expectedBlockMacs,
-                hash_final($hashContext, true) . $actualBlockMacs
-            )
-        ) {
-            return new PasswordDecryptionResult(
-                DecryptionResultType::INVALID_MAC()
-            );
-        }
-
-        $data = mcrypt_decrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key->encryptionSecret(),
-            $blocks,
-            MCRYPT_MODE_CBC,
-            substr($data, 70, 16)
-        );
-
-        list($isSuccessful, $data) = $this->unpadder()->unpad($data);
-        if (!$isSuccessful) {
-            return new PasswordDecryptionResult(
-                DecryptionResultType::INVALID_PADDING()
-            );
-        }
-
-        return new PasswordDecryptionResult(
-            DecryptionResultType::SUCCESS(),
-            $data,
-            $iterations
-        );
+        return $result;
     }
 
     /**
@@ -223,6 +98,4 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
 
     private static $instance;
     private $transformFactory;
-    private $keyDeriver;
-    private $unpadder;
 }

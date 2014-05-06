@@ -15,6 +15,7 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\BoundPasswordEncrypter;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
@@ -30,7 +31,8 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->unpadder = new PkcsPadding;
-        $this->transform = new PasswordDecryptTransform($this->password, $this->keyDeriver, $this->unpadder);
+        $this->cipher = new PasswordDecryptCipher($this->password, $this->keyDeriver, $this->unpadder);
+        $this->transform = new PasswordDecryptTransform($this->cipher);
 
         $this->version = chr(1);
         $this->type = chr(2);
@@ -52,21 +54,14 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
 
         list($this->key) = $this->keyDeriver->deriveKeyFromPassword($this->password, $this->iterations, $this->salt);
+
+        $this->block = '1234567890123456';
+        $this->blockWithMac = $this->block . $this->authenticate($this->block, 2);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->password, $this->transform->password());
-        $this->assertSame($this->keyDeriver, $this->transform->keyDeriver());
-        $this->assertSame($this->unpadder, $this->transform->unpadder());
-    }
-
-    public function testConstructorDefaults()
-    {
-        $this->transform = new PasswordDecryptTransform($this->password);
-
-        $this->assertSame(KeyDeriver::instance(), $this->transform->keyDeriver());
-        $this->assertSame(PkcsPadding::instance(), $this->transform->unpadder());
+        $this->assertSame($this->cipher, $this->transform->cipher());
     }
 
     public function transformData()
@@ -159,6 +154,8 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         list($this->key) = $this->keyDeriver->deriveKeyFromPassword($this->password, $this->iterations, $this->salt);
+        $this->block = '1234567890123456';
+        $this->blockWithMac = $this->block . $this->authenticate($this->block, 2);
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
 
@@ -168,9 +165,10 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported version' => array(
-                chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv .
-                $this->encryptAndPadAes('1234567890123456') .
-                '12345678901234567890123456789012',
+                chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $this->blockWithMac .
+                $this->authenticate(
+                    chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $this->block
+                ),
                 'UNSUPPORTED_VERSION',
             ),
             'Empty type' => array(
@@ -178,9 +176,10 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Unsupported type' => array(
-                $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv .
-                $this->encryptAndPadAes('1234567890123456') .
-                '12345678901234567890123456789012',
+                $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv . $this->blockWithMac .
+                $this->authenticate(
+                    $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv . $this->block
+                ),
                 'UNSUPPORTED_TYPE',
             ),
             'Empty iterations' => array(
@@ -315,12 +314,18 @@ class PasswordDecryptTransformTest extends PHPUnit_Framework_TestCase
 
     public function testTransformAfterFailure()
     {
-        $this->transform->transform(str_repeat(' ', 200), $context);
+        $this->transform->transform(
+            chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $this->blockWithMac .
+            $this->authenticate(
+                chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $this->block
+            ),
+            $context
+        );
         list($data, $consumed, $error) = $this->transform->transform('', $context, true);
 
         $this->assertSame('', $data);
         $this->assertSame(0, $consumed);
-        $this->assertNull($error);
+        $this->assertNotNull($error);
     }
 
     protected function feedTransform($packets)
