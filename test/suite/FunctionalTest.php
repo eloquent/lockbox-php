@@ -341,6 +341,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider passwordSpecVectorData
+     * @large
      */
     public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
@@ -353,6 +354,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider passwordSpecVectorData
+     * @large
      */
     public function testPasswordSpecVectorsDecryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
     {
