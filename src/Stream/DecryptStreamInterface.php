@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Stream;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
  * The interface implemented by decrypt streams.
@@ -22,7 +22,7 @@ interface DecryptStreamInterface extends TransformStreamInterface
     /**
      * Get the decryption result.
      *
-     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
+     * @return CipherResultInterface|null The decryption result, or null if not yet known.
      */
     public function result();
 }

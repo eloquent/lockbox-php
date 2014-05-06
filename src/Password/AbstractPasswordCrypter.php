@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
 
 /**
  * An abstract base class for implementing password crypters.

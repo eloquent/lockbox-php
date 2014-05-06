@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Cipher\CipherInterface;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
  * A data transform for decryption of streaming data with a password.
@@ -85,7 +85,7 @@ class PasswordDecryptTransform extends AbstractTransform implements
     /**
      * Get the decryption result.
      *
-     * @return DecryptionResultInterface|null The decryption result, or null if not yet known.
+     * @return CipherResultInterface|null The decryption result, or null if not yet known.
      */
     public function result()
     {

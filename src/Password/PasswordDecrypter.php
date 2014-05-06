@@ -15,9 +15,8 @@ use Eloquent\Confetti\CompoundTransform;
 use Eloquent\Confetti\TransformInterface;
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64UrlDecodeTransform;
-use Eloquent\Lockbox\Result\DecryptionResultType;
-use Eloquent\Lockbox\Result\PasswordDecryptionResult;
-use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
 use Eloquent\Lockbox\Stream\DecryptStream;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
@@ -112,7 +111,7 @@ class PasswordDecrypter implements PasswordDecrypterInterface
             ->transform($data, $context, true);
         if (null !== $error) {
             return new PasswordDecryptionResult(
-                DecryptionResultType::INVALID_ENCODING()
+                CipherResultType::INVALID_ENCODING()
             );
         }
 

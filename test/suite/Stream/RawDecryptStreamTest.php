@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Stream;
 
-use Eloquent\Lockbox\Result\DecryptionResult;
-use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Cipher\Result\CipherResult;
+use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -28,7 +28,7 @@ class RawDecryptStreamTest extends PHPUnit_Framework_TestCase
 
     public function testResult()
     {
-        $this->result = new DecryptionResult(DecryptionResultType::INVALID_MAC());
+        $this->result = new CipherResult(CipherResultType::INVALID_MAC());
         Phake::when($this->decryptTransform)->result()->thenReturn(null)->thenReturn($this->result);
 
         $this->assertNull($this->stream->result());

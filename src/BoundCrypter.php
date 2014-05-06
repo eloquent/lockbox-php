@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
  * Binds a key to a crypter.
@@ -74,7 +74,7 @@ class BoundCrypter implements BoundCrypterInterface
      *
      * @param string $data The data to decrypt.
      *
-     * @return DecryptionResultInterface The decryption result.
+     * @return CipherResultInterface The decryption result.
      */
     public function decrypt($data)
     {

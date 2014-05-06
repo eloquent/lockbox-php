@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
  * The interface implemented by decrypters.
@@ -25,7 +25,7 @@ interface DecrypterInterface
      * @param Key\KeyInterface $key  The key to decrypt with.
      * @param string           $data The data to decrypt.
      *
-     * @return DecryptionResultInterface The decryption result.
+     * @return CipherResultInterface The decryption result.
      */
     public function decrypt(Key\KeyInterface $key, $data);
 

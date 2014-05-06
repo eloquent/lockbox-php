@@ -15,9 +15,9 @@ use Eloquent\Confetti\CompoundTransform;
 use Eloquent\Confetti\TransformInterface;
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64UrlDecodeTransform;
-use Eloquent\Lockbox\Result\DecryptionResult;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
-use Eloquent\Lockbox\Result\DecryptionResultType;
+use Eloquent\Lockbox\Cipher\Result\CipherResult;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Stream\DecryptStream;
 use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
 use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
@@ -104,16 +104,14 @@ class Decrypter implements DecrypterInterface
      * @param Key\KeyInterface $key  The key to decrypt with.
      * @param string           $data The data to decrypt.
      *
-     * @return DecryptionResultInterface The decryption result.
+     * @return CipherResultInterface The decryption result.
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
         list($data, $consumed, $error) = $this->decodeTransform()
             ->transform($data, $context, true);
         if (null !== $error) {
-            return new DecryptionResult(
-                DecryptionResultType::INVALID_ENCODING()
-            );
+            return new CipherResult(CipherResultType::INVALID_ENCODING());
         }
 
         return $this->rawDecrypter()->decrypt($key, $data);

@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundDecrypterInterface;
-use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
 
 /**
  * Binds a password to a decrypter.
