@@ -120,11 +120,12 @@ abstract class AbstractEncryptCipher implements CipherInterface
                     $this->padder->pad($this->buffer)
                 )
             ) .
-            hash_final($this->hashContext, true);
+            hash_final($this->finalHashContext, true);
 
         $this->buffer = $this->authenticationSecret = $this->iv = null;
         mcrypt_generic_deinit($this->mcryptModule);
         mcrypt_module_close($this->mcryptModule);
+        hash_final($this->blockHashContext);
 
         $this->result = new CipherResult(CipherResultType::SUCCESS());
 
@@ -184,7 +185,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
         }
 
         $this->isInitialized = true;
-        $this->key = $this->produceKey();
+        $key = $this->produceKey();
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,
@@ -194,18 +195,23 @@ abstract class AbstractEncryptCipher implements CipherInterface
         );
         mcrypt_generic_init(
             $this->mcryptModule,
-            $this->key->encryptionSecret(),
+            $key->encryptionSecret(),
             $this->iv
         );
 
-        $this->hashContext = hash_init(
-            'sha' . $this->key->authenticationSecretBits(),
+        $this->blockHashContext = hash_init(
+            'sha' . $key->authenticationSecretBits(),
             HASH_HMAC,
-            $this->key->authenticationSecret()
+            $key->authenticationSecret()
+        );
+        $this->finalHashContext = hash_init(
+            'sha' . $key->authenticationSecretBits(),
+            HASH_HMAC,
+            $key->authenticationSecret()
         );
 
         $header = $this->header($this->iv);
-        hash_update($this->hashContext, $header);
+        hash_update($this->finalHashContext, $header);
 
         return $header;
     }
@@ -214,32 +220,24 @@ abstract class AbstractEncryptCipher implements CipherInterface
     {
         $authenticated = '';
         foreach (str_split($output, 16) as $block) {
-            hash_update($this->hashContext, $block);
+            $blockHashContext = hash_copy($this->blockHashContext);
+            hash_update($blockHashContext, $block);
+            hash_update($this->finalHashContext, $block);
 
-            $authenticated .=
-                $block .
-                substr(
-                    hash_hmac(
-                        'sha' . $this->key->authenticationSecretBits(),
-                        $block,
-                        $this->key->authenticationSecret(),
-                        true
-                    ),
-                    0,
-                    2
-                );
+            $authenticated .= $block .
+                substr(hash_final($blockHashContext, true), 0, 2);
         }
 
         return $authenticated;
     }
 
-    private $key;
     private $iv;
     private $padder;
     private $buffer;
     private $isInitialized;
     private $isFinalized;
     private $mcryptModule;
-    private $hashContext;
+    private $blockHashContext;
+    private $finalHashContext;
     private $result;
 }
