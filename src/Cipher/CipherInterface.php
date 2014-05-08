@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Cipher;
 
+use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
@@ -19,14 +20,21 @@ use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 interface CipherInterface
 {
     /**
+     * Returns true if this cipher is initialized.
+     *
+     * @return boolean True if initialized.
+     */
+    public function isInitialized();
+
+    /**
      * Process the supplied input data.
      *
      * This method may be called repeatedly with additional data.
      *
      * @param string $input The data to process.
      *
-     * @return string                             Any output produced.
-     * @throws Exception\CipherFinalizedException If this cipher is already finalized.
+     * @return string                        Any output produced.
+     * @throws CipherStateExceptionInterface If the cipher is in an invalid state.
      */
     public function process($input);
 
@@ -35,8 +43,8 @@ interface CipherInterface
      *
      * @param string|null $input Any remaining data to process.
      *
-     * @return string                             Any output produced.
-     * @throws Exception\CipherFinalizedException If this cipher is already finalized.
+     * @return string                        Any output produced.
+     * @throws CipherStateExceptionInterface If the cipher is in an invalid state.
      */
     public function finalize($input = null);
 
@@ -60,4 +68,9 @@ interface CipherInterface
      * @return CipherResultInterface|null The result, if available.
      */
     public function result();
+
+    /**
+     * Reset this cipher to the state just after the last initialize() call.
+     */
+    public function reset();
 }

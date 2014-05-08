@@ -13,7 +13,6 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Lockbox\BoundEncrypter;
 use Eloquent\Lockbox\Cipher\DecryptCipher;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\RawEncrypter;
@@ -29,7 +28,8 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->unpadder = new PkcsPadding;
-        $this->cipher = new DecryptCipher($this->key, $this->unpadder);
+        $this->cipher = new DecryptCipher($this->unpadder);
+        $this->cipher->initialize($this->key);
         $this->transform = new DecryptTransform($this->cipher);
 
         $this->version = $this->type = chr(1);
@@ -37,7 +37,7 @@ class DecryptTransformTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->encrypter = new BoundEncrypter(
             $this->key,
-            new RawEncrypter(new EncryptTransformFactory(new EncryptCipherFactory($this->randomSource)))
+            new RawEncrypter(new EncryptTransformFactory($this->randomSource))
         );
 
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);

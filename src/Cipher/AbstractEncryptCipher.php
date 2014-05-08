@@ -11,12 +11,17 @@
 
 namespace Eloquent\Lockbox\Cipher;
 
+use Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException;
+use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
+use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
  * An abstract base class for implementing encrypt ciphers.
@@ -26,21 +31,35 @@ abstract class AbstractEncryptCipher implements CipherInterface
     /**
      * Construct a new encrypt cipher.
      *
-     * @param string               $iv     The initialization vector to use.
-     * @param PadderInterface|null $padder The padder to use.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        $iv,
+        RandomSourceInterface $randomSource = null,
         PadderInterface $padder = null
     ) {
+        if (null === $randomSource) {
+            $randomSource = DevUrandom::instance();
+        }
         if (null === $padder) {
             $padder = PkcsPadding::instance();
         }
 
-        $this->iv = $iv;
+        $this->randomSource = $randomSource;
         $this->padder = $padder;
-        $this->buffer = '';
-        $this->isInitialized = $this->isFinalized = false;
+        $this->isInitialized = $this->isMcryptInitialized = false;
+
+        $this->reset();
+    }
+
+    /**
+     * Get the random source.
+     *
+     * @return RandomSourceInterface The random source.
+     */
+    public function randomSource()
+    {
+        return $this->randomSource;
     }
 
     /**
@@ -54,22 +73,40 @@ abstract class AbstractEncryptCipher implements CipherInterface
     }
 
     /**
+     * Returns true if this cipher is initialized.
+     *
+     * @return boolean True if initialized.
+     */
+    public function isInitialized()
+    {
+        return $this->isInitialized;
+    }
+
+    /**
      * Process the supplied input data.
      *
      * This method may be called repeatedly with additional data.
      *
      * @param string $input The data to process.
      *
-     * @return string                             Any output produced.
-     * @throws Exception\CipherFinalizedException If this cipher is already finalized.
+     * @return string                        Any output produced.
+     * @throws CipherStateExceptionInterface If the cipher is in an invalid state.
      */
     public function process($input)
     {
+        if (!$this->isInitialized) {
+            throw new CipherNotInitializedException;
+        }
         if ($this->isFinalized) {
-            throw new Exception\CipherFinalizedException;
+            throw new CipherFinalizedException;
         }
 
-        $output = $this->initialize();
+        if ($this->isHeaderSent) {
+            $output = '';
+        } else {
+            $this->isHeaderSent = true;
+            $output = $this->header;
+        }
 
         $this->buffer .= $input;
         $size = strlen($this->buffer);
@@ -97,23 +134,33 @@ abstract class AbstractEncryptCipher implements CipherInterface
      *
      * @param string|null $input Any remaining data to process.
      *
-     * @return string                             Any output produced.
-     * @throws Exception\CipherFinalizedException If this cipher is already finalized.
+     * @return string                        Any output produced.
+     * @throws CipherStateExceptionInterface If the cipher is in an invalid state.
      */
     public function finalize($input = null)
     {
+        if (!$this->isInitialized) {
+            throw new CipherNotInitializedException;
+        }
         if ($this->isFinalized) {
-            throw new Exception\CipherFinalizedException;
+            throw new CipherFinalizedException;
         }
 
         $this->isFinalized = true;
+
+        if ($this->isHeaderSent) {
+            $output = '';
+        } else {
+            $this->isHeaderSent = true;
+            $output = $this->header;
+        }
 
         if (null !== $input) {
             $this->buffer .= $input;
         }
         $input = null;
 
-        $output = $this->initialize() .
+        $output .=
             $this->authenticateBlocks(
                 mcrypt_generic(
                     $this->mcryptModule,
@@ -121,11 +168,6 @@ abstract class AbstractEncryptCipher implements CipherInterface
                 )
             ) .
             hash_final($this->finalHashContext, true);
-
-        $this->buffer = $this->authenticationSecret = $this->iv = null;
-        mcrypt_generic_deinit($this->mcryptModule);
-        mcrypt_module_close($this->mcryptModule);
-        hash_final($this->blockHashContext);
 
         $this->result = new CipherResult(CipherResultType::SUCCESS());
 
@@ -163,11 +205,64 @@ abstract class AbstractEncryptCipher implements CipherInterface
     }
 
     /**
-     * Produce the key to use.
-     *
-     * @return KeyInterface The key.
+     * Reset this cipher to the state just after the last initialize() call.
      */
-    abstract protected function produceKey();
+    public function reset()
+    {
+        $this->isHeaderSent = $this->isFinalized = false;
+        $this->result = null;
+        $this->buffer = '';
+
+        if (null !== $this->mcryptModule) {
+            if ($this->isMcryptInitialized) {
+                mcrypt_generic_deinit($this->mcryptModule);
+            }
+
+            mcrypt_generic_init(
+                $this->mcryptModule,
+                $this->key->encryptionSecret(),
+                $this->iv
+            );
+        }
+
+        if (null !== $this->hashContext) {
+            $this->finalHashContext = hash_copy($this->hashContext);
+            hash_update($this->finalHashContext, $this->header);
+        }
+    }
+
+    /**
+     * Initialize this cipher.
+     *
+     * @param KeyInterface $key The key to use.
+     * @param string|null  $iv  The initialization vector to use, or null to generate one.
+     */
+    protected function doInitialize(KeyInterface $key, $iv)
+    {
+        if (null === $iv) {
+            $iv = $this->randomSource()->generate(16);
+        }
+
+        $this->isInitialized = true;
+        $this->key = $key;
+        $this->iv = $iv;
+        $this->header = $this->header($this->iv);
+
+        $this->mcryptModule = mcrypt_module_open(
+            MCRYPT_RIJNDAEL_128,
+            '',
+            MCRYPT_MODE_CBC,
+            ''
+        );
+
+        $this->hashContext = hash_init(
+            'sha' . $key->authenticationSecretBits(),
+            HASH_HMAC,
+            $key->authenticationSecret()
+        );
+
+        $this->reset();
+    }
 
     /**
      * Get the encryption header.
@@ -178,66 +273,33 @@ abstract class AbstractEncryptCipher implements CipherInterface
      */
     abstract protected function header($iv);
 
-    private function initialize()
-    {
-        if ($this->isInitialized) {
-            return '';
-        }
-
-        $this->isInitialized = true;
-        $key = $this->produceKey();
-
-        $this->mcryptModule = mcrypt_module_open(
-            MCRYPT_RIJNDAEL_128,
-            '',
-            MCRYPT_MODE_CBC,
-            ''
-        );
-        mcrypt_generic_init(
-            $this->mcryptModule,
-            $key->encryptionSecret(),
-            $this->iv
-        );
-
-        $this->blockHashContext = hash_init(
-            'sha' . $key->authenticationSecretBits(),
-            HASH_HMAC,
-            $key->authenticationSecret()
-        );
-        $this->finalHashContext = hash_init(
-            'sha' . $key->authenticationSecretBits(),
-            HASH_HMAC,
-            $key->authenticationSecret()
-        );
-
-        $header = $this->header($this->iv);
-        hash_update($this->finalHashContext, $header);
-
-        return $header;
-    }
-
     private function authenticateBlocks($output)
     {
         $authenticated = '';
         foreach (str_split($output, 16) as $block) {
-            $blockHashContext = hash_copy($this->blockHashContext);
-            hash_update($blockHashContext, $block);
+            $hashContext = hash_copy($this->hashContext);
+            hash_update($hashContext, $block);
             hash_update($this->finalHashContext, $block);
 
             $authenticated .= $block .
-                substr(hash_final($blockHashContext, true), 0, 2);
+                substr(hash_final($hashContext, true), 0, 2);
         }
 
         return $authenticated;
     }
 
-    private $iv;
+    private $randomSource;
     private $padder;
-    private $buffer;
     private $isInitialized;
+    private $isHeaderSent;
     private $isFinalized;
+    private $key;
+    private $iv;
+    private $header;
     private $mcryptModule;
-    private $blockHashContext;
+    private $isMcryptInitialized;
+    private $hashContext;
     private $finalHashContext;
+    private $buffer;
     private $result;
 }

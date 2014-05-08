@@ -12,8 +12,13 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactoryInterface;
+use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Padding\PadderInterface;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
 
 /**
@@ -39,26 +44,58 @@ class PasswordEncryptTransformFactory implements
     /**
      * Construct a new password encrypt transform factory.
      *
-     * @param PasswordEncryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        PasswordEncryptCipherFactoryInterface $cipherFactory = null
+        KeyDeriverInterface $keyDeriver = null,
+        RandomSourceInterface $randomSource = null,
+        PadderInterface $padder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = PasswordEncryptCipherFactory::instance();
+        if (null === $keyDeriver) {
+            $keyDeriver = KeyDeriver::instance();
+        }
+        if (null === $randomSource) {
+            $randomSource = DevUrandom::instance();
+        }
+        if (null === $padder) {
+            $padder = PkcsPadding::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->keyDeriver = $keyDeriver;
+        $this->randomSource = $randomSource;
+        $this->padder = $padder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the key deriver.
      *
-     * @return PasswordEncryptCipherFactoryInterface The cipher factory.
+     * @return KeyDeriverInterface The key deriver.
      */
-    public function cipherFactory()
+    public function keyDeriver()
     {
-        return $this->cipherFactory;
+        return $this->keyDeriver;
+    }
+
+    /**
+     * Get the random source.
+     *
+     * @return RandomSourceInterface The random source.
+     */
+    public function randomSource()
+    {
+        return $this->randomSource;
+    }
+
+    /**
+     * Get the padder.
+     *
+     * @return PadderInterface The padder.
+     */
+    public function padder()
+    {
+        return $this->padder;
     }
 
     /**
@@ -71,12 +108,18 @@ class PasswordEncryptTransformFactory implements
      */
     public function createTransform($password, $iterations)
     {
-        return new PasswordEncryptTransform(
-            $this->cipherFactory()
-                ->createPasswordEncryptCipher($password, $iterations)
+        $cipher = new PasswordEncryptCipher(
+            $this->keyDeriver(),
+            $this->randomSource(),
+            $this->padder()
         );
+        $cipher->initialize($password, $iterations);
+
+        return new PasswordEncryptTransform($cipher);
     }
 
     private static $instance;
-    private $cipherFactory;
+    private $keyDeriver;
+    private $randomSource;
+    private $padder;
 }

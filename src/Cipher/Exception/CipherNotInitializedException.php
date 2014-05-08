@@ -14,18 +14,18 @@ namespace Eloquent\Lockbox\Cipher\Exception;
 use Exception;
 
 /**
- * The cipher is already finalized.
+ * The cipher is not initialized.
  */
-final class CipherFinalizedException extends Exception implements
+final class CipherNotInitializedException extends Exception implements
     CipherStateExceptionInterface
 {
     /**
-     * Construct a new cipher finalized exception.
+     * Construct a new cipher not initialized exception.
      *
      * @param Exception|null $previous The cause, if available.
      */
     public function __construct(Exception $previous = null)
     {
-        parent::__construct('The cipher is already finalized.', 0, $previous);
+        parent::__construct('The cipher is not initialized.', 0, $previous);
     }
 }

@@ -25,7 +25,8 @@ class EncryptTransformTest extends PHPUnit_Framework_TestCase
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->iv = '1234567890123456';
-        $this->cipher = new EncryptCipher($this->key, $this->iv);
+        $this->cipher = new EncryptCipher;
+        $this->cipher->initialize($this->key, $this->iv);
         $this->transform = new EncryptTransform($this->cipher);
 
         $this->base64Url = Base64Url::instance();

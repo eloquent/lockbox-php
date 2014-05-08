@@ -13,7 +13,6 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Exception;
 use PHPUnit_Framework_TestCase;
@@ -29,15 +28,8 @@ class PasswordEncryptTransformTest extends PHPUnit_Framework_TestCase
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
         $this->keyDeriver = new KeyDeriver;
-        $this->padder = new PkcsPadding;
-        $this->cipher = new PasswordEncryptCipher(
-            $this->password,
-            $this->iterations,
-            $this->salt,
-            $this->iv,
-            $this->keyDeriver,
-            $this->padder
-        );
+        $this->cipher = new PasswordEncryptCipher($this->keyDeriver);
+        $this->cipher->initialize($this->password, $this->iterations, $this->salt, $this->iv);
         $this->transform = new PasswordEncryptTransform($this->cipher);
 
         $this->base64Url = Base64Url::instance();

@@ -13,9 +13,9 @@ namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Cipher\DecryptCipher;
-use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
-use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactoryInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Padding\UnpadderInterface;
 use Eloquent\Lockbox\Transform\DecryptTransform;
 
 /**
@@ -36,30 +36,28 @@ class DecryptTransformFactory implements KeyTransformFactoryInterface
 
         return self::$instance;
     }
-
     /**
      * Construct a new decrypt transform factory.
      *
-     * @param DecryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param UnpadderInterface|null $unpadder The unpadder to use.
      */
-    public function __construct(
-        DecryptCipherFactoryInterface $cipherFactory = null
-    ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = DecryptCipherFactory::instance();
+    public function __construct(UnpadderInterface $unpadder = null)
+    {
+        if (null === $unpadder) {
+            $unpadder = PkcsPadding::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->unpadder = $unpadder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the unpadder.
      *
-     * @return DecryptCipherFactoryInterface The cipher factory.
+     * @return UnpadderInterface The unpadder.
      */
-    public function cipherFactory()
+    public function unpadder()
     {
-        return $this->cipherFactory;
+        return $this->unpadder;
     }
 
     /**
@@ -71,9 +69,12 @@ class DecryptTransformFactory implements KeyTransformFactoryInterface
      */
     public function createTransform(KeyInterface $key)
     {
-        return new DecryptTransform(new DecryptCipher($key));
+        $cipher = new DecryptCipher($this->unpadder());
+        $cipher->initialize($key);
+
+        return new DecryptTransform($cipher);
     }
 
     private static $instance;
-    private $cipherFactory;
+    private $unpadder;
 }

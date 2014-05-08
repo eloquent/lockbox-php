@@ -9,26 +9,27 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Password\Cipher\Factory;
+namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyExceptionInterface;
 
 /**
- * The interface implemented by password encrypt cipher factories.
+ * The interface implemented by encrypt ciphers that use passwords.
  */
-interface PasswordEncryptCipherFactoryInterface
+interface PasswordEncryptCipherInterface extends CipherInterface
 {
     /**
-     * Create a new password encrypt cipher.
+     * Initialize this cipher.
      *
      * @param string      $password   The password to encrypt with.
      * @param integer     $iterations The number of hash iterations to use.
      * @param string|null $salt       The salt to use for key derivation, or null to generate one.
      * @param string|null $iv         The initialization vector to use, or null to generate one.
      *
-     * @return CipherInterface The newly created cipher.
+     * @throws InvalidKeyExceptionInterface If the supplied arguments are invalid.
      */
-    public function createPasswordEncryptCipher(
+    public function initialize(
         $password,
         $iterations,
         $salt = null,

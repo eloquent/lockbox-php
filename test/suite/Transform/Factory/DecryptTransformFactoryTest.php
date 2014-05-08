@@ -12,9 +12,8 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Cipher\DecryptCipher;
-use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Transform\DecryptTransform;
 use PHPUnit_Framework_TestCase;
 
@@ -24,27 +23,27 @@ class DecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->cipherFactory = new DecryptCipherFactory;
-        $this->factory = new DecryptTransformFactory($this->cipherFactory);
+        $this->unpadder = new PkcsPadding;
+        $this->factory = new DecryptTransformFactory($this->unpadder);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->cipherFactory, $this->factory->cipherFactory());
+        $this->assertSame($this->unpadder, $this->factory->unpadder());
     }
 
     public function testConstructorDefaults()
     {
         $this->factory = new DecryptTransformFactory;
 
-        $this->assertSame(DecryptCipherFactory::instance(), $this->factory->cipherFactory());
+        $this->assertSame(PkcsPadding::instance(), $this->factory->unpadder());
     }
 
     public function testCreateTransform()
     {
         $key = new Key('1234567890123456', '1234567890123456789012345678');
 
-        $this->assertEquals(new DecryptTransform(new DecryptCipher($key)), $this->factory->createTransform($key));
+        $this->assertInstanceOf('Eloquent\Lockbox\Transform\DecryptTransform', $this->factory->createTransform($key));
     }
 
     public function testInstance()

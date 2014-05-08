@@ -93,15 +93,9 @@ EOD;
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->transform = new PasswordEncryptTransform(
-            new PasswordEncryptCipher(
-                $this->password,
-                $this->iterations,
-                $this->salt,
-                $this->iv,
-                $this->keyDeriver
-            )
-        );
+        $this->cipher = new PasswordEncryptCipher($this->keyDeriver);
+        $this->cipher->initialize($this->password, $this->iterations, $this->salt, $this->iv);
+        $this->transform = new PasswordEncryptTransform($this->cipher);
 
         Phake::when($this->transformFactory)->createTransform($this->password, $this->iterations)
             ->thenReturn($this->transform);

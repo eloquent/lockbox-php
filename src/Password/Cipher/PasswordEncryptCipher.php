@@ -12,42 +12,36 @@
 namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Lockbox\Cipher\AbstractEncryptCipher;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyExceptionInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
  * Encrypts data with a password.
  */
-class PasswordEncryptCipher extends AbstractEncryptCipher
+class PasswordEncryptCipher extends AbstractEncryptCipher implements
+    PasswordEncryptCipherInterface
 {
     /**
      * Construct a new password encrypt cipher.
      *
-     * @param string                   $password   The password to encrypt with.
-     * @param integer                  $iterations The number of hash iterations to use.
-     * @param string                   $salt       The salt to use for key derivation.
-     * @param string                   $iv         The initialization vector to use.
-     * @param KeyDeriverInterface|null $keyDeriver The key deriver to use.
-     * @param PadderInterface|null     $padder     The padder to use.
+     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        $password,
-        $iterations,
-        $salt,
-        $iv,
         KeyDeriverInterface $keyDeriver = null,
+        RandomSourceInterface $randomSource = null,
         PadderInterface $padder = null
     ) {
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
 
-        parent::__construct($iv, $padder);
+        parent::__construct($randomSource, $padder);
 
-        $this->password = $password;
-        $this->iterations = $iterations;
-        $this->salt = $salt;
         $this->keyDeriver = $keyDeriver;
     }
 
@@ -62,19 +56,23 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
     }
 
     /**
-     * Produce the key to use.
+     * Initialize this cipher.
      *
-     * @return KeyInterface The key.
+     * @param string      $password   The password to encrypt with.
+     * @param integer     $iterations The number of hash iterations to use.
+     * @param string|null $salt       The salt to use for key derivation, or null to generate one.
+     * @param string|null $iv         The initialization vector to use, or null to generate one.
+     *
+     * @throws InvalidKeyExceptionInterface If the supplied arguments are invalid.
      */
-    protected function produceKey()
+    public function initialize($password, $iterations, $salt = null, $iv = null)
     {
-        list($key) = $this->keyDeriver()->deriveKeyFromPassword(
-            $this->password,
-            $this->iterations,
-            $this->salt
-        );
+        $this->iterations = $iterations;
 
-        return $key;
+        list($key, $this->salt) = $this->keyDeriver()
+            ->deriveKeyFromPassword($password, $iterations, $salt);
+
+        parent::doInitialize($key, $iv);
     }
 
     /**
@@ -90,8 +88,7 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
             $iv;
     }
 
-    private $password;
+    private $keyDeriver;
     private $iterations;
     private $salt;
-    private $keyDeriver;
 }

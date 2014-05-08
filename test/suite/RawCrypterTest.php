@@ -87,7 +87,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $encrypted = $this->crypter->encrypt($this->key, $data);
         $decryptionResult = $this->crypter->decrypt($this->key, $encrypted);
 
-        $this->assertTrue($decryptionResult->isSuccessful());
+        $this->assertSame('SUCCESS',$decryptionResult->type()->key());
         $this->assertSame($data, $decryptionResult->data());
     }
 

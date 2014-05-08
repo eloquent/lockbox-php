@@ -12,9 +12,9 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Cipher\EncryptCipher;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -26,8 +26,8 @@ class EncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->cipherFactory = new EncryptCipherFactory($this->randomSource);
-        $this->factory = new EncryptTransformFactory($this->cipherFactory);
+        $this->padder = new PkcsPadding;
+        $this->factory = new EncryptTransformFactory($this->randomSource, $this->padder);
 
         $this->iv = '1234567890123456';
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
@@ -35,24 +35,23 @@ class EncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->cipherFactory, $this->factory->cipherFactory());
+        $this->assertSame($this->randomSource, $this->factory->randomSource());
+        $this->assertSame($this->padder, $this->factory->padder());
     }
 
     public function testConstructorDefaults()
     {
         $this->factory = new EncryptTransformFactory;
 
-        $this->assertSame(EncryptCipherFactory::instance(), $this->factory->cipherFactory());
+        $this->assertSame(DevUrandom::instance(), $this->factory->randomSource());
+        $this->assertSame(PkcsPadding::instance(), $this->factory->padder());
     }
 
     public function testCreateTransform()
     {
         $key = new Key('1234567890123456', '1234567890123456789012345678');
 
-        $this->assertEquals(
-            new EncryptTransform(new EncryptCipher($key, $this->iv)),
-            $this->factory->createTransform($key)
-        );
+        $this->assertInstanceOf('Eloquent\Lockbox\Transform\EncryptTransform', $this->factory->createTransform($key));
     }
 
     public function testInstance()

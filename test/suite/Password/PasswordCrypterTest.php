@@ -13,7 +13,6 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -32,9 +31,7 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->encrypter = new PasswordEncrypter(
-            new PasswordEncryptTransformFactory(new PasswordEncryptCipherFactory($this->keyDeriver))
-        );
+        $this->encrypter = new PasswordEncrypter(new PasswordEncryptTransformFactory($this->keyDeriver));
         $this->decrypter = new PasswordDecrypter;
         $this->crypter = new PasswordCrypter($this->encrypter, $this->decrypter);
 

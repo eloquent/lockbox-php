@@ -13,8 +13,10 @@ namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactoryInterface;
+use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Padding\UnpadderInterface;
+use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
 
 /**
@@ -40,26 +42,42 @@ class PasswordDecryptTransformFactory implements
     /**
      * Construct a new password decrypt transform factory.
      *
-     * @param PasswordDecryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param KeyDeriverInterface|null $keyDeriver The key deriver to use.
+     * @param UnpadderInterface|null   $unpadder   The unpadder to use.
      */
     public function __construct(
-        PasswordDecryptCipherFactoryInterface $cipherFactory = null
+        KeyDeriverInterface $keyDeriver = null,
+        UnpadderInterface $unpadder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = PasswordDecryptCipherFactory::instance();
+        if (null === $keyDeriver) {
+            $keyDeriver = KeyDeriver::instance();
+        }
+        if (null === $unpadder) {
+            $unpadder = PkcsPadding::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->keyDeriver = $keyDeriver;
+        $this->unpadder = $unpadder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the key deriver.
      *
-     * @return PasswordDecryptCipherFactoryInterface The cipher factory.
+     * @return KeyDeriverInterface The key deriver.
      */
-    public function cipherFactory()
+    public function keyDeriver()
     {
-        return $this->cipherFactory;
+        return $this->keyDeriver;
+    }
+
+    /**
+     * Get the unpadder.
+     *
+     * @return UnpadderInterface The unpadder.
+     */
+    public function unpadder()
+    {
+        return $this->unpadder;
     }
 
     /**
@@ -71,12 +89,16 @@ class PasswordDecryptTransformFactory implements
      */
     public function createTransform($password)
     {
-        return new PasswordDecryptTransform(
-            $this->cipherFactory()->createPasswordDecryptCipher($password)
+        $cipher = new PasswordDecryptCipher(
+            $this->keyDeriver(),
+            $this->unpadder()
         );
+        $cipher->initialize($password);
+
+        return new PasswordDecryptTransform($cipher);
     }
 
     private static $instance;
-    private $cipherFactory;
     private $keyDeriver;
+    private $unpadder;
 }

@@ -12,9 +12,12 @@
 namespace Eloquent\Lockbox\Transform\Factory;
 
 use Eloquent\Confetti\TransformInterface;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactoryInterface;
+use Eloquent\Lockbox\Cipher\EncryptCipher;
 use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Padding\PadderInterface;
+use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Random\DevUrandom;
+use Eloquent\Lockbox\Random\RandomSourceInterface;
 use Eloquent\Lockbox\Transform\EncryptTransform;
 
 /**
@@ -39,26 +42,42 @@ class EncryptTransformFactory implements KeyTransformFactoryInterface
     /**
      * Construct a new encrypt transform factory.
      *
-     * @param EncryptCipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        EncryptCipherFactoryInterface $cipherFactory = null
+        RandomSourceInterface $randomSource = null,
+        PadderInterface $padder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = EncryptCipherFactory::instance();
+        if (null === $randomSource) {
+            $randomSource = DevUrandom::instance();
+        }
+        if (null === $padder) {
+            $padder = PkcsPadding::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->randomSource = $randomSource;
+        $this->padder = $padder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the random source.
      *
-     * @return EncryptCipherFactoryInterface The cipher factory.
+     * @return RandomSourceInterface The random source.
      */
-    public function cipherFactory()
+    public function randomSource()
     {
-        return $this->cipherFactory;
+        return $this->randomSource;
+    }
+
+    /**
+     * Get the padder.
+     *
+     * @return PadderInterface The padder.
+     */
+    public function padder()
+    {
+        return $this->padder;
     }
 
     /**
@@ -70,11 +89,13 @@ class EncryptTransformFactory implements KeyTransformFactoryInterface
      */
     public function createTransform(KeyInterface $key)
     {
-        return new EncryptTransform(
-            $this->cipherFactory()->createEncryptCipher($key)
-        );
+        $cipher = new EncryptCipher($this->randomSource(), $this->padder());
+        $cipher->initialize($key);
+
+        return new EncryptTransform($cipher);
     }
 
     private static $instance;
-    private $cipherFactory;
+    private $randomSource;
+    private $padder;
 }
