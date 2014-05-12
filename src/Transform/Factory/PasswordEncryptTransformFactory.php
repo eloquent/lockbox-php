@@ -19,8 +19,7 @@ use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
-use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
-
+use Eloquent\Lockbox\Transform\CipherTransform;
 /**
  * Creates encrypt transforms that use passwords.
  */
@@ -115,7 +114,7 @@ class PasswordEncryptTransformFactory implements
         );
         $cipher->initialize($password, $iterations);
 
-        return new PasswordEncryptTransform($cipher);
+        return new CipherTransform($cipher);
     }
 
     private static $instance;

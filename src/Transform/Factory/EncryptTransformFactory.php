@@ -18,7 +18,7 @@ use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
-use Eloquent\Lockbox\Transform\EncryptTransform;
+use Eloquent\Lockbox\Transform\CipherTransform;
 
 /**
  * Creates encrypt transforms that use keys.
@@ -92,7 +92,7 @@ class EncryptTransformFactory implements KeyTransformFactoryInterface
         $cipher = new EncryptCipher($this->randomSource(), $this->padder());
         $cipher->initialize($key);
 
-        return new EncryptTransform($cipher);
+        return new CipherTransform($cipher);
     }
 
     private static $instance;

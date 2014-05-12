@@ -12,17 +12,25 @@
 namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\TransformInterface;
+use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
- * The interface implemented by decrypt transforms.
+ * The interface implemented by cipher transforms.
  */
-interface DecryptTransformInterface extends TransformInterface
+interface CipherTransformInterface extends TransformInterface
 {
     /**
-     * Get the decryption result.
+     * Get the cipher.
      *
-     * @return CipherResultInterface|null The decryption result, or null if not yet known.
+     * @return CipherInterface The cipher.
+     */
+    public function cipher();
+
+    /**
+     * Get the result.
+     *
+     * @return CipherResultInterface|null The result, if available.
      */
     public function result();
 }

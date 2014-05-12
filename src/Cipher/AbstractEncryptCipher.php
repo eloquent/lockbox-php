@@ -195,7 +195,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
     }
 
     /**
-     * Returns true if this cipher has produced a result.
+     * Get the result.
      *
      * @return CipherResultInterface|null The result, if available.
      */

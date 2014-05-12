@@ -14,7 +14,6 @@ namespace Eloquent\Lockbox\Transform\Factory;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Transform\DecryptTransform;
 use PHPUnit_Framework_TestCase;
 
 class DecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
@@ -43,7 +42,7 @@ class DecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     {
         $key = new Key('1234567890123456', '1234567890123456789012345678');
 
-        $this->assertInstanceOf('Eloquent\Lockbox\Transform\DecryptTransform', $this->factory->createTransform($key));
+        $this->assertInstanceOf('Eloquent\Lockbox\Transform\CipherTransform', $this->factory->createTransform($key));
     }
 
     public function testInstance()

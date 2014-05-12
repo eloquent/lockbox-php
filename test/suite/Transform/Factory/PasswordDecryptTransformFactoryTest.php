@@ -14,7 +14,6 @@ namespace Eloquent\Lockbox\Transform\Factory;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
 use PHPUnit_Framework_TestCase;
 
 class PasswordDecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
@@ -45,7 +44,7 @@ class PasswordDecryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTransform()
     {
         $this->assertInstanceOf(
-            'Eloquent\Lockbox\Transform\PasswordDecryptTransform',
+            'Eloquent\Lockbox\Transform\CipherTransform',
             $this->factory->createTransform('password')
         );
     }

@@ -17,7 +17,7 @@ use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
 use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
-use Eloquent\Lockbox\Transform\PasswordDecryptTransform;
+use Eloquent\Lockbox\Transform\CipherTransform;
 
 /**
  * Creates decrypt transforms that use passwords.
@@ -95,7 +95,7 @@ class PasswordDecryptTransformFactory implements
         );
         $cipher->initialize($password);
 
-        return new PasswordDecryptTransform($cipher);
+        return new CipherTransform($cipher);
     }
 
     private static $instance;

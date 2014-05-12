@@ -15,7 +15,7 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
+use Eloquent\Lockbox\Transform\CipherTransform;
 use Icecave\Isolator\Isolator;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -95,7 +95,7 @@ EOD;
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->cipher = new PasswordEncryptCipher($this->keyDeriver);
         $this->cipher->initialize($this->password, $this->iterations, $this->salt, $this->iv);
-        $this->transform = new PasswordEncryptTransform($this->cipher);
+        $this->transform = new CipherTransform($this->cipher);
 
         Phake::when($this->transformFactory)->createTransform($this->password, $this->iterations)
             ->thenReturn($this->transform);

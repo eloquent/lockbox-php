@@ -16,7 +16,7 @@ use Eloquent\Lockbox\Cipher\DecryptCipher;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Transform\DecryptTransform;
+use Eloquent\Lockbox\Transform\CipherTransform;
 
 /**
  * Creates decrypt transforms that use keys.
@@ -72,7 +72,7 @@ class DecryptTransformFactory implements KeyTransformFactoryInterface
         $cipher = new DecryptCipher($this->unpadder());
         $cipher->initialize($key);
 
-        return new DecryptTransform($cipher);
+        return new CipherTransform($cipher);
     }
 
     private static $instance;

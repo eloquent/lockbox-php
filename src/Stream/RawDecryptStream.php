@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Stream;
 
 use Eloquent\Confetti\TransformStream;
-use Eloquent\Lockbox\Transform\DecryptTransformInterface;
+use Eloquent\Lockbox\Transform\CipherTransformInterface;
 
 /**
  * A transform stream for raw decryption.
@@ -22,11 +22,11 @@ class RawDecryptStream extends TransformStream implements DecryptStreamInterface
     /**
      * Construct a new raw decrypt stream.
      *
-     * @param DecryptTransformInterface $transform  The transform to use.
-     * @param integer|null              $bufferSize The buffer size in bytes.
+     * @param CipherTransformInterface $transform  The transform to use.
+     * @param integer|null             $bufferSize The buffer size in bytes.
      */
     public function __construct(
-        DecryptTransformInterface $transform,
+        CipherTransformInterface $transform,
         $bufferSize = null
     ) {
         parent::__construct($transform, $bufferSize);

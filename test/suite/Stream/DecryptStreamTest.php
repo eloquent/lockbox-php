@@ -24,16 +24,16 @@ class DecryptStreamTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->decodeTransform = Phake::mock('Eloquent\Confetti\TransformInterface');
-        $this->decryptTransform = Phake::mock('Eloquent\Lockbox\Transform\DecryptTransformInterface');
+        $this->cipherTransform = Phake::mock('Eloquent\Lockbox\Transform\CipherTransformInterface');
         $this->stream = new DecryptStream(
-            new CompoundTransform(array($this->decodeTransform, $this->decryptTransform))
+            new CompoundTransform(array($this->decodeTransform, $this->cipherTransform))
         );
     }
 
     public function testResult()
     {
         $this->result = new CipherResult(CipherResultType::INVALID_MAC());
-        Phake::when($this->decryptTransform)->result()->thenReturn(null)->thenReturn($this->result);
+        Phake::when($this->cipherTransform)->result()->thenReturn(null)->thenReturn($this->result);
 
         $this->assertNull($this->stream->result());
         $this->assertSame($this->result, $this->stream->result());

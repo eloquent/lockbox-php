@@ -15,7 +15,6 @@ use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
@@ -56,7 +55,7 @@ class PasswordEncryptTransformFactoryTest extends PHPUnit_Framework_TestCase
     public function testCreateTransform()
     {
         $this->assertInstanceOf(
-            'Eloquent\Lockbox\Transform\PasswordEncryptTransform',
+            'Eloquent\Lockbox\Transform\CipherTransform',
             $this->factory->createTransform('password', 111)
         );
     }

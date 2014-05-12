@@ -63,7 +63,7 @@ interface CipherInterface
     public function hasResult();
 
     /**
-     * Returns true if this cipher has produced a result.
+     * Get the result.
      *
      * @return CipherResultInterface|null The result, if available.
      */

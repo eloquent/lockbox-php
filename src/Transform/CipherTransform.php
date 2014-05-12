@@ -13,14 +13,16 @@ namespace Eloquent\Lockbox\Transform;
 
 use Eloquent\Confetti\AbstractTransform;
 use Eloquent\Lockbox\Cipher\CipherInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
- * A data transform for encryption of streaming data with a key.
+ * A data transform for wrapping a cipher instance.
  */
-class EncryptTransform extends AbstractTransform
+class CipherTransform extends AbstractTransform implements
+    CipherTransformInterface
 {
     /**
-     * Construct a new encrypt data transform.
+     * Construct a new cipher data transform.
      *
      * @param CipherInterface $cipher The cipher to use.
      */
@@ -78,6 +80,16 @@ class EncryptTransform extends AbstractTransform
         }
 
         return array($data, $size, $error);
+    }
+
+    /**
+     * Get the decryption result.
+     *
+     * @return CipherResultInterface|null The decryption result, or null if not yet known.
+     */
+    public function result()
+    {
+        return $this->cipher()->result();
     }
 
     private $cipher;

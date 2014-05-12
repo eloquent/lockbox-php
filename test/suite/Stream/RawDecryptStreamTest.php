@@ -22,7 +22,7 @@ class RawDecryptStreamTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->decryptTransform = Phake::mock('Eloquent\Lockbox\Transform\DecryptTransformInterface');
+        $this->decryptTransform = Phake::mock('Eloquent\Lockbox\Transform\CipherTransformInterface');
         $this->stream = new RawDecryptStream($this->decryptTransform);
     }
 
