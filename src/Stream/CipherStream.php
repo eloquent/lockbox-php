@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Stream;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
+use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Evenement\EventEmitter;
 use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
@@ -25,11 +26,13 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
      * Construct a new cipher stream.
      *
      * @param CipherInterface $cipher The cipher to use.
+     *
+     * @throws CipherNotInitializedException If the supplied cipher is not initialized.
      */
     public function __construct(CipherInterface $cipher)
     {
         if (!$cipher->isInitialized()) {
-            throw new RuntimeException('do something');
+            throw new CipherNotInitializedException;
         }
 
         $this->cipher = $cipher;
