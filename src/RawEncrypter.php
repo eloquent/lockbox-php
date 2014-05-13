@@ -11,10 +11,10 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStream;
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\EncryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
+use Eloquent\Lockbox\Key\KeyInterface;
+use Eloquent\Lockbox\Stream\CipherStream;
 
 /**
  * Encrypts data and produces raw output using keys.
@@ -38,59 +38,58 @@ class RawEncrypter implements EncrypterInterface
     /**
      * Construct a new raw encrypter.
      *
-     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(
-        KeyTransformFactoryInterface $transformFactory = null
-    ) {
-        if (null === $transformFactory) {
-            $transformFactory = EncryptTransformFactory::instance();
+    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    {
+        if (null === $cipherFactory) {
+            $cipherFactory = EncryptCipherFactory::instance();
         }
 
-        $this->transformFactory = $transformFactory;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the transform factory.
+     * Get the cipher factory.
      *
-     * @return KeyTransformFactoryInterface The transform factory.
+     * @return CipherFactoryInterface The cipher factory.
      */
-    public function transformFactory()
+    public function cipherFactory()
     {
-        return $this->transformFactory;
+        return $this->cipherFactory;
     }
 
     /**
      * Encrypt a data packet.
      *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $data The data to encrypt.
+     * @param KeyInterface $key  The key to encrypt with.
+     * @param string       $data The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\KeyInterface $key, $data)
+    public function encrypt(KeyInterface $key, $data)
     {
-        list($data) = $this->transformFactory()
-            ->createTransform($key)
-            ->transform($data, $context, true);
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($key);
 
-        return $data;
+        return $cipher->finalize($data);
     }
 
     /**
      * Create a new encrypt stream.
      *
-     * @param Key\KeyInterface $key The key to encrypt with.
+     * @param KeyInterface $key The key to encrypt with.
      *
      * @return TransformStreamInterface The newly created encrypt stream.
      */
-    public function createEncryptStream(Key\KeyInterface $key)
+    public function createEncryptStream(KeyInterface $key)
     {
-        return new TransformStream(
-            $this->transformFactory()->createTransform($key)
-        );
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($key);
+
+        return new CipherStream($cipher);
     }
 
     private static $instance;
-    private $transformFactory;
+    private $cipherFactory;
 }
