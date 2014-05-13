@@ -15,6 +15,7 @@ use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Encrypts data and produces raw output using keys.
@@ -80,7 +81,7 @@ class RawEncrypter implements EncrypterInterface
      *
      * @param KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(KeyInterface $key)
     {

@@ -11,11 +11,11 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Stream\RawDecryptStream;
-use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\KeyTransformFactoryInterface;
+use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Decrypts raw data using keys.
@@ -37,28 +37,27 @@ class RawDecrypter implements DecrypterInterface
     }
 
     /**
-     * Construct a new raw decrypter.
+     * Construct a new raw encrypter.
      *
-     * @param KeyTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(
-        KeyTransformFactoryInterface $transformFactory = null
-    ) {
-        if (null === $transformFactory) {
-            $transformFactory = DecryptTransformFactory::instance();
+    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    {
+        if (null === $cipherFactory) {
+            $cipherFactory = DecryptCipherFactory::instance();
         }
 
-        $this->transformFactory = $transformFactory;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the transform factory.
+     * Get the cipher factory.
      *
-     * @return KeyTransformFactoryInterface The transform factory.
+     * @return CipherFactoryInterface The cipher factory.
      */
-    public function transformFactory()
+    public function cipherFactory()
     {
-        return $this->transformFactory;
+        return $this->cipherFactory;
     }
 
     /**
@@ -71,10 +70,12 @@ class RawDecrypter implements DecrypterInterface
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
-        $transform = $this->transformFactory()->createTransform($key);
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($key);
 
-        list($data) = $transform->transform($data, $context, true);
-        $result = $transform->result();
+        $data = $cipher->finalize($data);
+
+        $result = $cipher->result();
         if ($result->isSuccessful()) {
             $result->setData($data);
         }
@@ -87,15 +88,16 @@ class RawDecrypter implements DecrypterInterface
      *
      * @param Key\KeyInterface $key The key to decrypt with.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {
-        return new RawDecryptStream(
-            $this->transformFactory()->createTransform($key)
-        );
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($key);
+
+        return new CipherStream($cipher);
     }
 
     private static $instance;
-    private $transformFactory;
+    private $cipherFactory;
 }
