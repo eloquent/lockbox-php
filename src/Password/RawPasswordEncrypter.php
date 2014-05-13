@@ -11,10 +11,10 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStream;
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Encrypts data and produces raw output using passwords.
@@ -38,26 +38,26 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
     /**
      * Construct a new raw password encrypter.
      *
-     * @param PasswordEncryptTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
     public function __construct(
-        PasswordEncryptTransformFactoryInterface $transformFactory = null
+        CipherFactoryInterface $cipherFactory = null
     ) {
-        if (null === $transformFactory) {
-            $transformFactory = PasswordEncryptTransformFactory::instance();
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
 
-        $this->transformFactory = $transformFactory;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the transform factory.
+     * Get the cipher factory.
      *
-     * @return PasswordEncryptTransformFactoryInterface The transform factory.
+     * @return CipherFactoryInterface The cipher factory.
      */
-    public function transformFactory()
+    public function cipherFactory()
     {
-        return $this->transformFactory;
+        return $this->cipherFactory;
     }
 
     /**
@@ -71,11 +71,10 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
      */
     public function encrypt($password, $iterations, $data)
     {
-        list($data) = $this->transformFactory()
-            ->createTransform($password, $iterations)
-            ->transform($data, $context, true);
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password, $iterations);
 
-        return $data;
+        return $cipher->finalize($data);
     }
 
     /**
@@ -84,15 +83,16 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
      * @param string  $password   The password to encrypt with.
      * @param integer $iterations The number of hash iterations to use.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream($password, $iterations)
     {
-        return new TransformStream(
-            $this->transformFactory()->createTransform($password, $iterations)
-        );
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password, $iterations);
+
+        return new CipherStream($cipher);
     }
 
     private static $instance;
-    private $transformFactory;
+    private $cipherFactory;
 }
