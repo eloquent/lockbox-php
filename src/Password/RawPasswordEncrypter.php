@@ -40,9 +40,8 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
      *
      * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(
-        CipherFactoryInterface $cipherFactory = null
-    ) {
+    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    {
         if (null === $cipherFactory) {
             $cipherFactory = PasswordEncryptCipherFactory::instance();
         }

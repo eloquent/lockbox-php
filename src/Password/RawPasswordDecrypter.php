@@ -11,11 +11,11 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
-use Eloquent\Lockbox\Stream\RawDecryptStream;
-use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactoryInterface;
+use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Decrypts raw data using passwords.
@@ -39,26 +39,25 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
     /**
      * Construct a new raw password decrypter.
      *
-     * @param PasswordDecryptTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(
-        PasswordDecryptTransformFactoryInterface $transformFactory = null
-    ) {
-        if (null === $transformFactory) {
-            $transformFactory = PasswordDecryptTransformFactory::instance();
+    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    {
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordDecryptCipherFactory::instance();
         }
 
-        $this->transformFactory = $transformFactory;
+        $this->cipherFactory = $cipherFactory;
     }
 
     /**
-     * Get the transform factory.
+     * Get the cipher factory.
      *
-     * @return PasswordDecryptTransformFactoryInterface The transform factory.
+     * @return CipherFactoryInterface The cipher factory.
      */
-    public function transformFactory()
+    public function cipherFactory()
     {
-        return $this->transformFactory;
+        return $this->cipherFactory;
     }
 
     /**
@@ -71,10 +70,12 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      */
     public function decrypt($password, $data)
     {
-        $transform = $this->transformFactory()->createTransform($password);
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password);
 
-        list($data) = $transform->transform($data, $context, true);
-        $result = $transform->result();
+        $data = $cipher->finalize($data);
+
+        $result = $cipher->result();
         if ($result->isSuccessful()) {
             $result->setData($data);
         }
@@ -87,15 +88,16 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
      *
      * @param string $password The password to decrypt with.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream($password)
     {
-        return new RawDecryptStream(
-            $this->transformFactory()->createTransform($password)
-        );
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password);
+
+        return new CipherStream($cipher);
     }
 
     private static $instance;
-    private $transformFactory;
+    private $cipherFactory;
 }

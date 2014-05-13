@@ -15,16 +15,13 @@ use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
-use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
-use Eloquent\Lockbox\Random\DevUrandom;
-use Eloquent\Lockbox\Random\RandomSourceInterface;
+use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 
 /**
- * Creates encrypt ciphers that use passwords.
+ * Creates decrypt ciphers that use passwords.
  */
-class PasswordEncryptCipherFactory implements CipherFactoryInterface
+class PasswordDecryptCipherFactory implements CipherFactoryInterface
 {
     /**
      * Get the static instance of this factory.
@@ -41,30 +38,24 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
     }
 
     /**
-     * Construct a new password encrypt cipher factory.
+     * Construct a new password decrypt cipher factory.
      *
-     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
-     * @param RandomSourceInterface|null $randomSource The random source to use.
-     * @param PadderInterface|null       $padder       The padder to use.
+     * @param KeyDeriverInterface|null $keyDeriver The key deriver to use.
+     * @param UnpadderInterface|null   $unpadder   The unpadder to use.
      */
     public function __construct(
         KeyDeriverInterface $keyDeriver = null,
-        RandomSourceInterface $randomSource = null,
-        PadderInterface $padder = null
+        UnpadderInterface $unpadder = null
     ) {
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
-        if (null === $randomSource) {
-            $randomSource = DevUrandom::instance();
-        }
-        if (null === $padder) {
-            $padder = PkcsPadding::instance();
+        if (null === $unpadder) {
+            $unpadder = PkcsPadding::instance();
         }
 
         $this->keyDeriver = $keyDeriver;
-        $this->randomSource = $randomSource;
-        $this->padder = $padder;
+        $this->unpadder = $unpadder;
     }
 
     /**
@@ -78,23 +69,13 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
     }
 
     /**
-     * Get the random source.
+     * Get the unpadder.
      *
-     * @return RandomSourceInterface The random source.
+     * @return UnpadderInterface The unpadder.
      */
-    public function randomSource()
+    public function unpadder()
     {
-        return $this->randomSource;
-    }
-
-    /**
-     * Get the padder.
-     *
-     * @return PadderInterface The padder.
-     */
-    public function padder()
-    {
-        return $this->padder;
+        return $this->unpadder;
     }
 
     /**
@@ -104,15 +85,13 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
      */
     public function createCipher()
     {
-        return new PasswordEncryptCipher(
+        return new PasswordDecryptCipher(
             $this->keyDeriver(),
-            $this->randomSource(),
-            $this->padder()
+            $this->unpadder()
         );
     }
 
     private static $instance;
     private $keyDeriver;
-    private $randomSource;
-    private $padder;
+    private $unpadder;
 }
