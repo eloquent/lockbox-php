@@ -18,9 +18,9 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
 use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
 
 class FunctionalTest extends PHPUnit_Framework_TestCase
 {
@@ -34,7 +34,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new Decrypter;
 
         $this->passwordEncrypter = new PasswordEncrypter(
-            new PasswordEncryptTransformFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            new PasswordEncryptCipherFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
         );
         $this->passwordDecrypter = new PasswordDecrypter;
 

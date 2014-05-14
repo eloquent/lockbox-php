@@ -11,13 +11,13 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\CompoundTransform;
-use Eloquent\Confetti\TransformInterface;
-use Eloquent\Confetti\TransformStream;
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Endec\Base64\Base64UrlEncodeTransform;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
+use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\EncoderInterface;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
+use Eloquent\Lockbox\Stream\CompositePostCipherStream;
 
 /**
  * Encrypts data and produces encoded output using passwords.
@@ -39,44 +39,44 @@ class PasswordEncrypter implements PasswordEncrypterInterface
     }
 
     /**
-     * Construct a new encrypter.
+     * Construct a new password encrypter.
      *
-     * @param PasswordEncryptTransformFactoryInterface|null $transformFactory The transform factory to use.
-     * @param TransformInterface|null                       $encodeTransform  The encode transform to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param EncoderInterface|null       $encoder       The encoder to use.
      */
     public function __construct(
-        PasswordEncryptTransformFactoryInterface $transformFactory = null,
-        TransformInterface $encodeTransform = null
+        CipherFactoryInterface $cipherFactory = null,
+        EncoderInterface $encoder = null
     ) {
-        if (null === $transformFactory) {
-            $transformFactory = PasswordEncryptTransformFactory::instance();
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
-        if (null === $encodeTransform) {
-            $encodeTransform = Base64UrlEncodeTransform::instance();
+        if (null === $encoder) {
+            $encoder = Base64Url::instance();
         }
 
-        $this->transformFactory = $transformFactory;
-        $this->encodeTransform = $encodeTransform;
+        $this->cipherFactory = $cipherFactory;
+        $this->encoder = $encoder;
     }
 
     /**
-     * Get the transform factory.
+     * Get the cipher factory.
      *
-     * @return PasswordEncryptTransformFactoryInterface The transform factory.
+     * @return CipherFactoryInterface The cipher factory.
      */
-    public function transformFactory()
+    public function cipherFactory()
     {
-        return $this->transformFactory;
+        return $this->cipherFactory;
     }
 
     /**
-     * Get the encode transform.
+     * Get the encoder.
      *
-     * @return TransformInterface The encode transform.
+     * @return EncoderInterface The encoder.
      */
-    public function encodeTransform()
+    public function encoder()
     {
-        return $this->encodeTransform;
+        return $this->encoder;
     }
 
     /**
@@ -90,15 +90,10 @@ class PasswordEncrypter implements PasswordEncrypterInterface
      */
     public function encrypt($password, $iterations, $data)
     {
-        list($data) = $this->transformFactory()
-            ->createTransform($password, $iterations)
-            ->transform($data, $context, true);
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password, $iterations);
 
-        $context = null;
-        list($data) = $this->encodeTransform()
-            ->transform($data, $context, true);
-
-        return $data;
+        return $this->encoder()->encode($cipher->finalize($data));
     }
 
     /**
@@ -107,22 +102,22 @@ class PasswordEncrypter implements PasswordEncrypterInterface
      * @param string  $password   The password to encrypt with.
      * @param integer $iterations The number of hash iterations to use.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream($password, $iterations)
     {
-        return new TransformStream(
-            new CompoundTransform(
-                array(
-                    $this->transformFactory()
-                        ->createTransform($password, $iterations),
-                    $this->encodeTransform(),
-                )
-            )
-        );
+        $cipher = $this->cipherFactory()->createCipher();
+        $cipher->initialize($password, $iterations);
+        $cipherStream = new CipherStream($cipher);
+
+        $encodeStream = $this->encoder()->createEncodeStream();
+
+        $cipherStream->pipe($encodeStream);
+
+        return new CompositePostCipherStream($cipherStream, $encodeStream);
     }
 
     private static $instance;
-    private $transformFactory;
-    private $encodeTransform;
+    private $cipherFactory;
+    private $encoder;
 }

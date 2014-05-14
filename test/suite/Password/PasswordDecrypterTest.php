@@ -11,9 +11,9 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Base64\Base64UrlDecodeTransform;
+use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
 use PHPUnit_Framework_TestCase;
 
 class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
@@ -22,26 +22,23 @@ class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->rawDecrypter = new RawPasswordDecrypter;
-        $this->transformFactory = new PasswordDecryptTransformFactory;
-        $this->decodeTransform = new Base64UrlDecodeTransform;
-        $this->encrypter = new PasswordDecrypter($this->rawDecrypter, $this->transformFactory, $this->decodeTransform);
+        $this->cipherFactory = new PasswordDecryptCipherFactory;
+        $this->decoder = new Base64Url;
+        $this->encrypter = new PasswordDecrypter($this->cipherFactory, $this->decoder);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->rawDecrypter, $this->encrypter->rawDecrypter());
-        $this->assertSame($this->transformFactory, $this->encrypter->transformFactory());
-        $this->assertSame($this->decodeTransform, $this->encrypter->decodeTransform());
+        $this->assertSame($this->cipherFactory, $this->encrypter->cipherFactory());
+        $this->assertSame($this->decoder, $this->encrypter->decoder());
     }
 
     public function testConstructorDefaults()
     {
         $this->encrypter = new PasswordDecrypter;
 
-        $this->assertSame(RawPasswordDecrypter::instance(), $this->encrypter->rawDecrypter());
-        $this->assertSame(PasswordDecryptTransformFactory::instance(), $this->encrypter->transformFactory());
-        $this->assertSame(Base64UrlDecodeTransform::instance(), $this->encrypter->decodeTransform());
+        $this->assertSame(PasswordDecryptCipherFactory::instance(), $this->encrypter->cipherFactory());
+        $this->assertSame(Base64Url::instance(), $this->encrypter->decoder());
     }
 
     public function testInstance()

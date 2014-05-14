@@ -13,9 +13,8 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Transform\CipherTransform;
 use Icecave\Isolator\Isolator;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -26,10 +25,10 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->transformFactory = Phake::mock(
-            'Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface'
-        );
-        $this->encrypter = new PasswordEncrypter($this->transformFactory);
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->cipherFactory = new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource);
+        $this->encrypter = new PasswordEncrypter($this->cipherFactory);
         $this->encoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());
         $this->writer = new KeyWriter($this->encrypter, $this->encoder, $this->isolator);
@@ -91,14 +90,8 @@ EOD;
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
 
-        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->cipher = new PasswordEncryptCipher($this->keyDeriver);
-        $this->cipher->initialize($this->password, $this->iterations, $this->salt, $this->iv);
-        $this->transform = new CipherTransform($this->cipher);
-
-        Phake::when($this->transformFactory)->createTransform($this->password, $this->iterations)
-            ->thenReturn($this->transform);
+        Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
+        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
     }
 
     protected function tearDown()
