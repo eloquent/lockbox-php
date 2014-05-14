@@ -107,9 +107,10 @@ class Encrypter implements EncrypterInterface
     {
         $cipher = $this->cipherFactory()->createCipher();
         $cipher->initialize($key);
-
         $cipherStream = new CipherStream($cipher);
+
         $encodeStream = $this->encoder()->createEncodeStream();
+
         $cipherStream->pipe($encodeStream);
 
         return new CompositePostCipherStream($cipherStream, $encodeStream);

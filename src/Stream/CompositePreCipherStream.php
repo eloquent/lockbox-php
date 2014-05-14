@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox\Stream;
 use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use React\Stream\CompositeStream;
+use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
 
 /**
@@ -34,6 +35,8 @@ class CompositePreCipherStream extends CompositeStream implements
         WritableStreamInterface $writable
     ) {
         parent::__construct($cipherStream, $writable);
+
+        Util::forwardEvents($cipherStream, $this, array('success'));
     }
 
     /**

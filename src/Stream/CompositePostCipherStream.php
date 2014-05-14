@@ -15,6 +15,7 @@ use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use React\Stream\CompositeStream;
 use React\Stream\ReadableStreamInterface;
+use React\Stream\Util;
 
 /**
  * A composite cipher stream that allows reading from the end of a set of piped
@@ -34,6 +35,8 @@ class CompositePostCipherStream extends CompositeStream implements
         ReadableStreamInterface $readable
     ) {
         parent::__construct($readable, $cipherStream);
+
+        Util::forwardEvents($cipherStream, $this, array('success'));
     }
 
     /**
