@@ -77,7 +77,7 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
             $parameters->salt()
         );
 
-        parent::doInitialize($key, $parameters->iv());
+        $this->doInitialize($key, $parameters->iv());
     }
 
     /**

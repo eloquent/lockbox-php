@@ -33,7 +33,7 @@ class EncryptCipher extends AbstractEncryptCipher
             throw new UnsupportedCipherParametersException($parameters);
         }
 
-        parent::doInitialize($parameters->key(), $parameters->iv());
+        $this->doInitialize($parameters->key(), $parameters->iv());
     }
 
     /**
