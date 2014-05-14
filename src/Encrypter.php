@@ -15,6 +15,7 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParameters;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
@@ -90,8 +91,10 @@ class Encrypter implements EncrypterInterface
      */
     public function encrypt(KeyInterface $key, $data)
     {
+        $parameters = new EncryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         return $this->encoder()->encode($cipher->finalize($data));
     }
@@ -105,8 +108,10 @@ class Encrypter implements EncrypterInterface
      */
     public function createEncryptStream(KeyInterface $key)
     {
+        $parameters = new EncryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
         $cipherStream = new CipherStream($cipher);
 
         $encodeStream = $this->encoder()->createEncodeStream();

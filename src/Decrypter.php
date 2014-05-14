@@ -16,6 +16,7 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParameters;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
@@ -93,6 +94,8 @@ class Decrypter implements DecrypterInterface
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
+        $parameters = new DecryptCipherParameters($key);
+
         try {
             $data = $this->decoder()->decode($data);
         } catch (EncodingExceptionInterface $e) {
@@ -100,7 +103,7 @@ class Decrypter implements DecrypterInterface
         }
 
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         $data = $cipher->finalize($data);
 
@@ -121,10 +124,12 @@ class Decrypter implements DecrypterInterface
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {
+        $parameters = new DecryptCipherParameters($key);
+
         $decodeStream = $this->decoder()->createDecodeStream();
 
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
         $cipherStream = new CipherStream($cipher);
 
         $decodeStream->pipe($cipherStream);

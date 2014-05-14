@@ -14,10 +14,11 @@ namespace Eloquent\Lockbox\Password\Cipher;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Exception;
-use Phake;
 use PHPUnit_Framework_TestCase;
+use Phake;
 
 class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 {
@@ -34,6 +35,12 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->iterations = 10;
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
+        $this->parameters = new PasswordEncryptCipherParameters(
+            $this->password,
+            $this->iterations,
+            $this->salt,
+            $this->iv
+        );
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
@@ -58,7 +65,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testCipher()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $output = '';
         $output .= $this->cipher->process('foo');
         $output .= $this->cipher->process('bar');
@@ -79,7 +86,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testCipherExactBlockSizes()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $output = '';
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->process('foobarbazquxdoom');
@@ -96,7 +103,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testCipherEmpty()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize('');
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
@@ -110,7 +117,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testCipherFinalizeOnly()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize();
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
@@ -124,7 +131,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testProcessFailureFinalized()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $this->cipher->finalize();
         $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException');
 
@@ -133,7 +140,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testFinalizeFailureFinalized()
     {
-        $this->cipher->initialize($this->password, $this->iterations);
+        $this->cipher->initialize($this->parameters);
         $this->cipher->finalize();
         $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException');
 

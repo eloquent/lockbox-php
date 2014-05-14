@@ -9,19 +9,19 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Cipher;
+namespace Eloquent\Lockbox\Cipher\Parameters;
 
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
- * The interface implemented by decrypt ciphers that use keys.
+ * The interface implemented by decrypt cipher parameters.
  */
-interface DecryptCipherInterface extends CipherInterface
+interface DecryptCipherParametersInterface extends CipherParametersInterface
 {
     /**
-     * Initialize this cipher.
+     * Get the key.
      *
-     * @param KeyInterface $key The key to use.
+     * @return KeyInterface The key.
      */
-    public function initialize(KeyInterface $key);
+    public function key();
 }

@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParameters;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
@@ -70,8 +71,10 @@ class RawDecrypter implements DecrypterInterface
      */
     public function decrypt(Key\KeyInterface $key, $data)
     {
+        $parameters = new DecryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         $data = $cipher->finalize($data);
 
@@ -92,8 +95,10 @@ class RawDecrypter implements DecrypterInterface
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {
+        $parameters = new DecryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         return new CipherStream($cipher);
     }

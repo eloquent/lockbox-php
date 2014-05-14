@@ -12,6 +12,8 @@
 namespace Eloquent\Lockbox\Cipher;
 
 use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
+use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
@@ -25,6 +27,15 @@ interface CipherInterface
      * @return boolean True if initialized.
      */
     public function isInitialized();
+
+    /**
+     * Initialize this cipher.
+     *
+     * @param CipherParametersInterface $parameters The parameters to use.
+     *
+     * @throws UnsupportedCipherParametersException If unsupported parameters are supplied.
+     */
+    public function initialize(CipherParametersInterface $parameters);
 
     /**
      * Process the supplied input data.

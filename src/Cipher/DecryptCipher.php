@@ -14,18 +14,20 @@ namespace Eloquent\Lockbox\Cipher;
 use Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
+use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
 
 /**
  * Decrypts data with a key.
  */
-class DecryptCipher implements DecryptCipherInterface
+class DecryptCipher implements CipherInterface
 {
     /**
      * Construct a new decrypt cipher.
@@ -57,12 +59,18 @@ class DecryptCipher implements DecryptCipherInterface
     /**
      * Initialize this cipher.
      *
-     * @param KeyInterface $key The key to use.
+     * @param CipherParametersInterface $parameters The parameters to use.
+     *
+     * @throws UnsupportedCipherParametersException If unsupported parameters are supplied.
      */
-    public function initialize(KeyInterface $key)
+    public function initialize(CipherParametersInterface $parameters)
     {
+        if (!$parameters instanceof DecryptCipherParametersInterface) {
+            throw new UnsupportedCipherParametersException($parameters);
+        }
+
         $this->isInitialized = true;
-        $this->key = $key;
+        $this->key = $parameters->key();
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,
@@ -72,11 +80,11 @@ class DecryptCipher implements DecryptCipherInterface
         );
 
         $this->hashContext = hash_init(
-            'sha' . $key->authenticationSecretBits(),
+            'sha' . $this->key->authenticationSecretBits(),
             HASH_HMAC,
-            $key->authenticationSecret()
+            $this->key->authenticationSecret()
         );
-        $this->macSize = $key->authenticationSecretBytes();
+        $this->macSize = $this->key->authenticationSecretBytes();
 
         $this->reset();
     }

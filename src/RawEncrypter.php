@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParameters;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
@@ -70,8 +71,10 @@ class RawEncrypter implements EncrypterInterface
      */
     public function encrypt(KeyInterface $key, $data)
     {
+        $parameters = new EncryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         return $cipher->finalize($data);
     }
@@ -85,8 +88,10 @@ class RawEncrypter implements EncrypterInterface
      */
     public function createEncryptStream(KeyInterface $key)
     {
+        $parameters = new EncryptCipherParameters($key);
+
         $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($key);
+        $cipher->initialize($parameters);
 
         return new CipherStream($cipher);
     }

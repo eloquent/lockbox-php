@@ -15,14 +15,16 @@ use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Exception\CipherFinalizedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
+use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
-use Eloquent\Lockbox\Key\Exception\InvalidKeyExceptionInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParametersInterface;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
 
 /**
@@ -77,14 +79,18 @@ class PasswordDecryptCipher implements CipherInterface
     /**
      * Initialize this cipher.
      *
-     * @param string $password The password to decrypt with.
+     * @param CipherParametersInterface $parameters The parameters to use.
      *
-     * @throws InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @throws UnsupportedCipherParametersException If unsupported parameters are supplied.
      */
-    public function initialize($password)
+    public function initialize(CipherParametersInterface $parameters)
     {
+        if (!$parameters instanceof PasswordDecryptCipherParametersInterface) {
+            throw new UnsupportedCipherParametersException($parameters);
+        }
+
         $this->isInitialized = true;
-        $this->password = $password;
+        $this->password = $parameters->password();
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,
