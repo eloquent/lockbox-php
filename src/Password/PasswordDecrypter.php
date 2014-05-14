@@ -11,7 +11,6 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
@@ -21,6 +20,7 @@ use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 use Eloquent\Lockbox\Stream\CompositePreCipherStream;
 
 /**
@@ -119,7 +119,7 @@ class PasswordDecrypter implements PasswordDecrypterInterface
      *
      * @param string $password The password to decrypt with.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream($password)
     {

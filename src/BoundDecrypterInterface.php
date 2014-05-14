@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * The interface implemented by bound decrypters.
@@ -31,7 +31,7 @@ interface BoundDecrypterInterface
     /**
      * Create a new decrypt stream.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream();
 }

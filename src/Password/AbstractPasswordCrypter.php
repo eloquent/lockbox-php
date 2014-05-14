@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * An abstract base class for implementing password crypters.
@@ -85,7 +85,7 @@ abstract class AbstractPasswordCrypter implements PasswordCrypterInterface
      * @param string  $password   The password to encrypt with.
      * @param integer $iterations The number of hash iterations to use.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream($password, $iterations)
     {
@@ -97,7 +97,7 @@ abstract class AbstractPasswordCrypter implements PasswordCrypterInterface
      *
      * @param string $password The password to decrypt with.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream($password)
     {

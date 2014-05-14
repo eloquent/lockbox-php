@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * An abstract base class for implementing crypters.
@@ -84,7 +84,7 @@ abstract class AbstractCrypter implements CrypterInterface
      *
      * @param Key\KeyInterface $key The key to encrypt with.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream(Key\KeyInterface $key)
     {
@@ -96,7 +96,7 @@ abstract class AbstractCrypter implements CrypterInterface
      *
      * @param Key\KeyInterface $key The key to decrypt with.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream(Key\KeyInterface $key)
     {

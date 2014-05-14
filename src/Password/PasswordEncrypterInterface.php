@@ -11,7 +11,7 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * The interface implemented by password encrypters.
@@ -35,7 +35,7 @@ interface PasswordEncrypterInterface
      * @param string  $password   The password to encrypt with.
      * @param integer $iterations The number of hash iterations to use.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream($password, $iterations);
 }

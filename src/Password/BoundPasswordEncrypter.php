@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundEncrypterInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Binds a password to an encrypter.
@@ -86,7 +86,7 @@ class BoundPasswordEncrypter implements BoundEncrypterInterface
     /**
      * Create a new encrypt stream.
      *
-     * @return TransformStreamInterface The newly created encrypt stream.
+     * @return CipherStreamInterface The newly created encrypt stream.
      */
     public function createEncryptStream()
     {

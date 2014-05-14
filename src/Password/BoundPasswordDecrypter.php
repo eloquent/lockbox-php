@@ -11,9 +11,9 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
 use Eloquent\Lockbox\BoundDecrypterInterface;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Binds a password to a decrypter.
@@ -73,7 +73,7 @@ class BoundPasswordDecrypter implements BoundDecrypterInterface
     /**
      * Create a new decrypt stream.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream()
     {
