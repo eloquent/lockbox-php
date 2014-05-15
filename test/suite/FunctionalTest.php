@@ -485,6 +485,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider keyDerivationSpecVectorData
+     * @large
      */
     public function testKeyDerivationSpecVectors(
         $password,
