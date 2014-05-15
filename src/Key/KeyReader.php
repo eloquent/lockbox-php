@@ -15,8 +15,9 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
+use Eloquent\Lockbox\DecrypterInterface;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
-use Eloquent\Lockbox\Password\PasswordDecrypterInterface;
 use Icecave\Isolator\Isolator;
 
 /**
@@ -41,14 +42,14 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Construct a new key reader.
      *
-     * @param KeyFactoryInterface|null        $factory   The factory to use.
-     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
-     * @param DecoderInterface|null           $decoder   The decoder to use.
-     * @param Isolator|null                   $isolator  The isolator to use.
+     * @param KeyFactoryInterface|null $factory   The factory to use.
+     * @param DecrypterInterface|null  $decrypter The decrypter to use.
+     * @param DecoderInterface|null    $decoder   The decoder to use.
+     * @param Isolator|null            $isolator  The isolator to use.
      */
     public function __construct(
         KeyFactoryInterface $factory = null,
-        PasswordDecrypterInterface $decrypter = null,
+        DecrypterInterface $decrypter = null,
         DecoderInterface $decoder = null,
         Isolator $isolator = null
     ) {
@@ -82,7 +83,7 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Get the decrypter.
      *
-     * @return PasswordDecrypterInterface The decrypter.
+     * @return DecrypterInterface The decrypter.
      */
     public function decrypter()
     {
@@ -312,7 +313,10 @@ class KeyReader implements EncryptedKeyReaderInterface
      */
     public function readStringWithPassword($password, $data, $path = null)
     {
-        $result = $this->decrypter()->decrypt($password, trim($data));
+        $result = $this->decrypter()->decrypt(
+            new PasswordDecryptCipherParameters($password),
+            trim($data)
+        );
         if (!$result->isSuccessful()) {
             throw new Exception\KeyReadException($path);
         }

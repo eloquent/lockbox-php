@@ -19,22 +19,22 @@ class BoundDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
+        $this->parameters = new Key\Key('1234567890123456', '12345678901234567890123456789012');
         $this->innerDecrypter = new Decrypter;
-        $this->decrypter = new BoundDecrypter($this->key, $this->innerDecrypter);
+        $this->decrypter = new BoundDecrypter($this->parameters, $this->innerDecrypter);
 
-        $this->encrypter = new BoundEncrypter($this->key);
+        $this->encrypter = new BoundEncrypter($this->parameters);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->decrypter->key());
+        $this->assertSame($this->parameters, $this->decrypter->parameters());
         $this->assertSame($this->innerDecrypter, $this->decrypter->decrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->decrypter = new BoundDecrypter($this->key);
+        $this->decrypter = new BoundDecrypter($this->parameters);
 
         $this->assertSame(Decrypter::instance(), $this->decrypter->decrypter());
     }

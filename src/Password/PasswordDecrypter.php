@@ -11,28 +11,24 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Endec\Exception\EncodingExceptionInterface;
+use Eloquent\Lockbox\AbstractDecrypter;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\DecrypterInterface;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
-use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
-use Eloquent\Lockbox\Stream\CompositePreCipherStream;
 
 /**
  * Decrypts encoded data using passwords.
  */
-class PasswordDecrypter implements PasswordDecrypterInterface
+class PasswordDecrypter extends AbstractDecrypter
 {
     /**
      * Get the static instance of this decrypter.
      *
-     * @return PasswordDecrypterInterface The static decrypter.
+     * @return DecrypterInterface The static decrypter.
      */
     public static function instance()
     {
@@ -56,90 +52,21 @@ class PasswordDecrypter implements PasswordDecrypterInterface
         if (null === $cipherFactory) {
             $cipherFactory = PasswordDecryptCipherFactory::instance();
         }
-        if (null === $decoder) {
-            $decoder = Base64Url::instance();
-        }
 
-        $this->cipherFactory = $cipherFactory;
-        $this->decoder = $decoder;
+        parent::__construct($cipherFactory, $decoder);
     }
 
     /**
-     * Get the cipher factory.
+     * Create a new cipher result of the supplied type.
      *
-     * @return CipherFactoryInterface The cipher factory.
+     * @param CipherResultType $type The result type.
+     *
+     * @return CipherResultInterface The newly created cipher result.
      */
-    public function cipherFactory()
+    protected function createResult(CipherResultType $type)
     {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Get the decoder.
-     *
-     * @return DecoderInterface The decoder.
-     */
-    public function decoder()
-    {
-        return $this->decoder;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param string $password The password to decrypt with.
-     * @param string $data     The data to decrypt.
-     *
-     * @return PasswordDecryptionResultInterface The decryption result.
-     */
-    public function decrypt($password, $data)
-    {
-        $parameters = new PasswordDecryptCipherParameters($password);
-
-        try {
-            $data = $this->decoder()->decode($data);
-        } catch (EncodingExceptionInterface $e) {
-            return new PasswordDecryptionResult(
-                CipherResultType::INVALID_ENCODING()
-            );
-        }
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        $data = $cipher->finalize($data);
-
-        $result = $cipher->result();
-        if ($result->isSuccessful()) {
-            $result->setData($data);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @param string $password The password to decrypt with.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream($password)
-    {
-        $parameters = new PasswordDecryptCipherParameters($password);
-
-        $decodeStream = $this->decoder()->createDecodeStream();
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
-        $decodeStream->pipe($cipherStream);
-
-        return new CompositePreCipherStream($cipherStream, $decodeStream);
+        return new PasswordDecryptionResult($type);
     }
 
     private static $instance;
-    private $cipherFactory;
-    private $decoder;
 }

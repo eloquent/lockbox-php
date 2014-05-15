@@ -11,23 +11,17 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
-use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParameters;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
-use Eloquent\Lockbox\Stream\CompositePreCipherStream;
 
 /**
  * Decrypts encoded data using keys.
  */
-class Decrypter implements DecrypterInterface
+class Decrypter extends AbstractDecrypter
 {
     /**
      * Get the static instance of this decrypter.
@@ -56,88 +50,21 @@ class Decrypter implements DecrypterInterface
         if (null === $cipherFactory) {
             $cipherFactory = DecryptCipherFactory::instance();
         }
-        if (null === $decoder) {
-            $decoder = Base64Url::instance();
-        }
 
-        $this->cipherFactory = $cipherFactory;
-        $this->decoder = $decoder;
+        parent::__construct($cipherFactory, $decoder);
     }
 
     /**
-     * Get the cipher factory.
+     * Create a new cipher result of the supplied type.
      *
-     * @return CipherFactoryInterface The cipher factory.
+     * @param CipherResultType $type The result type.
+     *
+     * @return CipherResultInterface The newly created cipher result.
      */
-    public function cipherFactory()
+    protected function createResult(CipherResultType $type)
     {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Get the decoder.
-     *
-     * @return DecoderInterface The decoder.
-     */
-    public function decoder()
-    {
-        return $this->decoder;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param Key\KeyInterface $key  The key to decrypt with.
-     * @param string           $data The data to decrypt.
-     *
-     * @return CipherResultInterface The decryption result.
-     */
-    public function decrypt(Key\KeyInterface $key, $data)
-    {
-        $parameters = new DecryptCipherParameters($key);
-
-        try {
-            $data = $this->decoder()->decode($data);
-        } catch (EncodingExceptionInterface $e) {
-            return new CipherResult(CipherResultType::INVALID_ENCODING());
-        }
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        $data = $cipher->finalize($data);
-
-        $result = $cipher->result();
-        if ($result->isSuccessful()) {
-            $result->setData($data);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @param Key\KeyInterface $key The key to decrypt with.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream(Key\KeyInterface $key)
-    {
-        $parameters = new DecryptCipherParameters($key);
-
-        $decodeStream = $this->decoder()->createDecodeStream();
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
-        $decodeStream->pipe($cipherStream);
-
-        return new CompositePreCipherStream($cipherStream, $decodeStream);
+        return new CipherResult($type);
     }
 
     private static $instance;
-    private $cipherFactory;
-    private $decoder;
 }

@@ -11,74 +11,27 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 
 /**
- * Binds a key to a decrypter.
+ * Binds a set of parameters to a decrypter.
  */
-class BoundDecrypter implements BoundDecrypterInterface
+class BoundDecrypter extends AbstractBoundDecrypter
 {
     /**
      * Construct a new bound decrypter.
      *
-     * @param Key\KeyInterface        $key       The key to use.
-     * @param DecrypterInterface|null $decrypter The decrypter to use.
+     * @param CipherParametersInterface $parameters The parameters to use.
+     * @param DecrypterInterface|null   $decrypter  The decrypter to use.
      */
     public function __construct(
-        Key\KeyInterface $key,
+        CipherParametersInterface $parameters,
         DecrypterInterface $decrypter = null
     ) {
         if (null === $decrypter) {
             $decrypter = Decrypter::instance();
         }
 
-        $this->key = $key;
-        $this->decrypter = $decrypter;
+        parent::__construct($parameters, $decrypter);
     }
-
-    /**
-     * Get the key.
-     *
-     * @return Key\KeyInterface The key.
-     */
-    public function key()
-    {
-        return $this->key;
-    }
-
-    /**
-     * Get the decrypter.
-     *
-     * @return DecrypterInterface The decrypter;
-     */
-    public function decrypter()
-    {
-        return $this->decrypter;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param string $data The data to decrypt.
-     *
-     * @return CipherResultInterface The decryption result.
-     */
-    public function decrypt($data)
-    {
-        return $this->decrypter()->decrypt($this->key(), $data);
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream()
-    {
-        return $this->decrypter()->createDecryptStream($this->key());
-    }
-
-    private $key;
-    private $decrypter;
 }

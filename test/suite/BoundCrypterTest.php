@@ -19,20 +19,22 @@ class BoundCrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
+        $this->encryptParameters = new Key\Key('1234567890123456', '12345678901234567890123456789012');
+        $this->decryptParameters = new Key\Key('1234567890123456', '12345678901234567890123456789012');
         $this->innerCrypter = new Crypter;
-        $this->crypter = new BoundCrypter($this->key, $this->innerCrypter);
+        $this->crypter = new BoundCrypter($this->encryptParameters, $this->decryptParameters, $this->innerCrypter);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->crypter->key());
+        $this->assertSame($this->encryptParameters, $this->crypter->encryptParameters());
+        $this->assertSame($this->decryptParameters, $this->crypter->decryptParameters());
         $this->assertSame($this->innerCrypter, $this->crypter->crypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->crypter = new BoundCrypter($this->key);
+        $this->crypter = new BoundCrypter($this->encryptParameters, $this->decryptParameters);
 
         $this->assertSame(Crypter::instance(), $this->crypter->crypter());
     }

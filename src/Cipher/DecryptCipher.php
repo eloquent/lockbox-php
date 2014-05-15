@@ -16,11 +16,11 @@ use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
 use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
-use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
+use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
 
@@ -65,12 +65,12 @@ class DecryptCipher implements CipherInterface
      */
     public function initialize(CipherParametersInterface $parameters)
     {
-        if (!$parameters instanceof DecryptCipherParametersInterface) {
+        if (!$parameters instanceof KeyInterface) {
             throw new UnsupportedCipherParametersException($parameters);
         }
 
         $this->isInitialized = true;
-        $this->key = $parameters->key();
+        $this->key = $parameters;
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,

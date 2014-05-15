@@ -11,24 +11,21 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
+use Eloquent\Lockbox\AbstractEncrypter;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\EncrypterInterface;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
-use Eloquent\Lockbox\Stream\CompositePostCipherStream;
 
 /**
  * Encrypts data and produces encoded output using passwords.
  */
-class PasswordEncrypter implements PasswordEncrypterInterface
+class PasswordEncrypter extends AbstractEncrypter
 {
     /**
      * Get the static instance of this encrypter.
      *
-     * @return PasswordEncrypterInterface The static encrypter.
+     * @return EncrypterInterface The static encrypter.
      */
     public static function instance()
     {
@@ -52,79 +49,9 @@ class PasswordEncrypter implements PasswordEncrypterInterface
         if (null === $cipherFactory) {
             $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
-        if (null === $encoder) {
-            $encoder = Base64Url::instance();
-        }
 
-        $this->cipherFactory = $cipherFactory;
-        $this->encoder = $encoder;
-    }
-
-    /**
-     * Get the cipher factory.
-     *
-     * @return CipherFactoryInterface The cipher factory.
-     */
-    public function cipherFactory()
-    {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Get the encoder.
-     *
-     * @return EncoderInterface The encoder.
-     */
-    public function encoder()
-    {
-        return $this->encoder;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     * @param string  $data       The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($password, $iterations, $data)
-    {
-        $parameters =
-            new PasswordEncryptCipherParameters($password, $iterations);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return $this->encoder()->encode($cipher->finalize($data));
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     *
-     * @return CipherStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream($password, $iterations)
-    {
-        $parameters =
-            new PasswordEncryptCipherParameters($password, $iterations);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
-        $encodeStream = $this->encoder()->createEncodeStream();
-
-        $cipherStream->pipe($encodeStream);
-
-        return new CompositePostCipherStream($cipherStream, $encodeStream);
+        parent::__construct($cipherFactory, $encoder);
     }
 
     private static $instance;
-    private $cipherFactory;
-    private $encoder;
 }

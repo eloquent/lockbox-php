@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
@@ -21,19 +22,19 @@ interface EncrypterInterface
     /**
      * Encrypt a data packet.
      *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $data The data to encrypt.
+     * @param CipherParametersInterface $parameters The parameters to encrypt with.
+     * @param string                    $data       The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\KeyInterface $key, $data);
+    public function encrypt(CipherParametersInterface $parameters, $data);
 
     /**
      * Create a new encrypt stream.
      *
-     * @param Key\KeyInterface $key The key to encrypt with.
+     * @param CipherParametersInterface $parameters The parameters to encrypt with.
      *
      * @return CipherStreamInterface The newly created encrypt stream.
      */
-    public function createEncryptStream(Key\KeyInterface $key);
+    public function createEncryptStream(CipherParametersInterface $parameters);
 }

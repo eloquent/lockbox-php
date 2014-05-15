@@ -11,10 +11,12 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+
 /**
  * The interface implemented by encryption keys.
  */
-interface KeyInterface
+interface KeyInterface extends CipherParametersInterface
 {
     /**
      * Get the encryption secret.

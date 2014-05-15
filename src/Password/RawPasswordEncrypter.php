@@ -11,21 +11,20 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Lockbox\AbstractRawEncrypter;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\EncrypterInterface;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Encrypts data and produces raw output using passwords.
  */
-class RawPasswordEncrypter implements PasswordEncrypterInterface
+class RawPasswordEncrypter extends AbstractRawEncrypter
 {
     /**
      * Get the static instance of this encrypter.
      *
-     * @return PasswordEncrypterInterface The static encrypter.
+     * @return EncrypterInterface The static encrypter.
      */
     public static function instance()
     {
@@ -47,58 +46,8 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
             $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
-    }
-
-    /**
-     * Get the cipher factory.
-     *
-     * @return CipherFactoryInterface The cipher factory.
-     */
-    public function cipherFactory()
-    {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     * @param string  $data       The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($password, $iterations, $data)
-    {
-        $parameters =
-            new PasswordEncryptCipherParameters($password, $iterations);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return $cipher->finalize($data);
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     *
-     * @return CipherStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream($password, $iterations)
-    {
-        $parameters =
-            new PasswordEncryptCipherParameters($password, $iterations);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return new CipherStream($cipher);
+        parent::__construct($cipherFactory);
     }
 
     private static $instance;
-    private $cipherFactory;
 }

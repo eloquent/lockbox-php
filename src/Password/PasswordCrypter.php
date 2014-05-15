@@ -11,15 +11,20 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Lockbox\AbstractCrypter;
+use Eloquent\Lockbox\CrypterInterface;
+use Eloquent\Lockbox\DecrypterInterface;
+use Eloquent\Lockbox\EncrypterInterface;
+
 /**
  * Encrypts and decrypts encoded data using passwords.
  */
-class PasswordCrypter extends AbstractPasswordCrypter
+class PasswordCrypter extends AbstractCrypter
 {
     /**
      * Get the static instance of this crypter.
      *
-     * @return PasswordCrypterInterface The static crypter.
+     * @return CrypterInterface The static crypter.
      */
     public static function instance()
     {
@@ -33,12 +38,12 @@ class PasswordCrypter extends AbstractPasswordCrypter
     /**
      * Construct a new password crypter.
      *
-     * @param PasswordEncrypterInterface|null $encrypter The encrypter to use.
-     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
+     * @param EncrypterInterface|null $encrypter The encrypter to use.
+     * @param DecrypterInterface|null $decrypter The decrypter to use.
      */
     public function __construct(
-        PasswordEncrypterInterface $encrypter = null,
-        PasswordDecrypterInterface $decrypter = null
+        EncrypterInterface $encrypter = null,
+        DecrypterInterface $decrypter = null
     ) {
         if (null === $encrypter) {
             $encrypter = PasswordEncrypter::instance();

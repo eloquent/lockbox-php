@@ -11,22 +11,20 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Lockbox\AbstractRawDecrypter;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\DecrypterInterface;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
-use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResultInterface;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Decrypts raw data using passwords.
  */
-class RawPasswordDecrypter implements PasswordDecrypterInterface
+class RawPasswordDecrypter extends AbstractRawDecrypter
 {
     /**
      * Get the static instance of this decrypter.
      *
-     * @return PasswordDecrypterInterface The static decrypter.
+     * @return DecrypterInterface The static decrypter.
      */
     public static function instance()
     {
@@ -48,61 +46,8 @@ class RawPasswordDecrypter implements PasswordDecrypterInterface
             $cipherFactory = PasswordDecryptCipherFactory::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
-    }
-
-    /**
-     * Get the cipher factory.
-     *
-     * @return CipherFactoryInterface The cipher factory.
-     */
-    public function cipherFactory()
-    {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param string $password The password to decrypt with.
-     * @param string $data     The data to decrypt.
-     *
-     * @return PasswordDecryptionResultInterface The decryption result.
-     */
-    public function decrypt($password, $data)
-    {
-        $parameters = new PasswordDecryptCipherParameters($password);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        $data = $cipher->finalize($data);
-
-        $result = $cipher->result();
-        if ($result->isSuccessful()) {
-            $result->setData($data);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @param string $password The password to decrypt with.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream($password)
-    {
-        $parameters = new PasswordDecryptCipherParameters($password);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return new CipherStream($cipher);
+        parent::__construct($cipherFactory);
     }
 
     private static $instance;
-    private $cipherFactory;
 }

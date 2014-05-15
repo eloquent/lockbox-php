@@ -11,20 +11,14 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
-use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParameters;
-use Eloquent\Lockbox\Key\KeyInterface;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
-use Eloquent\Lockbox\Stream\CompositePostCipherStream;
 
 /**
  * Encrypts data and produces encoded output using keys.
  */
-class Encrypter implements EncrypterInterface
+class Encrypter extends AbstractEncrypter
 {
     /**
      * Get the static instance of this encrypter.
@@ -53,75 +47,9 @@ class Encrypter implements EncrypterInterface
         if (null === $cipherFactory) {
             $cipherFactory = EncryptCipherFactory::instance();
         }
-        if (null === $encoder) {
-            $encoder = Base64Url::instance();
-        }
 
-        $this->cipherFactory = $cipherFactory;
-        $this->encoder = $encoder;
-    }
-
-    /**
-     * Get the cipher factory.
-     *
-     * @return CipherFactoryInterface The cipher factory.
-     */
-    public function cipherFactory()
-    {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Get the encoder.
-     *
-     * @return EncoderInterface The encoder.
-     */
-    public function encoder()
-    {
-        return $this->encoder;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param KeyInterface $key  The key to encrypt with.
-     * @param string       $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt(KeyInterface $key, $data)
-    {
-        $parameters = new EncryptCipherParameters($key);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return $this->encoder()->encode($cipher->finalize($data));
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @param KeyInterface $key The key to encrypt with.
-     *
-     * @return CipherStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream(KeyInterface $key)
-    {
-        $parameters = new EncryptCipherParameters($key);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
-        $encodeStream = $this->encoder()->createEncodeStream();
-
-        $cipherStream->pipe($encodeStream);
-
-        return new CompositePostCipherStream($cipherStream, $encodeStream);
+        parent::__construct($cipherFactory, $encoder);
     }
 
     private static $instance;
-    private $cipherFactory;
-    private $encoder;
 }

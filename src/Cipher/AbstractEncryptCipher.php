@@ -237,7 +237,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
      * @param KeyInterface $key The key to use.
      * @param string|null  $iv  The initialization vector to use, or null to generate one.
      */
-    protected function doInitialize(KeyInterface $key, $iv)
+    protected function doInitialize(KeyInterface $key, $iv = null)
     {
         if (null === $iv) {
             $iv = $this->randomSource()->generate(16);

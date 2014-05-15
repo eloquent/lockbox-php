@@ -14,12 +14,13 @@ namespace Eloquent\Lockbox\Password;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
 /**
  * @covers \Eloquent\Lockbox\Password\PasswordCrypter
- * @covers \Eloquent\Lockbox\Password\AbstractPasswordCrypter
  * @covers \Eloquent\Lockbox\Password\PasswordEncrypter
  * @covers \Eloquent\Lockbox\Password\PasswordDecrypter
  */
@@ -39,6 +40,8 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->type = chr(2);
         $this->password = 'foobar';
         $this->iterations = 10;
+        $this->encryptParameters = new PasswordEncryptCipherParameters($this->password, $this->iterations);
+        $this->decryptParameters = new PasswordDecryptCipherParameters($this->password);
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
@@ -79,8 +82,8 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecrypt($dataSize)
     {
         $data = str_repeat('A', $dataSize);
-        $encrypted = $this->crypter->encrypt($this->password, $this->iterations, $data);
-        $decryptionResult = $this->crypter->decrypt($this->password, $encrypted);
+        $encrypted = $this->crypter->encrypt($this->encryptParameters, $data);
+        $decryptionResult = $this->crypter->decrypt($this->decryptParameters, $encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -92,8 +95,8 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($dataSize)
     {
-        $encryptStream = $this->crypter->createEncryptStream($this->password, $this->iterations);
-        $decryptStream = $this->crypter->createDecryptStream($this->password);
+        $encryptStream = $this->crypter->createEncryptStream($this->encryptParameters);
+        $decryptStream = $this->crypter->createDecryptStream($this->decryptParameters);
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
@@ -114,7 +117,7 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureNotBase64Url()
     {
-        $result = $this->crypter->decrypt($this->password, str_repeat('!', 100));
+        $result = $this->crypter->decrypt($this->decryptParameters, str_repeat('!', 100));
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_ENCODING', $result->type()->key());

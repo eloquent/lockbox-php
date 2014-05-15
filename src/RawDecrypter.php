@@ -13,15 +13,11 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
-use Eloquent\Lockbox\Cipher\Parameters\DecryptCipherParameters;
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Stream\CipherStream;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * Decrypts raw data using keys.
  */
-class RawDecrypter implements DecrypterInterface
+class RawDecrypter extends AbstractRawDecrypter
 {
     /**
      * Get the static instance of this decrypter.
@@ -48,61 +44,8 @@ class RawDecrypter implements DecrypterInterface
             $cipherFactory = DecryptCipherFactory::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
-    }
-
-    /**
-     * Get the cipher factory.
-     *
-     * @return CipherFactoryInterface The cipher factory.
-     */
-    public function cipherFactory()
-    {
-        return $this->cipherFactory;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param Key\KeyInterface $key  The key to decrypt with.
-     * @param string           $data The data to decrypt.
-     *
-     * @return CipherResultInterface The decryption result.
-     */
-    public function decrypt(Key\KeyInterface $key, $data)
-    {
-        $parameters = new DecryptCipherParameters($key);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        $data = $cipher->finalize($data);
-
-        $result = $cipher->result();
-        if ($result->isSuccessful()) {
-            $result->setData($data);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @param Key\KeyInterface $key The key to decrypt with.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream(Key\KeyInterface $key)
-    {
-        $parameters = new DecryptCipherParameters($key);
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return new CipherStream($cipher);
+        parent::__construct($cipherFactory);
     }
 
     private static $instance;
-    private $cipherFactory;
 }

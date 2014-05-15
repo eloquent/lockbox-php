@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Icecave\Isolator\Isolator;
@@ -71,6 +72,7 @@ EOD;
             return 'password';
         };
         $this->iterations = 10;
+        $this->parameters = new PasswordEncryptCipherParameters($this->password, $this->iterations);
 
         $this->encrypter = PasswordEncrypter::instance();
     }
@@ -516,10 +518,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyReadException',
             "Unable to read key."
         );
-        $this->reader->readStringWithPassword(
-            $this->password,
-            $this->encrypter->encrypt($this->password, $this->iterations, '{}')
-        );
+        $this->reader->readStringWithPassword($this->password, $this->encrypter->encrypt($this->parameters, '{}'));
     }
 
     public function testReadStringWithPasswordCallbackFull()
@@ -570,7 +569,7 @@ EOD;
         );
         $this->reader->readStringWithPasswordCallback(
             $this->passwordCallback,
-            $this->encrypter->encrypt($this->password, $this->iterations, '{}')
+            $this->encrypter->encrypt($this->parameters, '{}')
         );
     }
 
@@ -582,7 +581,7 @@ EOD;
         );
         $this->reader->readStringWithPasswordCallback(
             $this->passwordCallback,
-            $this->encrypter->encrypt($this->password, $this->iterations, '{}'),
+            $this->encrypter->encrypt($this->parameters, '{}'),
             '/path/to/file'
         );
     }

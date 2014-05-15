@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
 use PHPUnit_Framework_TestCase;
 
 class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
@@ -19,22 +21,22 @@ class BoundPasswordEncrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+        $this->parameters = new PasswordEncryptCipherParameters('password', 10);
         $this->innerEncrypter = new PasswordEncrypter;
-        $this->encrypter = new BoundPasswordEncrypter('password', 10, $this->innerEncrypter);
+        $this->encrypter = new BoundPasswordEncrypter($this->parameters, $this->innerEncrypter);
 
-        $this->decrypter = new BoundPasswordDecrypter('password');
+        $this->decrypter = new BoundPasswordDecrypter(new PasswordDecryptCipherParameters('password'));
     }
 
     public function testConstructor()
     {
-        $this->assertSame('password', $this->encrypter->password());
-        $this->assertSame(10, $this->encrypter->iterations());
+        $this->assertSame($this->parameters, $this->encrypter->parameters());
         $this->assertSame($this->innerEncrypter, $this->encrypter->encrypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->encrypter = new BoundPasswordEncrypter('password', 10);
+        $this->encrypter = new BoundPasswordEncrypter($this->parameters);
 
         $this->assertSame(PasswordEncrypter::instance(), $this->encrypter->encrypter());
     }

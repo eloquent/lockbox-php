@@ -11,96 +11,29 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Stream\CipherStreamInterface;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 
 /**
- * Binds a key to a crypter.
+ * Binds a set of parameters to a crypter.
  */
-class BoundCrypter implements BoundCrypterInterface
+class BoundCrypter extends AbstractBoundCrypter
 {
     /**
      * Construct a new bound crypter.
      *
-     * @param Key\KeyInterface      $key     The key to use.
-     * @param CrypterInterface|null $crypter The crypter to use.
+     * @param CipherParametersInterface $encryptParameters The parameters to use when encrypting.
+     * @param CipherParametersInterface $decryptParameters The parameters to use when decrypting.
+     * @param CrypterInterface|null     $crypter           The crypter to use.
      */
     public function __construct(
-        Key\KeyInterface $key,
+        CipherParametersInterface $encryptParameters,
+        CipherParametersInterface $decryptParameters,
         CrypterInterface $crypter = null
     ) {
         if (null === $crypter) {
             $crypter = Crypter::instance();
         }
 
-        $this->key = $key;
-        $this->crypter = $crypter;
+        parent::__construct($encryptParameters, $decryptParameters, $crypter);
     }
-
-    /**
-     * Get the key.
-     *
-     * @return Key\KeyInterface The key.
-     */
-    public function key()
-    {
-        return $this->key;
-    }
-
-    /**
-     * Get the crypter.
-     *
-     * @return CrypterInterface The crypter.
-     */
-    public function crypter()
-    {
-        return $this->crypter;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($data)
-    {
-        return $this->crypter()->encrypt($this->key(), $data);
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param string $data The data to decrypt.
-     *
-     * @return CipherResultInterface The decryption result.
-     */
-    public function decrypt($data)
-    {
-        return $this->crypter()->decrypt($this->key(), $data);
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @return CipherStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream()
-    {
-        return $this->crypter()->createEncryptStream($this->key());
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @return CipherStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream()
-    {
-        return $this->crypter()->createDecryptStream($this->key());
-    }
-
-    private $key;
-    private $crypter;
 }

@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
@@ -56,51 +57,51 @@ abstract class AbstractCrypter implements CrypterInterface
     /**
      * Encrypt a data packet.
      *
-     * @param Key\KeyInterface $key  The key to encrypt with.
-     * @param string           $data The data to encrypt.
+     * @param CipherParametersInterface $parameters The parameters to encrypt with.
+     * @param string                    $data       The data to encrypt.
      *
      * @return string The encrypted data.
      */
-    public function encrypt(Key\KeyInterface $key, $data)
+    public function encrypt(CipherParametersInterface $parameters, $data)
     {
-        return $this->encrypter()->encrypt($key, $data);
+        return $this->encrypter()->encrypt($parameters, $data);
     }
 
     /**
      * Decrypt a data packet.
      *
-     * @param Key\KeyInterface $key  The key to decrypt with.
-     * @param string           $data The data to decrypt.
+     * @param CipherParametersInterface $parameters The parameters to decrypt with.
+     * @param string                    $data       The data to decrypt.
      *
      * @return CipherResultInterface The decryption result.
      */
-    public function decrypt(Key\KeyInterface $key, $data)
+    public function decrypt(CipherParametersInterface $parameters, $data)
     {
-        return $this->decrypter()->decrypt($key, $data);
+        return $this->decrypter()->decrypt($parameters, $data);
     }
 
     /**
      * Create a new encrypt stream.
      *
-     * @param Key\KeyInterface $key The key to encrypt with.
+     * @param CipherParametersInterface $parameters The parameters to encrypt with.
      *
      * @return CipherStreamInterface The newly created encrypt stream.
      */
-    public function createEncryptStream(Key\KeyInterface $key)
+    public function createEncryptStream(CipherParametersInterface $parameters)
     {
-        return $this->encrypter()->createEncryptStream($key);
+        return $this->encrypter()->createEncryptStream($parameters);
     }
 
     /**
      * Create a new decrypt stream.
      *
-     * @param Key\KeyInterface $key The key to decrypt with.
+     * @param CipherParametersInterface $parameters The parameters to decrypt with.
      *
      * @return CipherStreamInterface The newly created decrypt stream.
      */
-    public function createDecryptStream(Key\KeyInterface $key)
+    public function createDecryptStream(CipherParametersInterface $parameters)
     {
-        return $this->decrypter()->createDecryptStream($key);
+        return $this->decrypter()->createDecryptStream($parameters);
     }
 
     private $encrypter;

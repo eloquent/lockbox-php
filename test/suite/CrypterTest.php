@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParameters;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -32,6 +33,7 @@ class CrypterTest extends PHPUnit_Framework_TestCase
         $this->crypter = new Crypter($this->encrypter, $this->decrypter);
 
         $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
+        $this->parameters = new EncryptCipherParameters($this->key);
         $this->base64Url = Base64Url::instance();
     }
 
@@ -81,7 +83,8 @@ class CrypterTest extends PHPUnit_Framework_TestCase
     {
         $data = str_repeat('A', $dataSize);
         $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encrypted = $this->crypter->encrypt($this->key, $data);
+        $this->parameters = new EncryptCipherParameters($this->key);
+        $encrypted = $this->crypter->encrypt($this->parameters, $data);
         $decryptionResult = $this->crypter->decrypt($this->key, $encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
