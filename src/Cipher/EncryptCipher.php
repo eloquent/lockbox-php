@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Cipher;
 
 use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
-use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParametersInterface;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptParametersInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
@@ -30,7 +30,7 @@ class EncryptCipher extends AbstractEncryptCipher
      */
     public function initialize(CipherParametersInterface $parameters)
     {
-        if ($parameters instanceof EncryptCipherParametersInterface) {
+        if ($parameters instanceof EncryptParametersInterface) {
             $this->doInitialize($parameters->key(), $parameters->iv());
         } elseif ($parameters instanceof KeyInterface) {
             $this->doInitialize($parameters);

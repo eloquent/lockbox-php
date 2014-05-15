@@ -17,7 +17,7 @@ use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParametersInterface;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParametersInterface;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
 /**
@@ -65,7 +65,7 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
      */
     public function initialize(CipherParametersInterface $parameters)
     {
-        if (!$parameters instanceof PasswordEncryptCipherParametersInterface) {
+        if (!$parameters instanceof PasswordEncryptParametersInterface) {
             throw new UnsupportedCipherParametersException($parameters);
         }
 

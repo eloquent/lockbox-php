@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Cipher;
 
 use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Lockbox\Cipher\Parameters\EncryptCipherParameters;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptParameters;
 use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
@@ -32,7 +32,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
 
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->iv = '1234567890123456';
-        $this->parameters = new EncryptCipherParameters($this->key, $this->iv);
+        $this->parameters = new EncryptParameters($this->key, $this->iv);
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);

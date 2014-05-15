@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Cipher\Exception;
 
+use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Exception;
 
@@ -22,23 +23,37 @@ final class UnsupportedCipherParametersException extends Exception
     /**
      * Construct a new unsupported cipher parameters exception.
      *
+     * @param CipherInterface           $cipher     The cipher.
      * @param CipherParametersInterface $parameters The unsupported parameters.
      * @param Exception|null            $previous   The cause, if available.
      */
     public function __construct(
+        CipherInterface $cipher,
         CipherParametersInterface $parameters,
         Exception $previous = null
     ) {
+        $this->cipher = $cipher;
         $this->parameters = $parameters;
 
         parent::__construct(
             sprintf(
-                'Unsupported cipher parameters of type %s.',
+                'Cipher of type %s does not support parameters of type %s.',
+                var_export(get_class($cipher), true),
                 var_export(get_class($parameters), true)
             ),
             0,
             $previous
         );
+    }
+
+    /**
+     * Get the cipher.
+     *
+     * @return CipherInterface The cipher.
+     */
+    public function cipher()
+    {
+        return $this->cipher;
     }
 
     /**
@@ -51,5 +66,6 @@ final class UnsupportedCipherParametersException extends Exception
         return $this->parameters;
     }
 
+    private $cipher;
     private $parameters;
 }

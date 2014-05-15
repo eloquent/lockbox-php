@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox\Key;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
 use Eloquent\Lockbox\EncrypterInterface;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Icecave\Isolator\Isolator;
 
@@ -219,7 +219,7 @@ class KeyWriter implements EncryptedKeyWriterInterface
         return
             chunk_split(
                 $this->encrypter()->encrypt(
-                    new PasswordEncryptCipherParameters($password, $iterations),
+                    new PasswordEncryptParameters($password, $iterations),
                     $this->writeString($key)
                 ),
                 64,

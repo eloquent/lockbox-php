@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Icecave\Isolator\Isolator;
@@ -72,7 +72,7 @@ EOD;
             return 'password';
         };
         $this->iterations = 10;
-        $this->parameters = new PasswordEncryptCipherParameters($this->password, $this->iterations);
+        $this->parameters = new PasswordEncryptParameters($this->password, $this->iterations);
 
         $this->encrypter = PasswordEncrypter::instance();
     }

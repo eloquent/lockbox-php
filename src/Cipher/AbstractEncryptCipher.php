@@ -95,10 +95,10 @@ abstract class AbstractEncryptCipher implements CipherInterface
     public function process($input)
     {
         if (!$this->isInitialized) {
-            throw new CipherNotInitializedException;
+            throw new CipherNotInitializedException($this);
         }
         if ($this->isFinalized) {
-            throw new CipherFinalizedException;
+            throw new CipherFinalizedException($this);
         }
 
         if ($this->isHeaderSent) {
@@ -140,10 +140,10 @@ abstract class AbstractEncryptCipher implements CipherInterface
     public function finalize($input = null)
     {
         if (!$this->isInitialized) {
-            throw new CipherNotInitializedException;
+            throw new CipherNotInitializedException($this);
         }
         if ($this->isFinalized) {
-            throw new CipherFinalizedException;
+            throw new CipherFinalizedException($this);
         }
 
         $this->isFinalized = true;

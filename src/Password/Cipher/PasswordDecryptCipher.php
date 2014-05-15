@@ -24,7 +24,7 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParametersInterface;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParametersInterface;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
 
 /**
@@ -85,7 +85,7 @@ class PasswordDecryptCipher implements CipherInterface
      */
     public function initialize(CipherParametersInterface $parameters)
     {
-        if (!$parameters instanceof PasswordDecryptCipherParametersInterface) {
+        if (!$parameters instanceof PasswordDecryptParametersInterface) {
             throw new UnsupportedCipherParametersException($parameters);
         }
 
@@ -125,10 +125,10 @@ class PasswordDecryptCipher implements CipherInterface
     public function process($input)
     {
         if (!$this->isInitialized) {
-            throw new CipherNotInitializedException;
+            throw new CipherNotInitializedException($this);
         }
         if ($this->isFinalized) {
-            throw new CipherFinalizedException;
+            throw new CipherFinalizedException($this);
         }
 
         $this->buffer .= $input;
@@ -164,10 +164,10 @@ class PasswordDecryptCipher implements CipherInterface
     public function finalize($input = null)
     {
         if (!$this->isInitialized) {
-            throw new CipherNotInitializedException;
+            throw new CipherNotInitializedException($this);
         }
         if ($this->isFinalized) {
-            throw new CipherFinalizedException;
+            throw new CipherFinalizedException($this);
         }
 
         if (null !== $input) {

@@ -14,10 +14,9 @@ namespace Eloquent\Lockbox\Password\Cipher\Parameters;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 
 /**
- * The interface implemented by password decrypt cipher parameters.
+ * The interface implemented by password decrypt parameters.
  */
-interface PasswordDecryptCipherParametersInterface extends
-    CipherParametersInterface
+interface PasswordDecryptParametersInterface extends CipherParametersInterface
 {
     /**
      * Get the password.

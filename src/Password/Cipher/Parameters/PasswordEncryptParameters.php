@@ -14,11 +14,10 @@ namespace Eloquent\Lockbox\Password\Cipher\Parameters;
 /**
  * Cipher parameters for encrypting data with a password.
  */
-class PasswordEncryptCipherParameters implements
-    PasswordEncryptCipherParametersInterface
+class PasswordEncryptParameters implements PasswordEncryptParametersInterface
 {
     /**
-     * Construct a new encrypt cipher parameters instance.
+     * Construct a new encrypt parameters instance.
      *
      * @param string      $password   The password to use.
      * @param integer     $iterations The number of hash iterations to use.

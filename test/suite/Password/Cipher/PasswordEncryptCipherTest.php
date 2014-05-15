@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox\Password\Cipher;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Exception;
 use PHPUnit_Framework_TestCase;
@@ -35,7 +35,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->iterations = 10;
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
-        $this->parameters = new PasswordEncryptCipherParameters(
+        $this->parameters = new PasswordEncryptParameters(
             $this->password,
             $this->iterations,
             $this->salt,

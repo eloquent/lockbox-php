@@ -16,10 +16,10 @@ use Eloquent\Lockbox\Key\KeyInterface;
 /**
  * Cipher parameters for encrypting data with a key.
  */
-class EncryptCipherParameters implements EncryptCipherParametersInterface
+class EncryptParameters implements EncryptParametersInterface
 {
     /**
-     * Construct a new encrypt cipher parameters instance.
+     * Construct a new encrypt parameters instance.
      *
      * @param KeyInterface $key The key to use.
      * @param string|null  $iv  The initialization vector to use, or null to generate one.

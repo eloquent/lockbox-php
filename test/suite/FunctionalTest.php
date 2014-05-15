@@ -19,8 +19,8 @@ use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
 use Eloquent\Lockbox\Key\KeyWriter;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParameters;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
@@ -308,7 +308,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $actual = $this->passwordEncrypter->encrypt(new PasswordEncryptCipherParameters($password, $iterations), $data);
+        $actual = $this->passwordEncrypter->encrypt(new PasswordEncryptParameters($password, $iterations), $data);
 
         $this->assertSame($encrypted, $actual);
     }
@@ -321,7 +321,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $stream = $this->passwordEncrypter->createEncryptStream(new PasswordEncryptCipherParameters($password, $iterations));
+        $stream = $this->passwordEncrypter->createEncryptStream(new PasswordEncryptParameters($password, $iterations));
         $actual = '';
         $stream->on(
             'data',
@@ -349,7 +349,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptCipherParameters($password), $encrypted);
+        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptParameters($password), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame($data, $result->data());
@@ -362,7 +362,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsDecryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        $stream = $this->passwordDecrypter->createDecryptStream(new PasswordDecryptCipherParameters($password));
+        $stream = $this->passwordDecrypter->createDecryptStream(new PasswordDecryptParameters($password));
         $actual = '';
         $stream->on(
             'data',
@@ -398,8 +398,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
-        $encrypted = $this->passwordEncrypter->encrypt(new PasswordEncryptCipherParameters('password', 10), 'foobar');
-        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptCipherParameters('password'), $encrypted);
+        $encrypted = $this->passwordEncrypter->encrypt(new PasswordEncryptParameters('password', 10), 'foobar');
+        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptParameters('password'), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame('foobar', $result->data());

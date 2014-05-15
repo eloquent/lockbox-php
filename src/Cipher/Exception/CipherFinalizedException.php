@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Cipher\Exception;
 
+use Eloquent\Lockbox\Cipher\CipherInterface;
 use Exception;
 
 /**
@@ -22,10 +23,27 @@ final class CipherFinalizedException extends Exception implements
     /**
      * Construct a new cipher finalized exception.
      *
-     * @param Exception|null $previous The cause, if available.
+     * @param CipherInterface $cipher   The cipher.
+     * @param Exception|null  $previous The cause, if available.
      */
-    public function __construct(Exception $previous = null)
-    {
+    public function __construct(
+        CipherInterface $cipher,
+        Exception $previous = null
+    ) {
+        $this->cipher = $cipher;
+
         parent::__construct('The cipher is already finalized.', 0, $previous);
     }
+
+    /**
+     * Get the cipher.
+     *
+     * @return CipherInterface The cipher.
+     */
+    public function cipher()
+    {
+        return $this->cipher;
+    }
+
+    private $cipher;
 }

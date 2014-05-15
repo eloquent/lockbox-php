@@ -14,9 +14,9 @@ namespace Eloquent\Lockbox\Cipher\Parameters;
 use Eloquent\Lockbox\Key\KeyInterface;
 
 /**
- * The interface implemented by encrypt cipher parameters.
+ * The interface implemented by encrypt parameters.
  */
-interface EncryptCipherParametersInterface extends CipherParametersInterface
+interface EncryptParametersInterface extends CipherParametersInterface
 {
     /**
      * Get the key.
