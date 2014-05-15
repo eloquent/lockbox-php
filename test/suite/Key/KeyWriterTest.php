@@ -15,6 +15,7 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
+use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Icecave\Isolator\Isolator;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -28,7 +29,7 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
         $this->cipherFactory = new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource);
-        $this->encrypter = new PasswordEncrypter($this->cipherFactory);
+        $this->encrypter = new PasswordEncrypter(new RawPasswordEncrypter($this->cipherFactory));
         $this->encoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());
         $this->writer = new KeyWriter($this->encrypter, $this->encoder, $this->isolator);

@@ -13,7 +13,6 @@ namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
-use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
@@ -27,29 +26,29 @@ abstract class AbstractEncrypter implements EncrypterInterface
     /**
      * Construct a new encrypter.
      *
-     * @param CipherFactoryInterface $cipherFactory The cipher factory to use.
-     * @param EncoderInterface|null  $encoder       The encoder to use.
+     * @param EncrypterInterface    $rawEncrypter The raw encrypter to use.
+     * @param EncoderInterface|null $encoder      The encoder to use.
      */
     public function __construct(
-        CipherFactoryInterface $cipherFactory,
+        EncrypterInterface $rawEncrypter,
         EncoderInterface $encoder = null
     ) {
         if (null === $encoder) {
             $encoder = Base64Url::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->rawEncrypter = $rawEncrypter;
         $this->encoder = $encoder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the raw encrypter.
      *
-     * @return CipherFactoryInterface The cipher factory.
+     * @return EncrypterInterface The raw encrypter.
      */
-    public function cipherFactory()
+    public function rawEncrypter()
     {
-        return $this->cipherFactory;
+        return $this->rawEncrypter;
     }
 
     /**
@@ -72,10 +71,8 @@ abstract class AbstractEncrypter implements EncrypterInterface
      */
     public function encrypt(CipherParametersInterface $parameters, $data)
     {
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        return $this->encoder()->encode($cipher->finalize($data));
+        return $this->encoder()
+            ->encode($this->rawEncrypter()->encrypt($parameters, $data));
     }
 
     /**
@@ -87,17 +84,14 @@ abstract class AbstractEncrypter implements EncrypterInterface
      */
     public function createEncryptStream(CipherParametersInterface $parameters)
     {
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
         $encodeStream = $this->encoder()->createEncodeStream();
 
+        $cipherStream = $this->rawEncrypter()->createEncryptStream($parameters);
         $cipherStream->pipe($encodeStream);
 
         return new CompositePostCipherStream($cipherStream, $encodeStream);
     }
 
-    private $cipherFactory;
+    private $rawEncrypter;
     private $encoder;
 }

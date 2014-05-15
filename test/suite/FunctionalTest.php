@@ -23,6 +23,8 @@ use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptCipherParameters;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptCipherParameters;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
+use Eloquent\Lockbox\Password\RawPasswordEncrypter;
+use Eloquent\Lockbox\RawEncrypter;
 
 class FunctionalTest extends PHPUnit_Framework_TestCase
 {
@@ -32,11 +34,13 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
 
-        $this->encrypter = new Encrypter(new EncryptCipherFactory($this->randomSource));
+        $this->encrypter = new Encrypter(new RawEncrypter(new EncryptCipherFactory($this->randomSource)));
         $this->decrypter = new Decrypter;
 
         $this->passwordEncrypter = new PasswordEncrypter(
-            new PasswordEncryptCipherFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            new RawPasswordEncrypter(
+                new PasswordEncryptCipherFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+            )
         );
         $this->passwordDecrypter = new PasswordDecrypter;
 

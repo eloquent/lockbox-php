@@ -12,8 +12,6 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\EncoderInterface;
-use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 
 /**
  * Encrypts data and produces encoded output using keys.
@@ -37,18 +35,18 @@ class Encrypter extends AbstractEncrypter
     /**
      * Construct a new encrypter.
      *
-     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
-     * @param EncoderInterface|null       $encoder       The encoder to use.
+     * @param EncrypterInterface|null $rawEncrypter The raw encrypter to use.
+     * @param EncoderInterface|null   $encoder      The encoder to use.
      */
     public function __construct(
-        CipherFactoryInterface $cipherFactory = null,
+        EncrypterInterface $rawEncrypter = null,
         EncoderInterface $encoder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = EncryptCipherFactory::instance();
+        if (null === $rawEncrypter) {
+            $rawEncrypter = RawEncrypter::instance();
         }
 
-        parent::__construct($cipherFactory, $encoder);
+        parent::__construct($rawEncrypter, $encoder);
     }
 
     private static $instance;

@@ -13,9 +13,7 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Endec\EncoderInterface;
 use Eloquent\Lockbox\AbstractEncrypter;
-use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\EncrypterInterface;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 
 /**
  * Encrypts data and produces encoded output using passwords.
@@ -39,18 +37,18 @@ class PasswordEncrypter extends AbstractEncrypter
     /**
      * Construct a new password encrypter.
      *
-     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
-     * @param EncoderInterface|null       $encoder       The encoder to use.
+     * @param EncrypterInterface|null $rawEncrypter The raw encrypter to use.
+     * @param EncoderInterface|null   $encoder      The encoder to use.
      */
     public function __construct(
-        CipherFactoryInterface $cipherFactory = null,
+        EncrypterInterface $rawEncrypter = null,
         EncoderInterface $encoder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = PasswordEncryptCipherFactory::instance();
+        if (null === $rawEncrypter) {
+            $rawEncrypter = RawPasswordEncrypter::instance();
         }
 
-        parent::__construct($cipherFactory, $encoder);
+        parent::__construct($rawEncrypter, $encoder);
     }
 
     private static $instance;

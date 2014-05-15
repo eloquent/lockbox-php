@@ -13,7 +13,6 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
 use PHPUnit_Framework_TestCase;
 
 class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
@@ -22,14 +21,14 @@ class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->cipherFactory = new PasswordDecryptCipherFactory;
+        $this->rawDecrypter = new RawPasswordDecrypter;
         $this->decoder = new Base64Url;
-        $this->encrypter = new PasswordDecrypter($this->cipherFactory, $this->decoder);
+        $this->encrypter = new PasswordDecrypter($this->rawDecrypter, $this->decoder);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->cipherFactory, $this->encrypter->cipherFactory());
+        $this->assertSame($this->rawDecrypter, $this->encrypter->rawDecrypter());
         $this->assertSame($this->decoder, $this->encrypter->decoder());
     }
 
@@ -37,7 +36,7 @@ class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         $this->encrypter = new PasswordDecrypter;
 
-        $this->assertSame(PasswordDecryptCipherFactory::instance(), $this->encrypter->cipherFactory());
+        $this->assertSame(RawPasswordDecrypter::instance(), $this->encrypter->rawDecrypter());
         $this->assertSame(Base64Url::instance(), $this->encrypter->decoder());
     }
 

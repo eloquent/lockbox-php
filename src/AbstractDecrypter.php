@@ -14,7 +14,6 @@ namespace Eloquent\Lockbox;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
-use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
@@ -30,29 +29,29 @@ abstract class AbstractDecrypter implements DecrypterInterface
     /**
      * Construct a new decrypter.
      *
-     * @param CipherFactoryInterface $cipherFactory The cipher factory to use.
-     * @param DecoderInterface|null  $decoder       The decoder to use.
+     * @param DecrypterInterface    $rawDecrypter The raw decrypter to use.
+     * @param DecoderInterface|null $decoder      The decoder to use.
      */
     public function __construct(
-        CipherFactoryInterface $cipherFactory,
+        DecrypterInterface $rawDecrypter,
         DecoderInterface $decoder = null
     ) {
         if (null === $decoder) {
             $decoder = Base64Url::instance();
         }
 
-        $this->cipherFactory = $cipherFactory;
+        $this->rawDecrypter = $rawDecrypter;
         $this->decoder = $decoder;
     }
 
     /**
-     * Get the cipher factory.
+     * Get the raw encrypter.
      *
-     * @return CipherFactoryInterface The cipher factory.
+     * @return DecrypterInterface The raw encrypter.
      */
-    public function cipherFactory()
+    public function rawDecrypter()
     {
-        return $this->cipherFactory;
+        return $this->rawDecrypter;
     }
 
     /**
@@ -81,17 +80,7 @@ abstract class AbstractDecrypter implements DecrypterInterface
             return $this->createResult(CipherResultType::INVALID_ENCODING());
         }
 
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-
-        $data = $cipher->finalize($data);
-
-        $result = $cipher->result();
-        if ($result->isSuccessful()) {
-            $result->setData($data);
-        }
-
-        return $result;
+        return $this->rawDecrypter()->decrypt($parameters, $data);
     }
 
     /**
@@ -103,12 +92,9 @@ abstract class AbstractDecrypter implements DecrypterInterface
      */
     public function createDecryptStream(CipherParametersInterface $parameters)
     {
+        $cipherStream = $this->rawDecrypter()->createDecryptStream($parameters);
+
         $decodeStream = $this->decoder()->createDecodeStream();
-
-        $cipher = $this->cipherFactory()->createCipher();
-        $cipher->initialize($parameters);
-        $cipherStream = new CipherStream($cipher);
-
         $decodeStream->pipe($cipherStream);
 
         return new CompositePreCipherStream($cipherStream, $decodeStream);
@@ -123,6 +109,6 @@ abstract class AbstractDecrypter implements DecrypterInterface
      */
     abstract protected function createResult(CipherResultType $type);
 
-    private $cipherFactory;
+    private $rawDecrypter;
     private $decoder;
 }

@@ -12,8 +12,6 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
-use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
@@ -40,18 +38,18 @@ class Decrypter extends AbstractDecrypter
     /**
      * Construct a new decrypter.
      *
-     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
-     * @param DecoderInterface|null       $decoder       The decoder to use.
+     * @param DecrypterInterface|null $rawDecrypter The raw decrypter to use.
+     * @param DecoderInterface|null   $decoder      The decoder to use.
      */
     public function __construct(
-        CipherFactoryInterface $cipherFactory = null,
+        DecrypterInterface $rawDecrypter = null,
         DecoderInterface $decoder = null
     ) {
-        if (null === $cipherFactory) {
-            $cipherFactory = DecryptCipherFactory::instance();
+        if (null === $rawDecrypter) {
+            $rawDecrypter = RawDecrypter::instance();
         }
 
-        parent::__construct($cipherFactory, $decoder);
+        parent::__construct($rawDecrypter, $decoder);
     }
 
     /**
