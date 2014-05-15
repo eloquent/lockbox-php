@@ -24,8 +24,8 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParametersInterface;
 use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Password\PasswordInterface;
 
 /**
  * Decrypts data with a password.
@@ -85,12 +85,12 @@ class PasswordDecryptCipher implements CipherInterface
      */
     public function initialize(CipherParametersInterface $parameters)
     {
-        if (!$parameters instanceof PasswordDecryptParametersInterface) {
+        if (!$parameters instanceof PasswordInterface) {
             throw new UnsupportedCipherParametersException($parameters);
         }
 
         $this->isInitialized = true;
-        $this->password = $parameters->password();
+        $this->password = $parameters->string();
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,

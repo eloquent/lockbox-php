@@ -14,7 +14,6 @@ namespace Eloquent\Lockbox\Password;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParameters;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -43,7 +42,7 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->type = chr(2);
         $this->iterations = 10;
         $this->encryptParameters = new PasswordEncryptParameters($this->password, $this->iterations);
-        $this->decryptParameters = new PasswordDecryptParameters($this->password);
+        $this->decryptParameters = new Password($this->password);
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';

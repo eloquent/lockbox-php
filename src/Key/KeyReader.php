@@ -16,7 +16,7 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\DecrypterInterface;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParameters;
+use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Icecave\Isolator\Isolator;
 
@@ -314,7 +314,7 @@ class KeyReader implements EncryptedKeyReaderInterface
     public function readStringWithPassword($password, $data, $path = null)
     {
         $result = $this->decrypter()->decrypt(
-            new PasswordDecryptParameters($password),
+            new Password($password),
             trim($data)
         );
         if (!$result->isSuccessful()) {

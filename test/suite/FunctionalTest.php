@@ -19,8 +19,8 @@ use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
 use Eloquent\Lockbox\Key\KeyWriter;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
-use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordDecryptParameters;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
+use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
@@ -349,7 +349,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsDecryption($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptParameters($password), $encrypted);
+        $result = $this->passwordDecrypter->decrypt(new Password($password), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame($data, $result->data());
@@ -362,7 +362,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testPasswordSpecVectorsDecryptionStreaming($data, $password, $iterations, $salt, $iv, $encrypted)
     {
-        $stream = $this->passwordDecrypter->createDecryptStream(new PasswordDecryptParameters($password));
+        $stream = $this->passwordDecrypter->createDecryptStream(new Password($password));
         $actual = '';
         $stream->on(
             'data',
@@ -399,7 +399,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
         $encrypted = $this->passwordEncrypter->encrypt(new PasswordEncryptParameters('password', 10), 'foobar');
-        $result = $this->passwordDecrypter->decrypt(new PasswordDecryptParameters('password'), $encrypted);
+        $result = $this->passwordDecrypter->decrypt(new Password('password'), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame('foobar', $result->data());
