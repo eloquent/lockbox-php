@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Password\PasswordInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
@@ -77,25 +78,22 @@ class KeyDeriver implements KeyDeriverInterface
     /**
      * Derive a key from a password.
      *
-     * @param string      $password    The password.
-     * @param integer     $iterations  The number of hash iterations to use.
-     * @param string|null $salt        The salt to use, or null to generate a random salt.
-     * @param string|null $name        The name.
-     * @param string|null $description The description.
+     * @param PasswordInterface $password    The password.
+     * @param integer           $iterations  The number of hash iterations to use.
+     * @param string|null       $salt        The salt to use, or null to generate a random salt.
+     * @param string|null       $name        The name.
+     * @param string|null       $description The description.
      *
      * @return tuple<KeyInterface,string>             A 2-tuple of the derived key, and the salt used.
      * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
      */
     public function deriveKeyFromPassword(
-        $password,
+        PasswordInterface $password,
         $iterations,
         $salt = null,
         $name = null,
         $description = null
     ) {
-        if (!is_string($password)) {
-            throw new Exception\InvalidPasswordException($password);
-        }
         if (!is_int($iterations) || $iterations < 1) {
             throw new Exception\InvalidIterationsException($iterations);
         }
@@ -114,7 +112,14 @@ class KeyDeriver implements KeyDeriverInterface
         }
 
         list($encryptionSecret, $authenticationSecret) = str_split(
-            hash_pbkdf2('sha512', $password, $salt, $iterations, 64, true),
+            hash_pbkdf2(
+                'sha512',
+                $password->string(),
+                $salt,
+                $iterations,
+                64,
+                true
+            ),
             32
         );
 

@@ -39,10 +39,10 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
 
         $this->version = chr(1);
         $this->type = chr(2);
-        $this->password = 'foobar';
+        $this->password = new Password('foobar');
         $this->iterations = 10;
         $this->encryptParameters = new PasswordEncryptParameters($this->password, $this->iterations);
-        $this->decryptParameters = new Password($this->password);
+        $this->decryptParameters = $this->password;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';

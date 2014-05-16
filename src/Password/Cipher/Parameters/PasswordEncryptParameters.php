@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Password\Cipher\Parameters;
 
+use Eloquent\Lockbox\Password\Password;
+use Eloquent\Lockbox\Password\PasswordInterface;
+
 /**
  * Cipher parameters for encrypting data with a password.
  */
@@ -19,10 +22,10 @@ class PasswordEncryptParameters implements PasswordEncryptParametersInterface
     /**
      * Construct a new encrypt parameters instance.
      *
-     * @param string      $password   The password to use.
-     * @param integer     $iterations The number of hash iterations to use.
-     * @param string|null $salt       The salt to use for key derivation, or null to generate one.
-     * @param string|null $iv         The initialization vector to use, or null to generate one.
+     * @param PasswordInterface|string $password   The password to use.
+     * @param integer                  $iterations The number of hash iterations to use.
+     * @param string|null              $salt       The salt to use for key derivation, or null to generate one.
+     * @param string|null              $iv         The initialization vector to use, or null to generate one.
      */
     public function __construct(
         $password,
@@ -30,7 +33,7 @@ class PasswordEncryptParameters implements PasswordEncryptParametersInterface
         $salt = null,
         $iv = null
     ) {
-        $this->password = $password;
+        $this->password = Password::adapt($password);
         $this->iterations = $iterations;
         $this->salt = $salt;
         $this->iv = $iv;
@@ -39,7 +42,7 @@ class PasswordEncryptParameters implements PasswordEncryptParametersInterface
     /**
      * Get the password.
      *
-     * @return string The password.
+     * @return PasswordInterface The password.
      */
     public function password()
     {

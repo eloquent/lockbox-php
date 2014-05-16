@@ -18,6 +18,7 @@ use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\DecrypterInterface;
 use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
+use Eloquent\Lockbox\Password\PasswordInterface;
 use Icecave\Isolator\Isolator;
 
 /**
@@ -120,13 +121,13 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Read a key from the supplied path, and decrypt with a password.
      *
-     * @param string $password The password.
-     * @param string $path     The path to read from.
+     * @param PasswordInterface $password The password.
+     * @param string            $path     The path to read from.
      *
      * @return KeyInterface               The key.
      * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readFileWithPassword($password, $path)
+    public function readFileWithPassword(PasswordInterface $password, $path)
     {
         if (!$data = @$this->isolator()->file_get_contents($path)) {
             throw new Exception\KeyReadException($path);
@@ -177,15 +178,18 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Read a key from the supplied stream, and decrypt with a password.
      *
-     * @param string      $password The password.
-     * @param stream      $stream   The stream to read from.
-     * @param string|null $path     The path, if known.
+     * @param PasswordInterface $password The password.
+     * @param stream            $stream   The stream to read from.
+     * @param string|null       $path     The path, if known.
      *
      * @return KeyInterface               The key.
      * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readStreamWithPassword($password, $stream, $path = null)
-    {
+    public function readStreamWithPassword(
+        PasswordInterface $password,
+        $stream,
+        $path = null
+    ) {
         if (!$data = @stream_get_contents($stream)) {
             throw new Exception\KeyReadException($path);
         }
@@ -304,19 +308,19 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Read a key from the supplied string, and decrypt with a password.
      *
-     * @param string      $password The password.
-     * @param string      $data     The string to read from.
-     * @param string|null $path     The path, if known.
+     * @param PasswordInterface $password The password.
+     * @param string            $data     The string to read from.
+     * @param string|null       $path     The path, if known.
      *
      * @return KeyInterface               The key.
      * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readStringWithPassword($password, $data, $path = null)
-    {
-        $result = $this->decrypter()->decrypt(
-            new Password($password),
-            trim($data)
-        );
+    public function readStringWithPassword(
+        PasswordInterface $password,
+        $data,
+        $path = null
+    ) {
+        $result = $this->decrypter()->decrypt($password, trim($data));
         if (!$result->isSuccessful()) {
             throw new Exception\KeyReadException($path);
         }

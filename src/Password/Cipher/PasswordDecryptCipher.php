@@ -90,7 +90,7 @@ class PasswordDecryptCipher implements CipherInterface
         }
 
         $this->isInitialized = true;
-        $this->password = $parameters->string();
+        $this->password = $parameters;
 
         $this->mcryptModule = mcrypt_module_open(
             MCRYPT_RIJNDAEL_128,

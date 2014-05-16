@@ -14,6 +14,8 @@ namespace Eloquent\Lockbox\Key;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
+use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
 use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Icecave\Isolator\Isolator;
@@ -86,8 +88,9 @@ GV6gLGQkG2udOCa3ncYIw7rRK8xfWZPX-EVN4g
 
 EOD;
 
-        $this->password = 'password';
+        $this->password = new Password('password');
         $this->iterations = 10;
+        $this->parameters = new PasswordEncryptParameters($this->password, $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
 
@@ -148,9 +151,7 @@ EOD;
         Phake::when($this->isolator)->file_put_contents('/path/to/file', $this->keyFullStringEncrypted)
             ->thenReturn(111);
 
-        $this->assertNull(
-            $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyFull, '/path/to/file')
-        );
+        $this->assertNull($this->writer->writeFileWithPassword($this->keyFull, $this->parameters, '/path/to/file'));
     }
 
     public function testWriteFileWithPasswordMinimal()
@@ -158,9 +159,7 @@ EOD;
         Phake::when($this->isolator)->file_put_contents('/path/to/file', $this->keyMinimalStringEncrypted)
             ->thenReturn(111);
 
-        $this->assertNull(
-            $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyMinimal, '/path/to/file')
-        );
+        $this->assertNull($this->writer->writeFileWithPassword($this->keyMinimal, $this->parameters, '/path/to/file'));
     }
 
     public function testWriteFileWithPasswordFailure()
@@ -172,7 +171,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to '/path/to/file'."
         );
-        $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyMinimal, '/path/to/file');
+        $this->writer->writeFileWithPassword($this->keyMinimal, $this->parameters, '/path/to/file');
     }
 
     public function testWriteStreamFull()
@@ -215,7 +214,7 @@ EOD;
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->stream = fopen($path, 'wb');
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyFull, $this->stream);
+        $this->writer->writeStreamWithPassword($this->keyFull, $this->parameters, $this->stream);
 
         $this->assertSame($this->keyFullStringEncrypted, file_get_contents($path));
     }
@@ -224,7 +223,7 @@ EOD;
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->stream = fopen($path, 'wb');
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, $this->stream);
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, $this->stream);
 
         $this->assertSame($this->keyMinimalStringEncrypted, file_get_contents($path));
     }
@@ -235,8 +234,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to '/path/to/file'."
         );
-        $this->writer
-            ->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, null, '/path/to/file');
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, null, '/path/to/file');
     }
 
     public function testWriteStreamWithPasswordFailureWithoutPath()
@@ -245,7 +243,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to stream."
         );
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, null);
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, null);
     }
 
     public function testWriteStringFull()
@@ -262,7 +260,7 @@ EOD;
     {
         $this->assertSame(
             $this->keyFullStringEncrypted,
-            $this->writer->writeStringWithPassword($this->password, $this->iterations, $this->keyFull)
+            $this->writer->writeStringWithPassword($this->keyFull, $this->parameters)
         );
     }
 
@@ -270,7 +268,7 @@ EOD;
     {
         $this->assertSame(
             $this->keyMinimalStringEncrypted,
-            $this->writer->writeStringWithPassword($this->password, $this->iterations, $this->keyMinimal)
+            $this->writer->writeStringWithPassword($this->keyMinimal, $this->parameters)
         );
     }
 

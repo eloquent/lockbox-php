@@ -20,11 +20,12 @@ class BoundPasswordDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->parameters = new Password('password');
+        $this->password = new Password('password');
+        $this->parameters = $this->password;
         $this->innerDecrypter = new PasswordDecrypter;
         $this->decrypter = new BoundPasswordDecrypter($this->parameters, $this->innerDecrypter);
 
-        $this->encrypter = new BoundPasswordEncrypter(new PasswordEncryptParameters('password', 10));
+        $this->encrypter = new BoundPasswordEncrypter(new PasswordEncryptParameters($this->password, 10));
     }
 
     public function testConstructor()

@@ -9,15 +9,14 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Key\Exception;
+namespace Eloquent\Lockbox\Password\Exception;
 
 use Exception;
 
 /**
  * The supplied password is invalid.
  */
-final class InvalidPasswordException extends Exception implements
-    InvalidKeyExceptionInterface
+final class InvalidPasswordException extends Exception
 {
     /**
      * Construct a new invalid password exception.

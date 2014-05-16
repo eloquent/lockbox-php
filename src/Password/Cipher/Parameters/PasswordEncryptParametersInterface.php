@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Password\Cipher\Parameters;
 
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+use Eloquent\Lockbox\Password\PasswordInterface;
 
 /**
  * The interface implemented by password encrypt parameters.
@@ -21,7 +22,7 @@ interface PasswordEncryptParametersInterface extends CipherParametersInterface
     /**
      * Get the password.
      *
-     * @return string The password.
+     * @return PasswordInterface The password.
      */
     public function password();
 

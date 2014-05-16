@@ -11,11 +11,33 @@
 
 namespace Eloquent\Lockbox\Password;
 
+use Eloquent\Lockbox\Password\Exception\InvalidPasswordException;
+
 /**
  * Respresents a password.
  */
 class Password implements PasswordInterface
 {
+    /**
+     * Adapt the supplied password into a password instance.
+     *
+     * @param PasswordInterface|string $password The password to adapt.
+     *
+     * @return PasswordInterface        The password instance.
+     * @throws InvalidPasswordException If the supplied password cannot be adapted.
+     */
+    public static function adapt($password)
+    {
+        if ($password instanceof PasswordInterface) {
+            return $password;
+        }
+        if (is_string($password)) {
+            return new Password($password);
+        }
+
+        throw new InvalidPasswordException($password);
+    }
+
     /**
      * Construct a new password.
      *

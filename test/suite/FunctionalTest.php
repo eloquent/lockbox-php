@@ -308,7 +308,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $actual = $this->passwordEncrypter->encrypt(new PasswordEncryptParameters($password, $iterations), $data);
+        $actual = $this->passwordEncrypter
+            ->encrypt(new PasswordEncryptParameters(new Password($password), $iterations), $data);
 
         $this->assertSame($encrypted, $actual);
     }
@@ -321,7 +322,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(64)->thenReturn($salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $stream = $this->passwordEncrypter->createEncryptStream(new PasswordEncryptParameters($password, $iterations));
+        $stream = $this->passwordEncrypter
+            ->createEncryptStream(new PasswordEncryptParameters(new Password($password), $iterations));
         $actual = '';
         $stream->on(
             'data',
@@ -398,7 +400,8 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
         Phake::when($this->randomSource)->generate(64)->thenReturn(mcrypt_create_iv(64, MCRYPT_DEV_URANDOM));
-        $encrypted = $this->passwordEncrypter->encrypt(new PasswordEncryptParameters('password', 10), 'foobar');
+        $encrypted = $this->passwordEncrypter
+            ->encrypt(new PasswordEncryptParameters(new Password('password'), 10), 'foobar');
         $result = $this->passwordDecrypter->decrypt(new Password('password'), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
@@ -494,7 +497,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $expectedEncryptionSecret,
         $expectedAuthenticationSecret
     ) {
-        list($key) = $this->keyDeriver->deriveKeyFromPassword($password, $iterations, $salt);
+        list($key) = $this->keyDeriver->deriveKeyFromPassword(new Password($password), $iterations, $salt);
 
         $this->assertSame($expectedEncryptionSecret, $this->base64Url->encode($key->encryptionSecret()));
         $this->assertSame($expectedAuthenticationSecret, $this->base64Url->encode($key->authenticationSecret()));
@@ -514,9 +517,13 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     public function testRealKeyReadWriteEncrypted()
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
-        $key = $this->keyReader->readFileWithPassword('password', __DIR__ . '/../fixture/key/key-256-256-encrypted.lockbox.key');
-        $this->keyWriter->writeFileWithPassword('password', 10, $key, $path);
-        $actual = $this->keyReader->readFileWithPassword('password', $path);
+        $key = $this->keyReader->readFileWithPassword(
+            new Password('password'),
+            __DIR__ . '/../fixture/key/key-256-256-encrypted.lockbox.key'
+        );
+        $this->keyWriter
+            ->writeFileWithPassword($key, new PasswordEncryptParameters(new Password('password'), 10), $path);
+        $actual = $this->keyReader->readFileWithPassword(new Password('password'), $path);
         unlink($path);
 
         $this->assertEquals($key, $actual);

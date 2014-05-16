@@ -37,12 +37,12 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new RawPasswordDecrypter;
         $this->crypter = new RawPasswordCrypter($this->encrypter, $this->decrypter);
 
-        $this->password = 'foobar';
+        $this->password = new Password('foobar');
         $this->version = chr(1);
         $this->type = chr(2);
         $this->iterations = 10;
         $this->encryptParameters = new PasswordEncryptParameters($this->password, $this->iterations);
-        $this->decryptParameters = new Password($this->password);
+        $this->decryptParameters = $this->password;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
