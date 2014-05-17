@@ -13,10 +13,9 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Endec\DecoderInterface;
 use Eloquent\Lockbox\AbstractDecrypter;
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\DecrypterInterface;
-use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Password\Cipher\Result\Factory\PasswordDecryptionResultFactory;
 
 /**
  * Decrypts encoded data using passwords.
@@ -40,30 +39,23 @@ class PasswordDecrypter extends AbstractDecrypter
     /**
      * Construct a new password decrypter.
      *
-     * @param DecrypterInterface|null $rawDecrypter The raw decrypter to use.
-     * @param DecoderInterface|null   $decoder      The decoder to use.
+     * @param DecrypterInterface|null           $rawDecrypter  The raw decrypter to use.
+     * @param DecoderInterface|null             $decoder       The decoder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
         DecrypterInterface $rawDecrypter = null,
-        DecoderInterface $decoder = null
+        DecoderInterface $decoder = null,
+        CipherResultFactoryInterface $resultFactory = null
     ) {
         if (null === $rawDecrypter) {
             $rawDecrypter = RawPasswordDecrypter::instance();
         }
+        if (null === $resultFactory) {
+            $resultFactory = PasswordDecryptionResultFactory::instance();
+        }
 
-        parent::__construct($rawDecrypter, $decoder);
-    }
-
-    /**
-     * Create a new cipher result of the supplied type.
-     *
-     * @param CipherResultType $type The result type.
-     *
-     * @return CipherResultInterface The newly created cipher result.
-     */
-    protected function createResult(CipherResultType $type)
-    {
-        return new PasswordDecryptionResult($type);
+        parent::__construct($rawDecrypter, $decoder, $resultFactory);
     }
 
     private static $instance;

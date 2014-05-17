@@ -17,6 +17,8 @@ use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
@@ -31,12 +33,14 @@ abstract class AbstractEncryptCipher implements CipherInterface
     /**
      * Construct a new encrypt cipher.
      *
-     * @param RandomSourceInterface|null $randomSource The random source to use.
-     * @param PadderInterface|null       $padder       The padder to use.
+     * @param RandomSourceInterface|null        $randomSource  The random source to use.
+     * @param PadderInterface|null              $padder        The padder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
         RandomSourceInterface $randomSource = null,
-        PadderInterface $padder = null
+        PadderInterface $padder = null,
+        CipherResultFactoryInterface $resultFactory = null
     ) {
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
@@ -44,9 +48,13 @@ abstract class AbstractEncryptCipher implements CipherInterface
         if (null === $padder) {
             $padder = PkcsPadding::instance();
         }
+        if (null === $resultFactory) {
+            $resultFactory = CipherResultFactory::instance();
+        }
 
         $this->randomSource = $randomSource;
         $this->padder = $padder;
+        $this->resultFactory = $resultFactory;
         $this->isInitialized = $this->isMcryptInitialized = false;
 
         $this->reset();
@@ -70,6 +78,16 @@ abstract class AbstractEncryptCipher implements CipherInterface
     public function padder()
     {
         return $this->padder;
+    }
+
+    /**
+     * Get the result factory.
+     *
+     * @return CipherResultFactoryInterface The result factory.
+     */
+    public function resultFactory()
+    {
+        return $this->resultFactory;
     }
 
     /**
@@ -290,6 +308,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
 
     private $randomSource;
     private $padder;
+    private $resultFactory;
     private $isInitialized;
     private $isHeaderSent;
     private $isFinalized;

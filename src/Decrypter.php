@@ -12,9 +12,7 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Endec\DecoderInterface;
-use Eloquent\Lockbox\Cipher\Result\CipherResult;
-use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
-use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 
 /**
  * Decrypts encoded data using keys.
@@ -38,30 +36,20 @@ class Decrypter extends AbstractDecrypter
     /**
      * Construct a new decrypter.
      *
-     * @param DecrypterInterface|null $rawDecrypter The raw decrypter to use.
-     * @param DecoderInterface|null   $decoder      The decoder to use.
+     * @param DecrypterInterface|null           $rawDecrypter  The raw decrypter to use.
+     * @param DecoderInterface|null             $decoder       The decoder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
         DecrypterInterface $rawDecrypter = null,
-        DecoderInterface $decoder = null
+        DecoderInterface $decoder = null,
+        CipherResultFactoryInterface $resultFactory = null
     ) {
         if (null === $rawDecrypter) {
             $rawDecrypter = RawDecrypter::instance();
         }
 
-        parent::__construct($rawDecrypter, $decoder);
-    }
-
-    /**
-     * Create a new cipher result of the supplied type.
-     *
-     * @param CipherResultType $type The result type.
-     *
-     * @return CipherResultInterface The newly created cipher result.
-     */
-    protected function createResult(CipherResultType $type)
-    {
-        return new CipherResult($type);
+        parent::__construct($rawDecrypter, $decoder, $resultFactory);
     }
 
     private static $instance;
