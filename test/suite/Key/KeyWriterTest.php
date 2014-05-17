@@ -29,8 +29,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->cipherFactory = new PasswordEncryptCipherFactory($this->keyDeriver, $this->randomSource);
+        $this->keyDeriver = new KeyDeriver($this->randomSource);
+        $this->cipherFactory = new PasswordEncryptCipherFactory($this->randomSource, $this->keyDeriver);
         $this->encrypter = new PasswordEncrypter(new RawPasswordEncrypter($this->cipherFactory));
         $this->encoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());

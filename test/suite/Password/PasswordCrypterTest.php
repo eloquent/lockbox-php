@@ -30,9 +30,9 @@ class PasswordCrypterTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->keyDeriver = new KeyDeriver($this->randomSource);
         $this->encrypter = new PasswordEncrypter(
-            new RawPasswordEncrypter(new PasswordEncryptCipherFactory($this->keyDeriver))
+            new RawPasswordEncrypter(new PasswordEncryptCipherFactory($this->randomSource, $this->keyDeriver))
         );
         $this->decrypter = new PasswordDecrypter;
         $this->crypter = new PasswordCrypter($this->encrypter, $this->decrypter);

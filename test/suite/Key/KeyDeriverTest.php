@@ -26,7 +26,7 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
 
         $this->factory = new KeyFactory;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->deriver = new KeyDeriver($this->factory, $this->randomSource);
+        $this->deriver = new KeyDeriver($this->randomSource, $this->factory);
 
         $this->base64Url = Base64Url::instance();
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
@@ -34,16 +34,16 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->factory, $this->deriver->factory());
         $this->assertSame($this->randomSource, $this->deriver->randomSource());
+        $this->assertSame($this->factory, $this->deriver->factory());
     }
 
     public function testConstructorDefaults()
     {
         $this->deriver = new KeyDeriver;
 
-        $this->assertSame(KeyFactory::instance(), $this->deriver->factory());
         $this->assertSame(DevUrandom::instance(), $this->deriver->randomSource());
+        $this->assertSame(KeyFactory::instance(), $this->deriver->factory());
     }
 
     public function keyDerivationData()

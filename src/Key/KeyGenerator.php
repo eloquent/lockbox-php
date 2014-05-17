@@ -43,28 +43,18 @@ class KeyGenerator implements KeyGeneratorInterface
      * @param RandomSourceInterface|null $randomSource The random source to use.
      */
     public function __construct(
-        KeyFactoryInterface $factory = null,
-        RandomSourceInterface $randomSource = null
+        RandomSourceInterface $randomSource = null,
+        KeyFactoryInterface $factory = null
     ) {
-        if (null === $factory) {
-            $factory = KeyFactory::instance();
-        }
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
         }
+        if (null === $factory) {
+            $factory = KeyFactory::instance();
+        }
 
-        $this->factory = $factory;
         $this->randomSource = $randomSource;
-    }
-
-    /**
-     * Get the factory.
-     *
-     * @return KeyFactoryInterface The factory.
-     */
-    public function factory()
-    {
-        return $this->factory;
+        $this->factory = $factory;
     }
 
     /**
@@ -75,6 +65,16 @@ class KeyGenerator implements KeyGeneratorInterface
     public function randomSource()
     {
         return $this->randomSource;
+    }
+
+    /**
+     * Get the factory.
+     *
+     * @return KeyFactoryInterface The factory.
+     */
+    public function factory()
+    {
+        return $this->factory;
     }
 
     /**
@@ -135,6 +135,6 @@ class KeyGenerator implements KeyGeneratorInterface
     }
 
     private static $instance;
-    private $factory;
     private $randomSource;
+    private $factory;
 }

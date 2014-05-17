@@ -39,7 +39,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->passwordEncrypter = new PasswordEncrypter(
             new RawPasswordEncrypter(
-                new PasswordEncryptCipherFactory(new KeyDeriver(null, $this->randomSource), $this->randomSource)
+                new PasswordEncryptCipherFactory($this->randomSource, new KeyDeriver($this->randomSource))
             )
         );
         $this->passwordDecrypter = new PasswordDecrypter;

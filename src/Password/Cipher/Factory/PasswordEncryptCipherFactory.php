@@ -43,13 +43,13 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
     /**
      * Construct a new password encrypt cipher factory.
      *
-     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
      * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
      * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        KeyDeriverInterface $keyDeriver = null,
         RandomSourceInterface $randomSource = null,
+        KeyDeriverInterface $keyDeriver = null,
         PadderInterface $padder = null
     ) {
         if (null === $keyDeriver) {
@@ -62,19 +62,9 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
             $padder = PkcsPadding::instance();
         }
 
-        $this->keyDeriver = $keyDeriver;
         $this->randomSource = $randomSource;
+        $this->keyDeriver = $keyDeriver;
         $this->padder = $padder;
-    }
-
-    /**
-     * Get the key deriver.
-     *
-     * @return KeyDeriverInterface The key deriver.
-     */
-    public function keyDeriver()
-    {
-        return $this->keyDeriver;
     }
 
     /**
@@ -85,6 +75,16 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
     public function randomSource()
     {
         return $this->randomSource;
+    }
+
+    /**
+     * Get the key deriver.
+     *
+     * @return KeyDeriverInterface The key deriver.
+     */
+    public function keyDeriver()
+    {
+        return $this->keyDeriver;
     }
 
     /**
@@ -105,14 +105,14 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
     public function createCipher()
     {
         return new PasswordEncryptCipher(
-            $this->keyDeriver(),
             $this->randomSource(),
+            $this->keyDeriver(),
             $this->padder()
         );
     }
 
     private static $instance;
-    private $keyDeriver;
     private $randomSource;
+    private $keyDeriver;
     private $padder;
 }

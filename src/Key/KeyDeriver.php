@@ -41,32 +41,22 @@ class KeyDeriver implements KeyDeriverInterface
     /**
      * Construct a new key deriver.
      *
-     * @param KeyFactoryInterface|null   $factory      The factory to use.
      * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param KeyFactoryInterface|null   $factory      The factory to use.
      */
     public function __construct(
-        KeyFactoryInterface $factory = null,
-        RandomSourceInterface $randomSource = null
+        RandomSourceInterface $randomSource = null,
+        KeyFactoryInterface $factory = null
     ) {
-        if (null === $factory) {
-            $factory = KeyFactory::instance();
-        }
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
         }
+        if (null === $factory) {
+            $factory = KeyFactory::instance();
+        }
 
-        $this->factory = $factory;
         $this->randomSource = $randomSource;
-    }
-
-    /**
-     * Get the factory.
-     *
-     * @return KeyFactoryInterface The factory.
-     */
-    public function factory()
-    {
-        return $this->factory;
+        $this->factory = $factory;
     }
 
     /**
@@ -77,6 +67,16 @@ class KeyDeriver implements KeyDeriverInterface
     public function randomSource()
     {
         return $this->randomSource;
+    }
+
+    /**
+     * Get the factory.
+     *
+     * @return KeyFactoryInterface The factory.
+     */
+    public function factory()
+    {
+        return $this->factory;
     }
 
     /**
@@ -139,6 +139,6 @@ class KeyDeriver implements KeyDeriverInterface
     }
 
     private static $instance;
-    private $factory;
     private $randomSource;
+    private $factory;
 }

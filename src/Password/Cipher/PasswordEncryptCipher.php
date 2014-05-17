@@ -28,13 +28,13 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
     /**
      * Construct a new password encrypt cipher.
      *
-     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
      * @param RandomSourceInterface|null $randomSource The random source to use.
+     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
      * @param PadderInterface|null       $padder       The padder to use.
      */
     public function __construct(
-        KeyDeriverInterface $keyDeriver = null,
         RandomSourceInterface $randomSource = null,
+        KeyDeriverInterface $keyDeriver = null,
         PadderInterface $padder = null
     ) {
         if (null === $keyDeriver) {

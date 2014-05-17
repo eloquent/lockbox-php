@@ -22,23 +22,23 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->factory = new KeyFactory;
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->generator = new KeyGenerator($this->factory, $this->randomSource);
+        $this->factory = new KeyFactory;
+        $this->generator = new KeyGenerator($this->randomSource, $this->factory);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->factory, $this->generator->factory());
         $this->assertSame($this->randomSource, $this->generator->randomSource());
+        $this->assertSame($this->factory, $this->generator->factory());
     }
 
     public function testConstructorDefaults()
     {
         $this->generator = new KeyGenerator;
 
-        $this->assertSame(KeyFactory::instance(), $this->generator->factory());
         $this->assertSame(DevUrandom::instance(), $this->generator->randomSource());
+        $this->assertSame(KeyFactory::instance(), $this->generator->factory());
     }
 
     public function testGenerateKey()

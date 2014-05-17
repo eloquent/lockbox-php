@@ -28,9 +28,9 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
+        $this->keyDeriver = new KeyDeriver($this->randomSource);
         $this->padder = new PkcsPadding;
-        $this->cipher = new PasswordEncryptCipher($this->keyDeriver, $this->randomSource, $this->padder);
+        $this->cipher = new PasswordEncryptCipher($this->randomSource, $this->keyDeriver, $this->padder);
 
         $this->password = new Password('password');
         $this->iterations = 10;
@@ -50,8 +50,8 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
         $this->assertSame($this->randomSource, $this->cipher->randomSource());
+        $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
         $this->assertSame($this->padder, $this->cipher->padder());
     }
 
@@ -59,8 +59,8 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
     {
         $this->cipher = new PasswordEncryptCipher;
 
-        $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
         $this->assertSame(DevUrandom::instance(), $this->cipher->randomSource());
+        $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
         $this->assertSame(PkcsPadding::instance(), $this->cipher->padder());
     }
 
