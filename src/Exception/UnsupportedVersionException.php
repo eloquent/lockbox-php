@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox\Exception;
 use Exception;
 
 /**
- * An supported version was encountered.
+ * An unsupported version was encountered.
  */
 final class UnsupportedVersionException extends Exception
 {

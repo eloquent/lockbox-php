@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
 
@@ -82,8 +85,8 @@ class KeyGenerator implements KeyGeneratorInterface
      * @param integer|null $encryptionSecretBits     The size of the encryption secret in bits.
      * @param integer|null $authenticationSecretBits The size of the authentication secret in bits.
      *
-     * @return KeyInterface                           The generated key.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return KeyInterface                          The generated key.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function generateKey(
         $name = null,
@@ -105,7 +108,7 @@ class KeyGenerator implements KeyGeneratorInterface
                 break;
 
             default:
-                throw new Exception\InvalidEncryptionSecretSizeException(
+                throw new InvalidEncryptionSecretSizeException(
                     $encryptionSecretBits
                 );
         }
@@ -118,7 +121,7 @@ class KeyGenerator implements KeyGeneratorInterface
                 break;
 
             default:
-                throw new Exception\InvalidAuthenticationSecretSizeException(
+                throw new InvalidAuthenticationSecretSizeException(
                     $authenticationSecretBits
                 );
         }

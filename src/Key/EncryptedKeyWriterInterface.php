@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\KeyWriteException;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParametersInterface;
 
 /**
@@ -25,7 +26,7 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
      * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
      * @param string                             $path       The path to write to.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeFileWithPassword(
         KeyInterface $key,
@@ -41,7 +42,7 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
      * @param stream                             $stream     The stream to write to.
      * @param string|null                        $path       The path, if known.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeStreamWithPassword(
         KeyInterface $key,

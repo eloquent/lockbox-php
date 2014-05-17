@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+
 /**
  * Creates encryption keys.
  */
@@ -38,8 +40,8 @@ class KeyFactory implements KeyFactoryInterface
      * @param string|null $name                 The name.
      * @param string|null $description          The description.
      *
-     * @return KeyInterface                           The key.
-     * @throws Exception\InvalidKeyExceptionInterface If the key is invalid.
+     * @return KeyInterface                          The key.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function createKey(
         $encryptionSecret,

@@ -16,6 +16,8 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Endec\Exception\EncodingExceptionInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\DecrypterInterface;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+use Eloquent\Lockbox\Key\Exception\KeyReadException;
 use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordDecrypter;
 use Eloquent\Lockbox\Password\PasswordInterface;
@@ -106,13 +108,13 @@ class KeyReader implements EncryptedKeyReaderInterface
      *
      * @param string $path The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readFile($path)
     {
         if (!$data = @$this->isolator()->file_get_contents($path)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readString($data, $path);
@@ -124,13 +126,13 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param PasswordInterface $password The password.
      * @param string            $path     The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readFileWithPassword(PasswordInterface $password, $path)
     {
         if (!$data = @$this->isolator()->file_get_contents($path)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readStringWithPassword($password, $data, $path);
@@ -145,13 +147,13 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param callable $callback The password callback.
      * @param string   $path     The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readFileWithPasswordCallback($callback, $path)
     {
         if (!$data = @$this->isolator()->file_get_contents($path)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readStringWithPasswordCallback($callback, $data, $path);
@@ -163,13 +165,13 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param stream      $stream The stream to read from.
      * @param string|null $path   The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStream($stream, $path = null)
     {
         if (!$data = @stream_get_contents($stream)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readString($data, $path);
@@ -182,8 +184,8 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param stream            $stream   The stream to read from.
      * @param string|null       $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStreamWithPassword(
         PasswordInterface $password,
@@ -191,7 +193,7 @@ class KeyReader implements EncryptedKeyReaderInterface
         $path = null
     ) {
         if (!$data = @stream_get_contents($stream)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readStringWithPassword($password, $data, $path);
@@ -208,8 +210,8 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param stream      $stream   The stream to read from.
      * @param string|null $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStreamWithPasswordCallback(
         $callback,
@@ -217,7 +219,7 @@ class KeyReader implements EncryptedKeyReaderInterface
         $path = null
     ) {
         if (!$data = @stream_get_contents($stream)) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readStringWithPasswordCallback($callback, $data, $path);
@@ -229,14 +231,14 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param string      $data The string to read from.
      * @param string|null $path The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readString($data, $path = null)
     {
         $data = json_decode($data);
         if (JSON_ERROR_NONE !== json_last_error()) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         $type = null;
@@ -244,7 +246,7 @@ class KeyReader implements EncryptedKeyReaderInterface
             $type = $data->type;
         }
         if ('lockbox-key' !== $type) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         $version = null;
@@ -252,7 +254,7 @@ class KeyReader implements EncryptedKeyReaderInterface
             $version = $data->version;
         }
         if (1 !== $version) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         $encryptionSecret = null;
@@ -261,11 +263,11 @@ class KeyReader implements EncryptedKeyReaderInterface
                 $encryptionSecret = $this->decoder()
                     ->decode($data->encryptionSecret);
             } catch (EncodingExceptionInterface $e) {
-                throw new Exception\KeyReadException($path, $e);
+                throw new KeyReadException($path, $e);
             }
         }
         if (!$encryptionSecret) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         $authenticationSecret = null;
@@ -274,11 +276,11 @@ class KeyReader implements EncryptedKeyReaderInterface
                 $authenticationSecret = $this->decoder()
                     ->decode($data->authenticationSecret);
             } catch (EncodingExceptionInterface $e) {
-                throw new Exception\KeyReadException($path, $e);
+                throw new KeyReadException($path, $e);
             }
         }
         if (!$authenticationSecret) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         $name = null;
@@ -298,8 +300,8 @@ class KeyReader implements EncryptedKeyReaderInterface
                 $name,
                 $description
             );
-        } catch (Exception\InvalidKeyExceptionInterface $e) {
-            throw new Exception\KeyReadException($path, $e);
+        } catch (InvalidKeyParameterExceptionInterface $e) {
+            throw new KeyReadException($path, $e);
         }
 
         return $key;
@@ -312,8 +314,8 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param string            $data     The string to read from.
      * @param string|null       $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStringWithPassword(
         PasswordInterface $password,
@@ -322,7 +324,7 @@ class KeyReader implements EncryptedKeyReaderInterface
     ) {
         $result = $this->decrypter()->decrypt($password, trim($data));
         if (!$result->isSuccessful()) {
-            throw new Exception\KeyReadException($path);
+            throw new KeyReadException($path);
         }
 
         return $this->readString($result->data(), $path);
@@ -335,8 +337,8 @@ class KeyReader implements EncryptedKeyReaderInterface
      * @param string      $data     The string to read from.
      * @param string|null $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStringWithPasswordCallback(
         $callback,

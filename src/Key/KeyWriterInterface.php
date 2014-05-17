@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\KeyWriteException;
+
 /**
  * The interface implemented by key writers.
  */
@@ -22,7 +24,7 @@ interface KeyWriterInterface
      * @param KeyInterface $key  The key.
      * @param string       $path The path to write to.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeFile(KeyInterface $key, $path);
 
@@ -33,7 +35,7 @@ interface KeyWriterInterface
      * @param stream       $stream The stream to write to.
      * @param string|null  $path   The path, if known.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeStream(KeyInterface $key, $stream, $path = null);
 

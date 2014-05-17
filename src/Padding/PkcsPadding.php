@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Padding;
 
+use Eloquent\Lockbox\Padding\Exception\InvalidBlockSizeException;
+
 /**
  * PCKS #5 / PKCS #7 padding scheme.
  *
@@ -39,14 +41,14 @@ class PkcsPadding implements PaddingSchemeInterface
      *
      * @param integer|null $blockSize The block size to pad to in bytes.
      *
-     * @throws Exception\InvalidBlockSizeException If the block size is invalid.
+     * @throws InvalidBlockSizeException If the block size is invalid.
      */
     public function __construct($blockSize = null)
     {
         if (null === $blockSize) {
             $blockSize = 16;
         } elseif (!is_int($blockSize) || $blockSize < 1 || $blockSize > 255) {
-            throw new Exception\InvalidBlockSizeException($blockSize);
+            throw new InvalidBlockSizeException($blockSize);
         }
 
         $this->blockSize = $blockSize;

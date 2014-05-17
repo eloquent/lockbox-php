@@ -17,7 +17,7 @@ use Exception;
  * The number of iterations is invalid.
  */
 final class InvalidIterationsException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid iterations exception.

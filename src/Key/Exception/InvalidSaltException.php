@@ -17,7 +17,7 @@ use Exception;
  * The supplied salt is invalid.
  */
 final class InvalidSaltException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid salt exception.

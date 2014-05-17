@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
 use Eloquent\Lockbox\Password\PasswordInterface;
 
 /**
@@ -27,8 +28,8 @@ interface KeyDeriverInterface
      * @param string|null       $name        The name.
      * @param string|null       $description The description.
      *
-     * @return tuple<KeyInterface,string>             A 2-tuple of the derived key, and the salt used.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return tuple<KeyInterface,string>            A 2-tuple of the derived key, and the salt used.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function deriveKeyFromPassword(
         PasswordInterface $password,

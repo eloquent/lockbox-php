@@ -12,8 +12,8 @@
 namespace Eloquent\Lockbox\Key\Exception;
 
 /**
- * The interface used to mark invalid key exceptions.
+ * The interface used to mark invalid key parameter exceptions.
  */
-interface InvalidKeyExceptionInterface
+interface InvalidKeyParameterExceptionInterface
 {
 }

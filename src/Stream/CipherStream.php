@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Stream;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
+use Eloquent\Lockbox\Stream\Exception\StreamClosedException;
 use Evenement\EventEmitter;
 use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
@@ -83,7 +84,7 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
         if ($this->isClosed) {
             $this->emit(
                 'error',
-                array(new Exception\StreamClosedException, $this)
+                array(new StreamClosedException, $this)
             );
 
             return false;

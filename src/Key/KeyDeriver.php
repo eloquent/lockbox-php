@@ -11,6 +11,10 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidIterationsException;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+use Eloquent\Lockbox\Key\Exception\InvalidSaltException;
+use Eloquent\Lockbox\Key\Exception\InvalidSaltSizeException;
 use Eloquent\Lockbox\Password\PasswordInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
@@ -84,8 +88,8 @@ class KeyDeriver implements KeyDeriverInterface
      * @param string|null       $name        The name.
      * @param string|null       $description The description.
      *
-     * @return tuple<KeyInterface,string>             A 2-tuple of the derived key, and the salt used.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return tuple<KeyInterface,string>            A 2-tuple of the derived key, and the salt used.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function deriveKeyFromPassword(
         PasswordInterface $password,
@@ -95,19 +99,19 @@ class KeyDeriver implements KeyDeriverInterface
         $description = null
     ) {
         if (!is_int($iterations) || $iterations < 1) {
-            throw new Exception\InvalidIterationsException($iterations);
+            throw new InvalidIterationsException($iterations);
         }
 
         if (null === $salt) {
             $salt = $this->randomSource()->generate(64);
         } else {
             if (!is_string($salt)) {
-                throw new Exception\InvalidSaltException($salt);
+                throw new InvalidSaltException($salt);
             }
 
             $saltSize = strlen($salt);
             if (64 !== $saltSize) {
-                throw new Exception\InvalidSaltSizeException($saltSize * 8);
+                throw new InvalidSaltSizeException($saltSize * 8);
             }
         }
 

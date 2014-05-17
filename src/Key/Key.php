@@ -11,6 +11,11 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+use Eloquent\Lockbox\Key\Exception\InvalidSecretException;
+
 /**
  * Represents an encryption key.
  */
@@ -24,7 +29,7 @@ class Key implements KeyInterface
      * @param string|null $name                 The name.
      * @param string|null $description          The description.
      *
-     * @throws Exception\InvalidKeyExceptionInterface If the key is invalid.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function __construct(
         $encryptionSecret,
@@ -33,10 +38,10 @@ class Key implements KeyInterface
         $description = null
     ) {
         if (!is_string($encryptionSecret)) {
-            throw new Exception\InvalidSecretException($encryptionSecret);
+            throw new InvalidSecretException($encryptionSecret);
         }
         if (!is_string($authenticationSecret)) {
-            throw new Exception\InvalidSecretException($authenticationSecret);
+            throw new InvalidSecretException($authenticationSecret);
         }
 
         $encryptionSecretBytes = strlen($encryptionSecret);
@@ -48,7 +53,7 @@ class Key implements KeyInterface
                 break;
 
             default:
-                throw new Exception\InvalidEncryptionSecretSizeException(
+                throw new InvalidEncryptionSecretSizeException(
                     $encryptionSecretBits
                 );
         }
@@ -63,7 +68,7 @@ class Key implements KeyInterface
                 break;
 
             default:
-                throw new Exception\InvalidAuthenticationSecretSizeException(
+                throw new InvalidAuthenticationSecretSizeException(
                     $authenticationSecretBits
                 );
         }

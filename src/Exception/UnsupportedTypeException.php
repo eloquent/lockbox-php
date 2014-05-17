@@ -14,7 +14,7 @@ namespace Eloquent\Lockbox\Exception;
 use Exception;
 
 /**
- * An supported type was encountered.
+ * An unsupported type was encountered.
  */
 final class UnsupportedTypeException extends Exception
 {

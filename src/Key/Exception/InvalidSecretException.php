@@ -17,7 +17,7 @@ use Exception;
  * The supplied secret is invalid.
  */
 final class InvalidSecretException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid secret exception.

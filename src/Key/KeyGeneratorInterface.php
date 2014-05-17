@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+
 /**
  * The interface implemented by encryption key generators.
  */
@@ -24,8 +26,8 @@ interface KeyGeneratorInterface
      * @param integer|null $encryptionSecretBits     The size of the encryption secret in bits.
      * @param integer|null $authenticationSecretBits The size of the authentication secret in bits.
      *
-     * @return KeyInterface                           The generated key.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return KeyInterface                          The generated key.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function generateKey(
         $name = null,

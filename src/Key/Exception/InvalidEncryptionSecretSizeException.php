@@ -17,7 +17,7 @@ use Exception;
  * The encryption secret size is invalid.
  */
 final class InvalidEncryptionSecretSizeException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid encryption secret size exception.

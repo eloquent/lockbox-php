@@ -16,8 +16,8 @@ use Exception;
 /**
  * The authentication secret size is invalid.
  */
-final class InvalidAuthenticationSecretSizeException extends Exception implements
-    InvalidKeyExceptionInterface
+final class InvalidAuthenticationSecretSizeException extends Exception
+    implements InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid authentication secret size exception.
