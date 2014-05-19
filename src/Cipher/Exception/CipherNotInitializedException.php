@@ -23,16 +23,16 @@ final class CipherNotInitializedException extends Exception implements
     /**
      * Construct a new cipher not initialized exception.
      *
-     * @param CipherInterface $cipher   The cipher.
-     * @param Exception|null  $previous The cause, if available.
+     * @param CipherInterface $cipher The cipher.
+     * @param Exception|null  $cause  The cause, if available.
      */
     public function __construct(
         CipherInterface $cipher,
-        Exception $previous = null
+        Exception $cause = null
     ) {
         $this->cipher = $cipher;
 
-        parent::__construct('The cipher is not initialized.', 0, $previous);
+        parent::__construct('The cipher is not initialized.', 0, $cause);
     }
 
     /**

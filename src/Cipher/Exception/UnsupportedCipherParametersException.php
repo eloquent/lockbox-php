@@ -25,12 +25,12 @@ final class UnsupportedCipherParametersException extends Exception
      *
      * @param CipherInterface           $cipher     The cipher.
      * @param CipherParametersInterface $parameters The unsupported parameters.
-     * @param Exception|null            $previous   The cause, if available.
+     * @param Exception|null            $cause      The cause, if available.
      */
     public function __construct(
         CipherInterface $cipher,
         CipherParametersInterface $parameters,
-        Exception $previous = null
+        Exception $cause = null
     ) {
         $this->cipher = $cipher;
         $this->parameters = $parameters;
@@ -42,7 +42,7 @@ final class UnsupportedCipherParametersException extends Exception
                 var_export(get_class($parameters), true)
             ),
             0,
-            $previous
+            $cause
         );
     }
 
