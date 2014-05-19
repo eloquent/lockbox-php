@@ -22,16 +22,16 @@ final class InvalidBlockSizeException extends Exception
      * Construct a new invalid block size exception.
      *
      * @param mixed          $blockSize The invalid block size.
-     * @param Exception|null $previous  The cause, if available.
+     * @param Exception|null $cause     The cause, if available.
      */
-    public function __construct($blockSize, Exception $previous = null)
+    public function __construct($blockSize, Exception $cause = null)
     {
         $this->blockSize = $blockSize;
 
         parent::__construct(
             sprintf('Invalid block size %s.', var_export($blockSize, true)),
             0,
-            $previous
+            $cause
         );
     }
 

@@ -21,10 +21,10 @@ final class InvalidPaddingException extends Exception
     /**
      * Construct a new invalid padding exception.
      *
-     * @param Exception|null $previous The cause, if available.
+     * @param Exception|null $cause The cause, if available.
      */
-    public function __construct(Exception $previous = null)
+    public function __construct(Exception $cause = null)
     {
-        parent::__construct('Invalid padding.', 0, $previous);
+        parent::__construct('Invalid padding.', 0, $cause);
     }
 }

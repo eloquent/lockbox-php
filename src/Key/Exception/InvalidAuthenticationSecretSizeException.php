@@ -22,10 +22,10 @@ final class InvalidAuthenticationSecretSizeException extends Exception
     /**
      * Construct a new invalid authentication secret size exception.
      *
-     * @param integer        $size     The invalid secret size.
-     * @param Exception|null $previous The cause, if available.
+     * @param integer        $size  The invalid secret size.
+     * @param Exception|null $cause The cause, if available.
      */
-    public function __construct($size, Exception $previous = null)
+    public function __construct($size, Exception $cause = null)
     {
         $this->size = $size;
 
@@ -36,7 +36,7 @@ final class InvalidAuthenticationSecretSizeException extends Exception
                 $size
             ),
             0,
-            $previous
+            $cause
         );
     }
 

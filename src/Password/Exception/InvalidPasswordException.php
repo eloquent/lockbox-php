@@ -22,16 +22,16 @@ final class InvalidPasswordException extends Exception
      * Construct a new invalid password exception.
      *
      * @param mixed          $password The invalid password.
-     * @param Exception|null $previous The cause, if available.
+     * @param Exception|null $cause    The cause, if available.
      */
-    public function __construct($password, Exception $previous = null)
+    public function __construct($password, Exception $cause = null)
     {
         $this->password = $password;
 
         parent::__construct(
             sprintf('Invalid password %s.', var_export($password, true)),
             0,
-            $previous
+            $cause
         );
     }
 

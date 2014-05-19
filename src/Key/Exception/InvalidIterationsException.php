@@ -23,16 +23,16 @@ final class InvalidIterationsException extends Exception implements
      * Construct a new invalid iterations exception.
      *
      * @param mixed          $iterations The invalid iterations.
-     * @param Exception|null $previous   The cause, if available.
+     * @param Exception|null $cause      The cause, if available.
      */
-    public function __construct($iterations, Exception $previous = null)
+    public function __construct($iterations, Exception $cause = null)
     {
         $this->iterations = $iterations;
 
         parent::__construct(
             sprintf('Invalid iterations %s.', var_export($iterations, true)),
             0,
-            $previous
+            $cause
         );
     }
 
