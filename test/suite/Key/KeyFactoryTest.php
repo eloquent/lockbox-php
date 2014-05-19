@@ -23,29 +23,34 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
         $this->factory = new KeyFactory;
     }
 
-    public function validEncryptionSecretData()
+    public function validSecretData()
     {
+        //                              encryptionSecret                    authenticationSecret
         return array(
-            '256 bit' => array('12345678901234567890123456789012'),
-            '192 bit' => array('123456789012345678901234'),
-            '128 bit' => array('1234567890123456'),
+            '256 bit, 512 bit' => array('12345678901234567890123456789012', '1234567890123456789012345678901234567890123456789012345678901234'),
+            '256 bit, 384 bit' => array('12345678901234567890123456789012', '123456789012345678901234567890123456789012345678'),
+            '256 bit, 256 bit' => array('12345678901234567890123456789012', '12345678901234567890123456789012'),
+            '256 bit, 224 bit' => array('12345678901234567890123456789012', '1234567890123456789012345678'),
+            '192 bit, 512 bit' => array('123456789012345678901234',         '1234567890123456789012345678901234567890123456789012345678901234'),
+            '192 bit, 384 bit' => array('123456789012345678901234',         '123456789012345678901234567890123456789012345678'),
+            '192 bit, 256 bit' => array('123456789012345678901234',         '12345678901234567890123456789012'),
+            '192 bit, 224 bit' => array('123456789012345678901234',         '1234567890123456789012345678'),
+            '128 bit, 512 bit' => array('1234567890123456',                 '1234567890123456789012345678901234567890123456789012345678901234'),
+            '128 bit, 384 bit' => array('1234567890123456',                 '123456789012345678901234567890123456789012345678'),
+            '128 bit, 256 bit' => array('1234567890123456',                 '12345678901234567890123456789012'),
+            '128 bit, 224 bit' => array('1234567890123456',                 '1234567890123456789012345678'),
         );
     }
 
     /**
-     * @dataProvider validEncryptionSecretData
+     * @dataProvider validSecretData
      */
-    public function testCreateKey($encryptionSecret)
+    public function testCreateKey($encryptionSecret, $authenticationSecret)
     {
-        $this->key = $this->factory->createKey(
-            $encryptionSecret,
-            '12345678901234567890123456789012',
-            'name',
-            'description'
-        );
+        $this->key = $this->factory->createKey($encryptionSecret, $authenticationSecret, 'name', 'description');
 
         $this->assertSame($encryptionSecret, $this->key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789012', $this->key->authenticationSecret());
+        $this->assertSame($authenticationSecret, $this->key->authenticationSecret());
         $this->assertSame('name', $this->key->name());
         $this->assertSame('description', $this->key->description());
     }

@@ -31,7 +31,7 @@ class KeyReader implements EncryptedKeyReaderInterface
     /**
      * Get the static instance of this reader.
      *
-     * @return KeyReaderInterface The static reader.
+     * @return EncryptedKeyReaderInterface The static reader.
      */
     public static function instance()
     {

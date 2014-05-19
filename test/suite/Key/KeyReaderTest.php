@@ -33,19 +33,28 @@ class KeyReaderTest extends PHPUnit_Framework_TestCase
         $this->isolator = Phake::mock(Isolator::className());
         $this->reader = new KeyReader($this->factory, $this->decrypter, $this->decoder, $this->isolator);
 
-        $this->jsonDataFull = <<<EOD
+        $this->keyFullString = <<<'EOD'
 {
-    "type": "lockbox-key",
-    "version": 1,
     "name": "name",
     "description": "description",
+    "type": "lockbox-key",
+    "version": 1,
     "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
     "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
-EOD;
-        $this->jsonDataMinimal = '{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}';
 
-        $this->jsonDataFullEncrypted = <<<'EOD'
+EOD;
+        $this->keyMinimalString = <<<'EOD'
+{
+    "type": "lockbox-key",
+    "version": 1,
+    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
+    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+}
+
+EOD;
+
+        $this->keyFullStringEncrypted = <<<'EOD'
 AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaIkMi2nO33jSCq
 d-PyQhN7QlQqvRgk91OJAfQNx8R6msw6mTqLqdQGsoaDNn_ijuCHgSPkcIb1SDDR
@@ -57,7 +66,7 @@ NXFzWE3EDKiJvpb168_dTgCEZRFfYpw-PY16CPRBHABnBlWC_CRE_S0rcWnMsMGh
 dMhpnoMo7dMTV-Vc0DhKI9QtMLDhPA
 
 EOD;
-        $this->jsonDataMinimalEncrypted = <<<'EOD'
+        $this->keyMinimalStringEncrypted = <<<'EOD'
 AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaahwBMpOBVXCgF
 T1Ohh60pZsF7hIP1CBZ2gOYirhC_W_Mf5lZ_JZZHMotEliRZSEgPDe5bZYdOSvLv
@@ -96,7 +105,7 @@ EOD;
 
     public function testReadFileFull()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataFull);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullString);
         $key = $this->reader->readFile('/path/to/file');
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -107,7 +116,7 @@ EOD;
 
     public function testReadFileMinimal()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataMinimal);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalString);
         $key = $this->reader->readFile('/path/to/file');
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -142,7 +151,7 @@ EOD;
 
     public function testReadFileWithPasswordFull()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataFullEncrypted);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullStringEncrypted);
         $key = $this->reader->readFileWithPassword($this->password, '/path/to/file');
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -153,7 +162,7 @@ EOD;
 
     public function testReadFileWithPasswordMinimal()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataMinimalEncrypted);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalStringEncrypted);
         $key = $this->reader->readFileWithPassword($this->password, '/path/to/file');
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -188,7 +197,7 @@ EOD;
 
     public function testReadFileWithPasswordCallbackFull()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataFull);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullString);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -199,7 +208,7 @@ EOD;
 
     public function testReadFileWithPasswordCallbackMinimal()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataMinimal);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalString);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -210,7 +219,7 @@ EOD;
 
     public function testReadFileWithPasswordCallbackFullEncrypted()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataFullEncrypted);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullStringEncrypted);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -221,7 +230,7 @@ EOD;
 
     public function testReadFileWithPasswordCallbackMinimalEncrypted()
     {
-        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->jsonDataMinimalEncrypted);
+        Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalStringEncrypted);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -256,7 +265,7 @@ EOD;
 
     public function testReadStreamFull()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataFull), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullString), 'rb');
         $key = $this->reader->readStream($stream);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -267,7 +276,7 @@ EOD;
 
     public function testReadStreamMinimal()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataMinimal), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalString), 'rb');
         $key = $this->reader->readStream($stream);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -278,10 +287,7 @@ EOD;
 
     public function testReadStreamFailureStreamReadWithoutPath()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readStream(null);
     }
 
@@ -296,7 +302,7 @@ EOD;
 
     public function testReadStreamWithPasswordFull()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataFullEncrypted), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPassword($this->password, $stream);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -307,7 +313,7 @@ EOD;
 
     public function testReadStreamWithPasswordMinimal()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataMinimalEncrypted), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPassword($this->password, $stream);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -318,10 +324,7 @@ EOD;
 
     public function testReadStreamWithPasswordFailureStreamReadWithoutPath()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readStreamWithPassword($this->password, null);
     }
 
@@ -336,7 +339,7 @@ EOD;
 
     public function testReadStreamWithPasswordCallbackFull()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataFull), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullString), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -347,7 +350,7 @@ EOD;
 
     public function testReadStreamWithPasswordCallbackMinimal()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataMinimal), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalString), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -358,7 +361,7 @@ EOD;
 
     public function testReadStreamWithPasswordCallbackFullEncrypted()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataFullEncrypted), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
@@ -369,7 +372,7 @@ EOD;
 
     public function testReadStreamWithPasswordCallbackMinimalEncrypted()
     {
-        $stream = fopen('data://text/plain;base64,' . base64_encode($this->jsonDataMinimalEncrypted), 'rb');
+        $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
@@ -380,10 +383,7 @@ EOD;
 
     public function testReadStreamWithPasswordCallbackFailureStreamReadWithoutPath()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readStreamWithPasswordCallback($this->passwordCallback, null);
     }
 
@@ -398,7 +398,7 @@ EOD;
 
     public function testReadStringFull()
     {
-        $key = $this->reader->readString($this->jsonDataFull);
+        $key = $this->reader->readString($this->keyFullString);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -408,7 +408,7 @@ EOD;
 
     public function testReadStringMinimal()
     {
-        $key = $this->reader->readString($this->jsonDataMinimal);
+        $key = $this->reader->readString($this->keyMinimalString);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -418,10 +418,7 @@ EOD;
 
     public function testReadStringFailureStreamReadWithoutPath()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readString(null);
     }
 
@@ -456,10 +453,7 @@ EOD;
      */
     public function testReadStringFailureInvalidDataWithoutPath($data)
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readString($data);
     }
 
@@ -477,7 +471,7 @@ EOD;
 
     public function testReadStringWithPasswordFull()
     {
-        $key = $this->reader->readStringWithPassword($this->password, $this->jsonDataFullEncrypted);
+        $key = $this->reader->readStringWithPassword($this->password, $this->keyFullStringEncrypted);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -487,7 +481,7 @@ EOD;
 
     public function testReadStringWithPasswordMinimal()
     {
-        $key = $this->reader->readStringWithPassword($this->password, $this->jsonDataMinimalEncrypted);
+        $key = $this->reader->readStringWithPassword($this->password, $this->keyMinimalStringEncrypted);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -497,11 +491,8 @@ EOD;
 
     public function testReadStringWithPasswordFailureNotEncrypted()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
-        $this->reader->readStringWithPassword($this->password, $this->jsonDataMinimal);
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
+        $this->reader->readStringWithPassword($this->password, $this->keyMinimalString);
     }
 
     public function testReadStringWithPasswordFailureNotEncryptedWithPath()
@@ -510,21 +501,18 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyReadException',
             "Unable to read key from '/path/to/file'."
         );
-        $this->reader->readStringWithPassword($this->password, $this->jsonDataMinimal, '/path/to/file');
+        $this->reader->readStringWithPassword($this->password, $this->keyMinimalString, '/path/to/file');
     }
 
     public function testReadStringWithPasswordFailureBadKey()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readStringWithPassword($this->password, $this->encrypter->encrypt($this->parameters, '{}'));
     }
 
     public function testReadStringWithPasswordCallbackFull()
     {
-        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->jsonDataFull);
+        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyFullString);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -534,7 +522,7 @@ EOD;
 
     public function testReadStringWithPasswordCallbackMinimal()
     {
-        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->jsonDataMinimal);
+        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyMinimalString);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -544,7 +532,7 @@ EOD;
 
     public function testReadStringWithPasswordCallbackFullEncrypted()
     {
-        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->jsonDataFullEncrypted);
+        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyFullStringEncrypted);
 
         $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -554,7 +542,7 @@ EOD;
 
     public function testReadStringWithPasswordCallbackMinimalEncrypted()
     {
-        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->jsonDataMinimalEncrypted);
+        $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyMinimalStringEncrypted);
 
         $this->assertSame('1234567890123456', $key->encryptionSecret());
         $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
@@ -564,10 +552,7 @@ EOD;
 
     public function testReadStringWithPasswordCallbackFailureBadKey()
     {
-        $this->setExpectedException(
-            'Eloquent\Lockbox\Key\Exception\KeyReadException',
-            "Unable to read key."
-        );
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException', "Unable to read key.");
         $this->reader->readStringWithPasswordCallback(
             $this->passwordCallback,
             $this->encrypter->encrypt($this->parameters, '{}')
