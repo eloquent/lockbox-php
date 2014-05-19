@@ -81,6 +81,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
     {
         $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -88,13 +89,14 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherWithKeyOnlyParameters()
     {
         $this->cipher->initialize($this->parametersNoIv);
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -102,13 +104,14 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherWithKeyOnly()
     {
         $this->cipher->initialize($this->key);
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -116,13 +119,14 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherEmpty()
     {
         $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2BsV8no6a9yLYUT6rbu2PdNC4LItQ9m-F9dQ65M-pun4OnZkLrHT8zDDw0sE4Dg'
         );
@@ -130,7 +134,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherByteByByte()
@@ -142,6 +146,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
             $output .= $this->cipher->process($input[$i]);
         }
         $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -149,7 +154,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherWithSmallPackets()
@@ -163,6 +168,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $output .= $this->cipher->process('dooms');
         $output .= $this->cipher->process('plat');
         $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -170,7 +176,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherBlockByBlock()
@@ -180,6 +186,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARu0_Bk3cPXHsLggdoFLPnlwR29pd_lX36Diz3sv2v6sIsAmdbSuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
         );
@@ -187,7 +194,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testCipherBlockByBlockProcessThenFinalize()
@@ -196,6 +203,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $output = '';
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->finalize('foobarbazquxdoom');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARu0_Bk3cPXHsLggdoFLPnlwR29pd_lX36Diz3sv2v6sIsAmdbSuDnDnVctQhnxXOgECTCSb8G-xnE_kmnhWk432g'
         );
@@ -203,7 +211,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testInitializeAfterUse()
@@ -212,6 +220,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->process('foobarbazquxdoomsplat');
         $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -219,7 +228,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testResetAfterUse()
@@ -229,6 +238,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->process('foobarbazquxdoomsplat');
         $this->cipher->reset();
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg'
         );
@@ -236,7 +246,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
     public function testProcessFailureNotInitialized()

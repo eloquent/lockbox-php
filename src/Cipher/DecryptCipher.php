@@ -16,9 +16,10 @@ use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Eloquent\Lockbox\Cipher\Exception\CipherStateExceptionInterface;
 use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
-use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\Comparator\SlowStringComparator;
 use Eloquent\Lockbox\Key\KeyInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
@@ -32,15 +33,22 @@ class DecryptCipher implements CipherInterface
     /**
      * Construct a new decrypt cipher.
      *
-     * @param UnpadderInterface|null $unpadder The unpadder to use.
+     * @param UnpadderInterface|null            $unpadder      The unpadder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
-    public function __construct(UnpadderInterface $unpadder = null)
-    {
+    public function __construct(
+        UnpadderInterface $unpadder = null,
+        CipherResultFactoryInterface $resultFactory = null
+    ) {
         if (null === $unpadder) {
             $unpadder = PkcsPadding::instance();
         }
+        if (null === $resultFactory) {
+            $resultFactory = CipherResultFactory::instance();
+        }
 
         $this->unpadder = $unpadder;
+        $this->resultFactory = $resultFactory;
         $this->isInitialized = false;
 
         $this->reset();
@@ -57,6 +65,16 @@ class DecryptCipher implements CipherInterface
     }
 
     /**
+     * Get the result factory.
+     *
+     * @return CipherResultFactoryInterface The result factory.
+     */
+    public function resultFactory()
+    {
+        return $this->resultFactory;
+    }
+
+    /**
      * Initialize this cipher.
      *
      * @param CipherParametersInterface $parameters The parameters to use.
@@ -66,7 +84,7 @@ class DecryptCipher implements CipherInterface
     public function initialize(CipherParametersInterface $parameters)
     {
         if (!$parameters instanceof KeyInterface) {
-            throw new UnsupportedCipherParametersException($parameters);
+            throw new UnsupportedCipherParametersException($this, $parameters);
         }
 
         $this->isInitialized = true;
@@ -78,6 +96,7 @@ class DecryptCipher implements CipherInterface
             MCRYPT_MODE_CBC,
             ''
         );
+        $this->isMcryptInitialized = false;
 
         $this->hashContext = hash_init(
             'sha' . $this->key->authenticationSecretBits(),
@@ -130,10 +149,6 @@ class DecryptCipher implements CipherInterface
 
         $size -= 18 + $this->macSize;
         $consume = $size - ($size % 18);
-        if (!$consume) {
-            return '';
-        }
-
         $input = substr($this->buffer, 0, $consume);
         $this->buffer = substr($this->buffer, $consume);
 
@@ -157,6 +172,8 @@ class DecryptCipher implements CipherInterface
             throw new CipherFinalizedException($this);
         }
 
+        $this->isFinalized = true;
+
         if (null !== $input) {
             $this->buffer .= $input;
         }
@@ -179,9 +196,8 @@ class DecryptCipher implements CipherInterface
         if (!$this->isHeaderReceived && !$this->preCheck($size)) {
             return '';
         }
-        if (!$this->processHeader($size)) {
-            return '';
-        }
+
+        $this->processHeader($size);
 
         $ciphertext = substr($this->buffer, 0, $ciphertextSize);
         $mac = substr($this->buffer, $ciphertextSize);
@@ -249,6 +265,7 @@ class DecryptCipher implements CipherInterface
     {
         $this->isHeaderReceived = $this->isFinalized = false;
         $this->buffer = '';
+        $this->result = null;
 
         if ($this->isMcryptInitialized) {
             mcrypt_generic_deinit($this->mcryptModule);
@@ -258,18 +275,6 @@ class DecryptCipher implements CipherInterface
         if (null !== $this->hashContext) {
             $this->finalHashContext = hash_copy($this->hashContext);
         }
-    }
-
-    /**
-     * Create a new cipher result of the supplied type.
-     *
-     * @param CipherResultType $type The result type.
-     *
-     * @return CipherResultInterface The newly created cipher result.
-     */
-    protected function createResult(CipherResultType $type)
-    {
-        return new CipherResult($type);
     }
 
     private function processHeader(&$size)
@@ -364,11 +369,12 @@ class DecryptCipher implements CipherInterface
     private function setResult(CipherResultType $type)
     {
         if (!$this->result) {
-            $this->result = $this->createResult($type);
+            $this->result = $this->resultFactory()->createResult($type);
         }
     }
 
     private $unpadder;
+    private $resultFactory;
     private $isInitialized;
     private $key;
     private $macSize;
