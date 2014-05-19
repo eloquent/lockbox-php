@@ -35,7 +35,7 @@ class EncryptCipher extends AbstractEncryptCipher
         } elseif ($parameters instanceof KeyInterface) {
             $this->doInitialize($parameters);
         } else {
-            throw new UnsupportedCipherParametersException($parameters);
+            throw new UnsupportedCipherParametersException($this, $parameters);
         }
     }
 

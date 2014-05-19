@@ -236,6 +236,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
                 mcrypt_generic_deinit($this->mcryptModule);
             }
 
+            $this->isMcryptInitialized = true;
             mcrypt_generic_init(
                 $this->mcryptModule,
                 $this->key->encryptionSecret(),
@@ -272,6 +273,7 @@ abstract class AbstractEncryptCipher implements CipherInterface
             MCRYPT_MODE_CBC,
             ''
         );
+        $this->isMcryptInitialized = false;
 
         $this->hashContext = hash_init(
             'sha' . $key->authenticationSecretBits(),
