@@ -15,6 +15,10 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\Encrypter
+ * @covers \Eloquent\Lockbox\AbstractEncrypter
+ */
 class EncrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()

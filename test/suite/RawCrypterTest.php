@@ -18,7 +18,9 @@ use PHPUnit_Framework_TestCase;
  * @covers \Eloquent\Lockbox\RawCrypter
  * @covers \Eloquent\Lockbox\AbstractCrypter
  * @covers \Eloquent\Lockbox\RawEncrypter
+ * @covers \Eloquent\Lockbox\AbstractRawEncrypter
  * @covers \Eloquent\Lockbox\RawDecrypter
+ * @covers \Eloquent\Lockbox\AbstractRawDecrypter
  */
 class RawCrypterTest extends PHPUnit_Framework_TestCase
 {

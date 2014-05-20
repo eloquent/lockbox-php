@@ -13,6 +13,10 @@ namespace Eloquent\Lockbox;
 
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\BoundDecrypter
+ * @covers \Eloquent\Lockbox\AbstractBoundDecrypter
+ */
 class BoundDecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()

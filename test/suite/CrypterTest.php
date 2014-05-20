@@ -20,7 +20,9 @@ use PHPUnit_Framework_TestCase;
  * @covers \Eloquent\Lockbox\Crypter
  * @covers \Eloquent\Lockbox\AbstractCrypter
  * @covers \Eloquent\Lockbox\Encrypter
+ * @covers \Eloquent\Lockbox\AbstractEncrypter
  * @covers \Eloquent\Lockbox\Decrypter
+ * @covers \Eloquent\Lockbox\AbstractDecrypter
  */
 class CrypterTest extends PHPUnit_Framework_TestCase
 {

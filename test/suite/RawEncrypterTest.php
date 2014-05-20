@@ -15,6 +15,10 @@ use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\RawEncrypter
+ * @covers \Eloquent\Lockbox\AbstractRawEncrypter
+ */
 class RawEncrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()

@@ -12,7 +12,6 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
-use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 use Eloquent\Lockbox\Stream\CipherStream;
 use Eloquent\Lockbox\Stream\CipherStreamInterface;
@@ -25,14 +24,10 @@ abstract class AbstractRawEncrypter implements EncrypterInterface
     /**
      * Construct a new raw encrypter.
      *
-     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
+     * @param CipherFactoryInterface $cipherFactory The cipher factory to use.
      */
-    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    public function __construct(CipherFactoryInterface $cipherFactory)
     {
-        if (null === $cipherFactory) {
-            $cipherFactory = EncryptCipherFactory::instance();
-        }
-
         $this->cipherFactory = $cipherFactory;
     }
 
