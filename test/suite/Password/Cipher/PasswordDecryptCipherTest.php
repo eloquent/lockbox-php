@@ -27,10 +27,16 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+        $this->maxIterations = 111;
         $this->keyDeriver = new KeyDeriver;
         $this->unpadder = new PkcsPadding;
         $this->resultFactory = new PasswordDecryptResultFactory;
-        $this->cipher = new PasswordDecryptCipher($this->keyDeriver, $this->unpadder, $this->resultFactory);
+        $this->cipher = new PasswordDecryptCipher(
+            $this->maxIterations,
+            $this->keyDeriver,
+            $this->unpadder,
+            $this->resultFactory
+        );
 
         $this->version = chr(1);
         $this->type = chr(2);
@@ -53,6 +59,7 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
+        $this->assertSame($this->maxIterations, $this->cipher->maxIterations());
         $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
         $this->assertSame($this->unpadder, $this->cipher->unpadder());
         $this->assertSame($this->resultFactory, $this->cipher->resultFactory());
@@ -62,6 +69,7 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
     {
         $this->cipher = new PasswordDecryptCipher;
 
+        $this->assertSame(4194304, $this->cipher->maxIterations());
         $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
         $this->assertSame(PkcsPadding::instance(), $this->cipher->unpadder());
         $this->assertSame(PasswordDecryptResultFactory::instance(), $this->cipher->resultFactory());
@@ -181,6 +189,27 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame('foobar', $output);
     }
 
+    public function testCipherWithMaxIterations()
+    {
+        $this->encryptParameters = new PasswordEncryptParameters(
+            $this->parameters,
+            $this->maxIterations,
+            $this->salt,
+            $this->iv
+        );
+        $this->encryptCipher->initialize($this->encryptParameters);
+        $encrypted = $this->encryptCipher->finalize('foobar');
+        $this->cipher->initialize($this->parameters);
+        $output = $this->cipher->finalize($encrypted);
+        $result = $this->cipher->result();
+
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertSame('foobar', $output);
+    }
+
     public function decryptFailureData()
     {
         $this->setUp();
@@ -242,6 +271,15 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
                     $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $unpaddedBlock
                 ),
                 'INVALID_PADDING',
+            ),
+            'Too many iterations' => array(
+                $this->version . $this->type . pack('N', $this->maxIterations + 1) . $this->salt . $this->iv .
+                $authedBlock .
+                $this->authenticate(
+                    $this->version . $this->type . pack('N', $this->maxIterations + 1) . $this->salt . $this->iv .
+                    $block
+                ),
+                'TOO_MANY_ITERATIONS',
             ),
         );
 

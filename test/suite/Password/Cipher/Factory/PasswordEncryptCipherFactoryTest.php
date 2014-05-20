@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Password\Cipher\Factory;
 
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
@@ -27,7 +28,13 @@ class PasswordEncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->randomSource = new DevUrandom;
         $this->keyDeriver = new KeyDeriver;
         $this->padder = new PkcsPadding;
-        $this->factory = new PasswordEncryptCipherFactory($this->randomSource, $this->keyDeriver, $this->padder);
+        $this->resultFactory = new CipherResultFactory;
+        $this->factory = new PasswordEncryptCipherFactory(
+            $this->randomSource,
+            $this->keyDeriver,
+            $this->padder,
+            $this->resultFactory
+        );
     }
 
     public function testConstructor()
@@ -35,6 +42,7 @@ class PasswordEncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->randomSource, $this->factory->randomSource());
         $this->assertSame($this->keyDeriver, $this->factory->keyDeriver());
         $this->assertSame($this->padder, $this->factory->padder());
+        $this->assertSame($this->resultFactory, $this->factory->resultFactory());
     }
 
     public function testConstructorDefaults()
@@ -44,6 +52,7 @@ class PasswordEncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame(DevUrandom::instance(), $this->factory->randomSource());
         $this->assertSame(KeyDeriver::instance(), $this->factory->keyDeriver());
         $this->assertSame(PkcsPadding::instance(), $this->factory->padder());
+        $this->assertSame(CipherResultFactory::instance(), $this->factory->resultFactory());
     }
 
     public function testCreateCipher()
@@ -55,6 +64,7 @@ class PasswordEncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->randomSource, $actual->randomSource());
         $this->assertSame($this->keyDeriver, $actual->keyDeriver());
         $this->assertSame($this->padder, $actual->padder());
+        $this->assertSame($this->resultFactory, $actual->resultFactory());
     }
 
     public function testInstance()

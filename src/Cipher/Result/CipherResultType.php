@@ -41,6 +41,7 @@ final class CipherResultType extends AbstractMultiton
         new static('UNSUPPORTED_VERSION', false);
         new static('UNSUPPORTED_TYPE', false);
         new static('INVALID_PADDING', false);
+        new static('TOO_MANY_ITERATIONS', false);
     }
 
     /**

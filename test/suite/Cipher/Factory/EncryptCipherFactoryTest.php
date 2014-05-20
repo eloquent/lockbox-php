@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\EncryptCipher;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
 use PHPUnit_Framework_TestCase;
@@ -25,13 +26,15 @@ class EncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->randomSource = new DevUrandom;
         $this->padder = new PkcsPadding;
-        $this->factory = new EncryptCipherFactory($this->randomSource, $this->padder);
+        $this->resultFactory = new CipherResultFactory;
+        $this->factory = new EncryptCipherFactory($this->randomSource, $this->padder, $this->resultFactory);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->randomSource, $this->factory->randomSource());
         $this->assertSame($this->padder, $this->factory->padder());
+        $this->assertSame($this->resultFactory, $this->factory->resultFactory());
     }
 
     public function testConstructorDefaults()
@@ -40,6 +43,7 @@ class EncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(DevUrandom::instance(), $this->factory->randomSource());
         $this->assertSame(PkcsPadding::instance(), $this->factory->padder());
+        $this->assertSame(CipherResultFactory::instance(), $this->factory->resultFactory());
     }
 
     public function testCreateCipher()
@@ -50,6 +54,7 @@ class EncryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
         $this->assertSame($this->randomSource, $actual->randomSource());
         $this->assertSame($this->padder, $actual->padder());
+        $this->assertSame($this->resultFactory, $actual->resultFactory());
     }
 
     public function testInstance()

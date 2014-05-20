@@ -13,6 +13,7 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\DecryptCipher;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use PHPUnit_Framework_TestCase;
 
@@ -23,12 +24,14 @@ class DecryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         parent::setUp();
 
         $this->unpadder = new PkcsPadding;
-        $this->factory = new DecryptCipherFactory($this->unpadder);
+        $this->resultFactory = new CipherResultFactory;
+        $this->factory = new DecryptCipherFactory($this->unpadder, $this->resultFactory);
     }
 
     public function testConstructor()
     {
         $this->assertSame($this->unpadder, $this->factory->unpadder());
+        $this->assertSame($this->resultFactory, $this->factory->resultFactory());
     }
 
     public function testConstructorDefaults()
@@ -36,6 +39,7 @@ class DecryptCipherFactoryTest extends PHPUnit_Framework_TestCase
         $this->factory = new DecryptCipherFactory;
 
         $this->assertSame(PkcsPadding::instance(), $this->factory->unpadder());
+        $this->assertSame(CipherResultFactory::instance(), $this->factory->resultFactory());
     }
 
     public function testCreateCipher()
@@ -45,6 +49,7 @@ class DecryptCipherFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($expected, $actual);
         $this->assertSame($this->unpadder, $actual->unpadder());
+        $this->assertSame($this->resultFactory, $actual->resultFactory());
     }
 
     public function testInstance()

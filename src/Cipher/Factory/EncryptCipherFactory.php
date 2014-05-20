@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\EncryptCipher;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Random\DevUrandom;
@@ -40,12 +42,14 @@ class EncryptCipherFactory implements CipherFactoryInterface
     /**
      * Construct a new encrypt cipher factory.
      *
-     * @param RandomSourceInterface|null $randomSource The random source to use.
-     * @param PadderInterface|null       $padder       The padder to use.
+     * @param RandomSourceInterface|null        $randomSource  The random source to use.
+     * @param PadderInterface|null              $padder        The padder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
         RandomSourceInterface $randomSource = null,
-        PadderInterface $padder = null
+        PadderInterface $padder = null,
+        CipherResultFactoryInterface $resultFactory = null
     ) {
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
@@ -53,9 +57,13 @@ class EncryptCipherFactory implements CipherFactoryInterface
         if (null === $padder) {
             $padder = PkcsPadding::instance();
         }
+        if (null === $resultFactory) {
+            $resultFactory = CipherResultFactory::instance();
+        }
 
         $this->randomSource = $randomSource;
         $this->padder = $padder;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
@@ -79,16 +87,31 @@ class EncryptCipherFactory implements CipherFactoryInterface
     }
 
     /**
+     * Get the result factory.
+     *
+     * @return CipherResultFactoryInterface The result factory.
+     */
+    public function resultFactory()
+    {
+        return $this->resultFactory;
+    }
+
+    /**
      * Create a new cipher.
      *
      * @return CipherInterface The newly created cipher.
      */
     public function createCipher()
     {
-        return new EncryptCipher($this->randomSource(), $this->padder());
+        return new EncryptCipher(
+            $this->randomSource(),
+            $this->padder(),
+            $this->resultFactory()
+        );
     }
 
     private static $instance;
     private $randomSource;
     private $padder;
+    private $resultFactory;
 }

@@ -33,5 +33,6 @@ class CipherResultTypeTest extends PHPUnit_Framework_TestCase
         $this->assertFalse(CipherResultType::UNSUPPORTED_VERSION()->isSuccessful());
         $this->assertFalse(CipherResultType::UNSUPPORTED_TYPE()->isSuccessful());
         $this->assertFalse(CipherResultType::INVALID_PADDING()->isSuccessful());
+        $this->assertFalse(CipherResultType::TOO_MANY_ITERATIONS()->isSuccessful());
     }
 }

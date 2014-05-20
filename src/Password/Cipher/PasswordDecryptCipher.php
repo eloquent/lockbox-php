@@ -37,15 +37,20 @@ class PasswordDecryptCipher implements CipherInterface
     /**
      * Construct a new password decrypt cipher.
      *
+     * @param integer|null                      $maxIterations The maximum number of hash iterations to allow.
      * @param KeyDeriverInterface|null          $keyDeriver    The key deriver to use.
      * @param UnpadderInterface|null            $unpadder      The unpadder to use.
      * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
+        $maxIterations = null,
         KeyDeriverInterface $keyDeriver = null,
         UnpadderInterface $unpadder = null,
         CipherResultFactoryInterface $resultFactory = null
     ) {
+        if (null === $maxIterations) {
+            $maxIterations = 4194304;
+        }
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
@@ -56,12 +61,23 @@ class PasswordDecryptCipher implements CipherInterface
             $resultFactory = PasswordDecryptResultFactory::instance();
         }
 
+        $this->maxIterations = $maxIterations;
         $this->keyDeriver = $keyDeriver;
         $this->unpadder = $unpadder;
         $this->resultFactory = $resultFactory;
         $this->isInitialized = false;
 
         $this->reset();
+    }
+
+    /**
+     * Get the maximum number of hash iterations.
+     *
+     * @return integer The maximum iterations.
+     */
+    public function maxIterations()
+    {
+        return $this->maxIterations;
     }
 
     /**
@@ -319,6 +335,12 @@ class PasswordDecryptCipher implements CipherInterface
         }
 
         list(, $this->iterations) = unpack('N', substr($header, 2, 4));
+
+        if ($this->iterations > $this->maxIterations) {
+            $this->setResult(CipherResultType::TOO_MANY_ITERATIONS());
+            $this->iterations = 1;
+        }
+
         list($this->key) = $this->keyDeriver()->deriveKeyFromPassword(
             $this->password,
             $this->iterations,
@@ -372,6 +394,13 @@ class PasswordDecryptCipher implements CipherInterface
         $mac = substr($this->buffer, $size - 32);
 
         list(, $iterations) = unpack('N', substr($header, 2, 4));
+
+        if ($iterations > $this->maxIterations) {
+            $this->setResult(CipherResultType::TOO_MANY_ITERATIONS());
+
+            return false;
+        }
+
         list($key) = $this->keyDeriver()->deriveKeyFromPassword(
             $this->password,
             $iterations,
@@ -408,6 +437,7 @@ class PasswordDecryptCipher implements CipherInterface
         }
     }
 
+    private $maxIterations;
     private $keyDeriver;
     private $unpadder;
     private $resultFactory;

@@ -13,6 +13,8 @@ namespace Eloquent\Lockbox\Cipher\Factory;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\DecryptCipher;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
 
@@ -38,15 +40,22 @@ class DecryptCipherFactory implements CipherFactoryInterface
     /**
      * Construct a new decrypt cipher factory.
      *
-     * @param UnpadderInterface|null $unpadder The unpadder to use.
+     * @param UnpadderInterface|null            $unpadder      The unpadder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
-    public function __construct(UnpadderInterface $unpadder = null)
-    {
+    public function __construct(
+        UnpadderInterface $unpadder = null,
+        CipherResultFactoryInterface $resultFactory = null
+    ) {
         if (null === $unpadder) {
             $unpadder = PkcsPadding::instance();
         }
+        if (null === $resultFactory) {
+            $resultFactory = CipherResultFactory::instance();
+        }
 
         $this->unpadder = $unpadder;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
@@ -60,16 +69,27 @@ class DecryptCipherFactory implements CipherFactoryInterface
     }
 
     /**
+     * Get the result factory.
+     *
+     * @return CipherResultFactoryInterface The result factory.
+     */
+    public function resultFactory()
+    {
+        return $this->resultFactory;
+    }
+
+    /**
      * Create a new cipher.
      *
      * @return CipherInterface The newly created cipher.
      */
     public function createCipher()
     {
-        return new DecryptCipher($this->unpadder());
+        return new DecryptCipher($this->unpadder(), $this->resultFactory());
     }
 
     private static $instance;
     private $randomSource;
     private $unpadder;
+    private $resultFactory;
 }
