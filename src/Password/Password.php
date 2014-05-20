@@ -31,11 +31,8 @@ class Password implements PasswordInterface
         if ($password instanceof PasswordInterface) {
             return $password;
         }
-        if (is_string($password)) {
-            return new Password($password);
-        }
 
-        throw new InvalidPasswordException($password);
+        return new Password($password);
     }
 
     /**
@@ -45,6 +42,10 @@ class Password implements PasswordInterface
      */
     public function __construct($password)
     {
+        if (!is_string($password)) {
+            throw new InvalidPasswordException($password);
+        }
+
         $this->password = $password;
     }
 
