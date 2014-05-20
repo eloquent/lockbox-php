@@ -406,6 +406,7 @@ class PasswordDecryptCipher implements CipherInterface
 
     private $keyDeriver;
     private $unpadder;
+    private $resultFactory;
     private $isInitialized;
     private $password;
     private $iterations;
