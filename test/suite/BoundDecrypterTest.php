@@ -11,6 +11,7 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Lockbox\Key\Key;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -23,7 +24,7 @@ class BoundDecrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->parameters = new Key\Key('1234567890123456', '12345678901234567890123456789012');
+        $this->parameters = new Key('1234567890123456', '1234567890123456789012345678');
         $this->innerDecrypter = new Decrypter;
         $this->decrypter = new BoundDecrypter($this->parameters, $this->innerDecrypter);
 

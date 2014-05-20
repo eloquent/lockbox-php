@@ -12,6 +12,8 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Cipher\Parameters\EncryptParameters;
+use Eloquent\Lockbox\Key\Key;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -32,8 +34,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
 
-        $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
-
+        $this->decryptParameters = new Key('1234567890123456', '1234567890123456789012345678');
         $this->version = $this->type = chr(1);
         $this->iv = '1234567890123456';
     }
@@ -85,9 +86,10 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
         $data = str_repeat('A', $dataSize);
-        $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encrypted = $this->crypter->encrypt($this->key, $data);
-        $decryptionResult = $this->crypter->decrypt($this->key, $encrypted);
+        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->encryptParameters = new EncryptParameters($this->decryptParameters, $this->iv);
+        $encrypted = $this->crypter->encrypt($this->encryptParameters, $data);
+        $decryptionResult = $this->crypter->decrypt($this->decryptParameters, $encrypted);
 
         $this->assertSame('SUCCESS',$decryptionResult->type()->key());
         $this->assertSame($data, $decryptionResult->data());
@@ -100,9 +102,10 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     {
         $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
-        $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encryptStream = $this->crypter->createEncryptStream($this->key);
-        $decryptStream = $this->crypter->createDecryptStream($this->key);
+        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->encryptParameters = new EncryptParameters($this->decryptParameters, $this->iv);
+        $encryptStream = $this->crypter->createEncryptStream($this->encryptParameters);
+        $decryptStream = $this->crypter->createDecryptStream($this->decryptParameters);
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
@@ -125,7 +128,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     {
         $data = '';
         $data .= $this->authenticate($data);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_SIZE', $result->type()->key());
@@ -137,7 +140,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = chr(111) . str_pad('', 17, '1234567890');
         $block = str_pad('', 16, '1234567890');
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('UNSUPPORTED_VERSION', $result->type()->key());
@@ -148,7 +151,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     {
         $data = $this->version;
         $data .= $this->authenticate($data);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_SIZE', $result->type()->key());
@@ -160,7 +163,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . chr(111) . str_pad('', 16, '1234567890');
         $block = str_pad('', 16, '1234567890');
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('UNSUPPORTED_TYPE', $result->type()->key());
@@ -171,7 +174,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     {
         $data = $this->version . $this->type;
         $data .= $this->authenticate($data);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_SIZE', $result->type()->key());
@@ -181,7 +184,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureInvalidSize()
     {
         $data = $this->version . $this->type . $this->iv . '789012345678901234567890123';
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_SIZE', $result->type()->key());
@@ -192,7 +195,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     {
         $data = $this->version . $this->type . $this->iv . '7890123456789012345678901234';
         $data .= $this->authenticate($data);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_SIZE', $result->type()->key());
@@ -204,7 +207,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . $this->type . $this->iv;
         $block = 'foobarbazquxdoom';
         $data = $header . $block . '12' . $this->authenticate($header . $block);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_MAC', $result->type()->key());
@@ -216,7 +219,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . $this->type . $this->iv;
         $block = 'foobarbazquxdoom';
         $data = $header . $block . $this->authenticate($block, 2) . '1234567890123456789012345678';
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_MAC', $result->type()->key());
@@ -228,7 +231,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . $this->type . $this->iv;
         $block = 'foobarbazquxdoom';
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_PADDING', $result->type()->key());
@@ -240,13 +243,13 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . $this->type . $this->iv;
         $block = mcrypt_encrypt(
             MCRYPT_RIJNDAEL_128,
-            $this->key->encryptionSecret(),
+            $this->decryptParameters->encryptionSecret(),
             'foobar',
             MCRYPT_MODE_CBC,
             $this->iv
         );
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
-        $result = $this->crypter->decrypt($this->key, $data);
+        $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_PADDING', $result->type()->key());
@@ -273,9 +276,9 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     protected function authenticate($data, $size = null)
     {
         $mac = hash_hmac(
-            'sha' . $this->key->authenticationSecretBits(),
+            'sha' . $this->decryptParameters->authenticationSecretBits(),
             $data,
-            $this->key->authenticationSecret(),
+            $this->decryptParameters->authenticationSecret(),
             true
         );
 

@@ -13,15 +13,16 @@ namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use PHPUnit_Framework_TestCase;
-use Phake;
 
 /**
  * @covers \Eloquent\Lockbox\Password\RawPasswordCrypter
+ * @covers \Eloquent\Lockbox\AbstractCrypter
  * @covers \Eloquent\Lockbox\Password\RawPasswordEncrypter
+ * @covers \Eloquent\Lockbox\AbstractRawEncrypter
  * @covers \Eloquent\Lockbox\Password\RawPasswordDecrypter
+ * @covers \Eloquent\Lockbox\AbstractRawDecrypter
  */
 class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
 {
@@ -29,28 +30,27 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver($this->randomSource);
-        $this->encrypter = new RawPasswordEncrypter(
-            new PasswordEncryptCipherFactory($this->randomSource, $this->keyDeriver)
-        );
+        $this->encrypter = new RawPasswordEncrypter;
         $this->decrypter = new RawPasswordDecrypter;
         $this->crypter = new RawPasswordCrypter($this->encrypter, $this->decrypter);
 
-        $this->password = new Password('foobar');
         $this->version = chr(1);
         $this->type = chr(2);
         $this->iterations = 10;
-        $this->encryptParameters = new PasswordEncryptParameters($this->password, $this->iterations);
-        $this->decryptParameters = $this->password;
         $this->iterationsData = pack('N', $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
+        $this->decryptParameters = new Password('foobar');
+        $this->encryptParameters = new PasswordEncryptParameters(
+            $this->decryptParameters,
+            $this->iterations,
+            $this->salt,
+            $this->iv
+        );
 
-        Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
-        Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
-
-        list($this->key) = $this->keyDeriver->deriveKeyFromPassword($this->password, $this->iterations);
+        $this->keyDeriver = new KeyDeriver;
+        list($this->key) = $this->keyDeriver
+            ->deriveKeyFromPassword($this->decryptParameters, $this->iterations, $this->salt);
     }
 
     public function testConstructor()
@@ -296,13 +296,6 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf($className, $instance);
         $this->assertSame($instance, $className::instance());
-    }
-
-    protected function pad($data)
-    {
-        $padSize = intval(16 - (strlen($data) % 16));
-
-        return $data . str_repeat(chr($padSize), $padSize);
     }
 
     protected function authenticate($data, $size = null)

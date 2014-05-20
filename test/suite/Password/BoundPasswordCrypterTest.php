@@ -14,15 +14,18 @@ namespace Eloquent\Lockbox\Password;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\Password\BoundPasswordCrypter
+ * @covers \Eloquent\Lockbox\AbstractBoundCrypter
+ */
 class BoundPasswordCrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->password = new Password('password');
-        $this->encryptParameters = new PasswordEncryptParameters($this->password, 10);
-        $this->decryptParameters = $this->password;
+        $this->decryptParameters = new Password('password');
+        $this->encryptParameters = new PasswordEncryptParameters($this->decryptParameters, 10);
         $this->innerCrypter = new PasswordCrypter;
         $this->crypter = new BoundPasswordCrypter(
             $this->encryptParameters,

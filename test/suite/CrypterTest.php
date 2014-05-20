@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox;
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\Parameters\EncryptParameters;
+use Eloquent\Lockbox\Key\Key;
 use PHPUnit_Framework_TestCase;
 
 /**
@@ -34,8 +35,6 @@ class CrypterTest extends PHPUnit_Framework_TestCase
         $this->decrypter = new Decrypter;
         $this->crypter = new Crypter($this->encrypter, $this->decrypter);
 
-        $this->key = new Key\Key('1234567890123456', '1234567890123456789012345678', 'key');
-        $this->parameters = new EncryptParameters($this->key);
         $this->base64Url = Base64Url::instance();
     }
 
@@ -84,10 +83,10 @@ class CrypterTest extends PHPUnit_Framework_TestCase
     public function testEncryptDecrypt($dataSize, $encryptionSecret, $authenticationSecret)
     {
         $data = str_repeat('A', $dataSize);
-        $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $this->parameters = new EncryptParameters($this->key);
-        $encrypted = $this->crypter->encrypt($this->parameters, $data);
-        $decryptionResult = $this->crypter->decrypt($this->key, $encrypted);
+        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->encryptParameters = new EncryptParameters($this->decryptParameters);
+        $encrypted = $this->crypter->encrypt($this->encryptParameters, $data);
+        $decryptionResult = $this->crypter->decrypt($this->decryptParameters, $encrypted);
 
         $this->assertTrue($decryptionResult->isSuccessful());
         $this->assertSame($data, $decryptionResult->data());
@@ -98,9 +97,9 @@ class CrypterTest extends PHPUnit_Framework_TestCase
      */
     public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
     {
-        $this->key = new Key\Key($encryptionSecret, $authenticationSecret);
-        $encryptStream = $this->crypter->createEncryptStream($this->key);
-        $decryptStream = $this->crypter->createDecryptStream($this->key);
+        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $encryptStream = $this->crypter->createEncryptStream($this->decryptParameters);
+        $decryptStream = $this->crypter->createDecryptStream($this->decryptParameters);
         $encryptStream->pipe($decryptStream);
         $decrypted = '';
         $decryptStream->on(
@@ -121,7 +120,8 @@ class CrypterTest extends PHPUnit_Framework_TestCase
 
     public function testDecryptFailureNotBase64Url()
     {
-        $result = $this->crypter->decrypt($this->key, str_repeat('!', 100));
+        $this->decryptParameters = new Key('1234567890123456', '12345678901234567890123456789012');
+        $result = $this->crypter->decrypt($this->decryptParameters, str_repeat('!', 100));
 
         $this->assertFalse($result->isSuccessful());
         $this->assertSame('INVALID_ENCODING', $result->type()->key());

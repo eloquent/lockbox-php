@@ -15,6 +15,10 @@ use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\Password\PasswordDecrypter
+ * @covers \Eloquent\Lockbox\AbstractDecrypter
+ */
 class PasswordDecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
