@@ -40,13 +40,33 @@ class CompositePreCipherStream extends CompositeStream implements
     }
 
     /**
+     * Get the cipher stream.
+     *
+     * @return CipherStreamInterface The cipher stream.
+     */
+    public function cipherStream()
+    {
+        return $this->readable;
+    }
+
+    /**
+     * Get the writable stream.
+     *
+     * @return WritableStreamInterface The writable stream.
+     */
+    public function writable()
+    {
+        return $this->writable;
+    }
+
+    /**
      * Get the cipher.
      *
      * @return CipherInterface The cipher.
      */
     public function cipher()
     {
-        return $this->readable->cipher();
+        return $this->cipherStream()->cipher();
     }
 
     /**
@@ -56,6 +76,6 @@ class CompositePreCipherStream extends CompositeStream implements
      */
     public function result()
     {
-        return $this->readable->result();
+        return $this->cipherStream()->result();
     }
 }
