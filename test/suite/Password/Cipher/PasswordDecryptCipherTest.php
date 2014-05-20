@@ -9,47 +9,62 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Cipher;
+namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Endec\Base64\Base64Url;
-use Eloquent\Lockbox\Cipher\Parameters\EncryptParameters;
-use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
 use Eloquent\Lockbox\Key\Key;
+use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
+use Eloquent\Lockbox\Password\Cipher\Result\Factory\PasswordDecryptResultFactory;
 use Eloquent\Lockbox\Password\Password;
 use Exception;
 use PHPUnit_Framework_TestCase;
 
-class DecryptCipherTest extends PHPUnit_Framework_TestCase
+class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
+        $this->keyDeriver = new KeyDeriver;
         $this->unpadder = new PkcsPadding;
-        $this->resultFactory = new CipherResultFactory;
-        $this->cipher = new DecryptCipher($this->unpadder, $this->resultFactory);
+        $this->resultFactory = new PasswordDecryptResultFactory;
+        $this->cipher = new PasswordDecryptCipher($this->keyDeriver, $this->unpadder, $this->resultFactory);
 
-        $this->version = $this->type = chr(1);
-        $this->parameters = new Key('1234567890123456', '1234567890123456789012345678');
+        $this->version = chr(1);
+        $this->type = chr(2);
+        $this->parameters = new Password('password');
+        $this->iterations = 10;
+        $this->iterationsData = pack('N', $this->iterations);
+        $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
-        $this->encryptParameters = new EncryptParameters($this->parameters, $this->iv);
-        $this->encryptCipher = new EncryptCipher;
+        $this->encryptParameters = new PasswordEncryptParameters(
+            $this->parameters,
+            $this->iterations,
+            $this->salt,
+            $this->iv
+        );
+        $this->encryptCipher = new PasswordEncryptCipher;
         $this->base64Url = Base64Url::instance();
+
+        list($this->key) = $this->keyDeriver->deriveKeyFromPassword($this->parameters, $this->iterations, $this->salt);
     }
 
     public function testConstructor()
     {
+        $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
         $this->assertSame($this->unpadder, $this->cipher->unpadder());
         $this->assertSame($this->resultFactory, $this->cipher->resultFactory());
     }
 
     public function testConstructorDefaults()
     {
-        $this->cipher = new DecryptCipher;
+        $this->cipher = new PasswordDecryptCipher;
 
+        $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
         $this->assertSame(PkcsPadding::instance(), $this->cipher->unpadder());
-        $this->assertSame(CipherResultFactory::instance(), $this->cipher->resultFactory());
+        $this->assertSame(PasswordDecryptResultFactory::instance(), $this->cipher->resultFactory());
     }
 
     public function testIsInitialized()
@@ -64,7 +79,7 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
     public function testInitializeFailureUnsupported()
     {
         $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException');
-        $this->cipher->initialize(new Password('password'));
+        $this->cipher->initialize(new Key('1234567890123456', '1234567890123456789012345678'));
     }
 
     public function cipherData()
@@ -127,18 +142,20 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
         $this->encryptCipher->initialize($this->encryptParameters);
         $encrypted = $this->encryptCipher->finalize($input);
 
-        $this->assertSame(118, strlen($encrypted));
+        $this->assertSame(190, strlen($encrypted));
 
         $this->cipher->initialize($this->parameters);
         $output = '';
-        $output .= $this->cipher->process(substr($encrypted, 0, 1));   // version
-        $output .= $this->cipher->process(substr($encrypted, 1, 1));   // type
-        $output .= $this->cipher->process(substr($encrypted, 2, 16));  // IV
-        $output .= $this->cipher->process(substr($encrypted, 18, 18)); // block 0
-        $output .= $this->cipher->process(substr($encrypted, 36, 18)); // block 1
-        $output .= $this->cipher->process(substr($encrypted, 54, 18)); // block 2
-        $output .= $this->cipher->process(substr($encrypted, 72, 18)); // padding block
-        $output .= $this->cipher->process(substr($encrypted, 90));     // MAC
+        $output .= $this->cipher->process(substr($encrypted, 0, 1));    // version
+        $output .= $this->cipher->process(substr($encrypted, 1, 1));    // type
+        $output .= $this->cipher->process(substr($encrypted, 2, 4));    // iterations
+        $output .= $this->cipher->process(substr($encrypted, 6, 64));   // salt
+        $output .= $this->cipher->process(substr($encrypted, 70, 18));  // IV
+        $output .= $this->cipher->process(substr($encrypted, 88, 18));  // block 0
+        $output .= $this->cipher->process(substr($encrypted, 106, 18)); // block 1
+        $output .= $this->cipher->process(substr($encrypted, 124, 18)); // block 2
+        $output .= $this->cipher->process(substr($encrypted, 142, 18)); // padding block
+        $output .= $this->cipher->process(substr($encrypted, 160));     // MAC
         $output .= $this->cipher->finalize();
         $result = $this->cipher->result();
 
@@ -163,39 +180,52 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
                 'INVALID_SIZE',
             ),
             'Insufficient data' => array(
-                $this->version . $this->type . $this->iv . substr($authedBlock, 0, -1) .
-                $this->authenticate($this->version . $this->type . $this->iv . substr($block, 0, -1)),
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+                substr($authedBlock, 0, -1) .
+                $this->authenticate(
+                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
+                    substr($block, 0, -1)
+                ),
                 'INVALID_SIZE',
             ),
             'Unsupported version' => array(
-                chr(111) . $this->type . $this->iv . $authedBlock .
-                $this->authenticate(chr(111) . $this->type . $this->iv . $block),
+                chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $authedBlock .
+                $this->authenticate(chr(111) . $this->type . $this->iterationsData . $this->salt . $this->iv . $block),
                 'UNSUPPORTED_VERSION',
             ),
             'Unsupported type' => array(
-                $this->version . chr(111) . $this->iv . $authedBlock .
-                $this->authenticate($this->version . chr(111) . $this->iv . $block),
+                $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv . $authedBlock .
+                $this->authenticate(
+                    $this->version . chr(111) . $this->iterationsData . $this->salt . $this->iv . $block
+                ),
                 'UNSUPPORTED_TYPE',
             ),
             'Bad block MAC' => array(
-                $this->version . $this->type . $this->iv . $block . '12' .
-                $this->authenticate($this->version . $this->type . $this->iv . $block),
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $block . '12' .
+                $this->authenticate(
+                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $block
+                ),
                 'INVALID_MAC',
             ),
             'Bad MAC' => array(
-                $this->version . $this->type . $this->iv . $authedBlock . '1234567890123456789012345678',
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $authedBlock .
+                    '12345678901234567890123456789012',
                 'INVALID_MAC',
             ),
             'Bad ciphertext' => array(
-                $this->version . $this->type . $this->iv .
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 'foobarbazquxdoom' . $this->authenticate('foobarbazquxdoom', 2) .
-                $this->authenticate($this->version . $this->type . $this->iv . 'foobarbazquxdoom'),
+                $this->authenticate(
+                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . 'foobarbazquxdoom'
+                ),
                 'INVALID_PADDING',
             ),
             'Bad padding' => array(
-                $this->version . $this->type . $this->iv .
+                $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv .
                 $unpaddedBlock . $this->authenticate($unpaddedBlock, 2) .
-                $this->authenticate($this->version . $this->type . $this->iv . $unpaddedBlock),
+                $this->authenticate(
+                    $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . $unpaddedBlock
+                ),
                 'INVALID_PADDING',
             ),
         );
@@ -248,10 +278,10 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testInitializeAfterUse()
     {
-        $input = 'foobarbazquxdoomsplat';
+        $input = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '123456789012345678';
         $this->encryptCipher->initialize($this->encryptParameters);
         $encrypted = $this->encryptCipher->finalize($input);
-        $this->cipher->initialize(new Key('12345678901234567890123456789012', '12345678901234567890123456789012'));
+        $this->cipher->initialize(new Password('foobar'));
         $this->cipher->process($input);
         $this->cipher->initialize($this->parameters);
         $output = $this->cipher->finalize($encrypted);
@@ -266,12 +296,12 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testResetAfterUse()
     {
-        $input = 'foobarbazquxdoomsplat';
+        $input = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv . '123456789012345678';
         $this->encryptCipher->initialize($this->encryptParameters);
         $encrypted = $this->encryptCipher->finalize($input);
         $this->cipher->reset();
         $this->cipher->initialize($this->parameters);
-        $this->cipher->process($this->version . $this->type . $this->iv);
+        $this->cipher->process($this->version . $this->type . $this->iterationsData . $this->salt . $this->iv);
         $this->cipher->reset();
         $output = $this->cipher->finalize($encrypted);
         $result = $this->cipher->result();
@@ -317,13 +347,7 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
 
     protected function encrypt($data)
     {
-        return mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_128,
-            $this->parameters->encryptSecret(),
-            $data,
-            MCRYPT_MODE_CBC,
-            $this->iv
-        );
+        return mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $this->key->encryptSecret(), $data, MCRYPT_MODE_CBC, $this->iv);
     }
 
     protected function encryptAndPad($data)
@@ -340,12 +364,7 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
 
     protected function authenticate($data, $size = null)
     {
-        $mac = hash_hmac(
-            'sha' . $this->parameters->authSecretBits(),
-            $data,
-            $this->parameters->authSecret(),
-            true
-        );
+        $mac = hash_hmac('sha' . $this->key->authSecretBits(), $data, $this->key->authSecret(), true);
 
         if (null !== $size) {
             $mac = substr($mac, 0, $size);
