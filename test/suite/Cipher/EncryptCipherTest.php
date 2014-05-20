@@ -40,7 +40,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->key = new Key('1234567890123456', '1234567890123456789012345678');
         $this->iv = '1234567890123456';
         $this->parameters = new EncryptParameters($this->key, $this->iv);
-        $this->parametersNoIv = new EncryptParameters($this->key);
+        $this->parametersDefaults = new EncryptParameters($this->key);
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
@@ -62,7 +62,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame(CipherResultFactory::instance(), $this->cipher->resultFactory());
     }
 
-    public function testisInitialized()
+    public function testIsInitialized()
     {
         $this->assertFalse($this->cipher->isInitialized());
 
@@ -94,7 +94,7 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
 
     public function testCipherWithKeyOnlyParameters()
     {
-        $this->cipher->initialize($this->parametersNoIv);
+        $this->cipher->initialize($this->parametersDefaults);
         $output = $this->cipher->finalize('foobarbazquxdoomsplat');
         $result = $this->cipher->result();
         $expected = $this->base64Url->decode(

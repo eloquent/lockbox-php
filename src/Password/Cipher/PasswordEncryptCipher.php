@@ -14,6 +14,7 @@ namespace Eloquent\Lockbox\Password\Cipher;
 use Eloquent\Lockbox\Cipher\AbstractEncryptCipher;
 use Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException;
 use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
@@ -28,20 +29,22 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
     /**
      * Construct a new password encrypt cipher.
      *
-     * @param RandomSourceInterface|null $randomSource The random source to use.
-     * @param KeyDeriverInterface|null   $keyDeriver   The key deriver to use.
-     * @param PadderInterface|null       $padder       The padder to use.
+     * @param RandomSourceInterface|null        $randomSource  The random source to use.
+     * @param KeyDeriverInterface|null          $keyDeriver    The key deriver to use.
+     * @param PadderInterface|null              $padder        The padder to use.
+     * @param CipherResultFactoryInterface|null $resultFactory The result factory to use.
      */
     public function __construct(
         RandomSourceInterface $randomSource = null,
         KeyDeriverInterface $keyDeriver = null,
-        PadderInterface $padder = null
+        PadderInterface $padder = null,
+        CipherResultFactoryInterface $resultFactory = null
     ) {
         if (null === $keyDeriver) {
             $keyDeriver = KeyDeriver::instance();
         }
 
-        parent::__construct($randomSource, $padder);
+        parent::__construct($randomSource, $padder, $resultFactory);
 
         $this->keyDeriver = $keyDeriver;
     }
@@ -66,7 +69,7 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
     public function initialize(CipherParametersInterface $parameters)
     {
         if (!$parameters instanceof PasswordEncryptParametersInterface) {
-            throw new UnsupportedCipherParametersException($parameters);
+            throw new UnsupportedCipherParametersException($this, $parameters);
         }
 
         $this->iterations = $parameters->iterations();

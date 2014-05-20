@@ -52,7 +52,7 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame(CipherResultFactory::instance(), $this->cipher->resultFactory());
     }
 
-    public function testisInitialized()
+    public function testIsInitialized()
     {
         $this->assertFalse($this->cipher->isInitialized());
 

@@ -12,6 +12,8 @@
 namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Key\Key;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
@@ -21,6 +23,10 @@ use Exception;
 use PHPUnit_Framework_TestCase;
 use Phake;
 
+/**
+ * @covers \Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher
+ * @covers \Eloquent\Lockbox\Cipher\AbstractEncryptCipher
+ */
 class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
@@ -30,18 +36,20 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
         $this->keyDeriver = new KeyDeriver($this->randomSource);
         $this->padder = new PkcsPadding;
-        $this->cipher = new PasswordEncryptCipher($this->randomSource, $this->keyDeriver, $this->padder);
+        $this->resultFactory = new CipherResultFactory;
+        $this->cipher = new PasswordEncryptCipher(
+            $this->randomSource,
+            $this->keyDeriver,
+            $this->padder,
+            $this->resultFactory
+        );
 
         $this->password = new Password('password');
         $this->iterations = 10;
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
-        $this->parameters = new PasswordEncryptParameters(
-            $this->password,
-            $this->iterations,
-            $this->salt,
-            $this->iv
-        );
+        $this->parameters = new PasswordEncryptParameters($this->password, $this->iterations, $this->salt, $this->iv);
+        $this->parametersDefaults = new PasswordEncryptParameters($this->password, $this->iterations);
         $this->base64Url = Base64Url::instance();
 
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
@@ -53,6 +61,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->randomSource, $this->cipher->randomSource());
         $this->assertSame($this->keyDeriver, $this->cipher->keyDeriver());
         $this->assertSame($this->padder, $this->cipher->padder());
+        $this->assertSame($this->resultFactory, $this->cipher->resultFactory());
     }
 
     public function testConstructorDefaults()
@@ -62,9 +71,90 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame(DevUrandom::instance(), $this->cipher->randomSource());
         $this->assertSame(KeyDeriver::instance(), $this->cipher->keyDeriver());
         $this->assertSame(PkcsPadding::instance(), $this->cipher->padder());
+        $this->assertSame(CipherResultFactory::instance(), $this->cipher->resultFactory());
     }
 
-    public function testCipher()
+    public function testIsInitialized()
+    {
+        $this->assertFalse($this->cipher->isInitialized());
+
+        $this->cipher->initialize($this->parameters);
+
+        $this->assertTrue($this->cipher->isInitialized());
+    }
+
+    public function testInitializeFailureUnsupported()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\UnsupportedCipherParametersException');
+        $this->cipher->initialize(new Key('1234567890123456', '1234567890123456789012345678'));
+    }
+
+    public function testCipherWithAllParameters()
+    {
+        $this->cipher->initialize($this->parameters);
+        $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
+        );
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testCipherWithMinimalParameters()
+    {
+        $this->cipher->initialize($this->parametersDefaults);
+        $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
+        );
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testCipherEmpty()
+    {
+        $this->cipher->initialize($this->parameters);
+        $output = $this->cipher->finalize();
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
+        );
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testCipherByteByByte()
+    {
+        $this->cipher->initialize($this->parameters);
+        $input = 'foobarbazquxdoomsplat';
+        $output = '';
+        for ($i = 0; $i < 21; $i ++) {
+            $output .= $this->cipher->process($input[$i]);
+        }
+        $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
+        );
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testCipherWithSmallPackets()
     {
         $this->cipher->initialize($this->parameters);
         $output = '';
@@ -75,6 +165,7 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $output .= $this->cipher->process('dooms');
         $output .= $this->cipher->process('plat');
         $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
         );
@@ -82,16 +173,17 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
-    public function testCipherExactBlockSizes()
+    public function testCipherBlockByBlock()
     {
         $this->cipher->initialize($this->parameters);
         $output = '';
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->process('foobarbazquxdoom');
         $output .= $this->cipher->finalize();
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
             'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsu2ffZKp7Pmx2I5cv5SR6lGDvJRncw789DXdwVAOOAh8OIzaHaMtOz4vKJAcX6tX5AQx7EjgnCyLfLpbLURpxf1q3ueA'
         );
@@ -99,35 +191,73 @@ class PasswordEncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
-    public function testCipherEmpty()
+    public function testCipherBlockByBlockProcessThenFinalize()
     {
         $this->cipher->initialize($this->parameters);
-        $output = $this->cipher->finalize('');
+        $output = '';
+        $output .= $this->cipher->process('foobarbazquxdoom');
+        $output .= $this->cipher->finalize('foobarbazquxdoom');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
-            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsu2ffZKp7Pmx2I5cv5SR6lGDvJRncw789DXdwVAOOAh8OIzaHaMtOz4vKJAcX6tX5AQx7EjgnCyLfLpbLURpxf1q3ueA'
         );
 
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
     }
 
-    public function testCipherFinalizeOnly()
+    public function testInitializeAfterUse()
     {
+        $this->cipher->initialize(new PasswordEncryptParameters(new Password('foobar'), 10));
+        $this->cipher->process('foobarbazquxdoomsplat');
         $this->cipher->initialize($this->parameters);
-        $output = $this->cipher->finalize();
+        $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
         $expected = $this->base64Url->decode(
-            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZRaA7HLiTfD-B0SQrtg_ea5B86TwcwY62uLJdEPHsiX10LKQ1P55HLko_TAiPDIGcDmg'
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
         );
 
         $this->assertSameCiphertext($expected, $output);
         $this->assertTrue($this->cipher->isFinalized());
         $this->assertTrue($this->cipher->hasResult());
-        $this->assertTrue($this->cipher->result()->isSuccessful());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testResetAfterUse()
+    {
+        $this->cipher->reset();
+        $this->cipher->initialize($this->parameters);
+        $this->cipher->process('foobarbazquxdoomsplat');
+        $this->cipher->reset();
+        $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode(
+            'AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTZplb_74ZXs48BZ6QgffQ8xhtsSSJBEHMgqLwqji2dWhP9P8gChqeTc7DOawFprN07brVp8W8E8Lhys5VY1qPPR8SjGbg'
+        );
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
+    public function testProcessFailureNotInitialized()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException');
+
+        $this->cipher->process('');
+    }
+
+    public function testFinalizeFailureNotInitialized()
+    {
+        $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException');
+
+        $this->cipher->finalize();
     }
 
     public function testProcessFailureFinalized()
