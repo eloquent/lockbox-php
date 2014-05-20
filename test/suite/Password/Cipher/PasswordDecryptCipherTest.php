@@ -166,6 +166,21 @@ class PasswordDecryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame($input, $output);
     }
 
+    public function testCipherWithEncryptionParameters()
+    {
+        $this->encryptCipher->initialize($this->encryptParameters);
+        $encrypted = $this->encryptCipher->finalize('foobar');
+        $this->cipher->initialize($this->encryptParameters);
+        $output = $this->cipher->finalize($encrypted);
+        $result = $this->cipher->result();
+
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+        $this->assertNull($result->data());
+        $this->assertSame('foobar', $output);
+    }
+
     public function decryptFailureData()
     {
         $this->setUp();
