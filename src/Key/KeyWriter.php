@@ -13,8 +13,11 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Endec\EncoderInterface;
+use Eloquent\Lockbox\EncrypterInterface;
+use Eloquent\Lockbox\Key\Exception\KeyWriteException;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParametersInterface;
+use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Password\PasswordEncrypterInterface;
 use Icecave\Isolator\Isolator;
 
 /**
@@ -39,12 +42,12 @@ class KeyWriter implements EncryptedKeyWriterInterface
     /**
      * Construct a new key reader.
      *
-     * @param PasswordEncrypterInterface $encrypter The encrypter to use.
-     * @param EncoderInterface|null      $encoder   The encoder to use.
-     * @param Isolator|null              $isolator  The isolator to use.
+     * @param EncrypterInterface    $encrypter The encrypter to use.
+     * @param EncoderInterface|null $encoder   The encoder to use.
+     * @param Isolator|null         $isolator  The isolator to use.
      */
     public function __construct(
-        PasswordEncrypterInterface $encrypter = null,
+        EncrypterInterface $encrypter = null,
         EncoderInterface $encoder = null,
         Isolator $isolator = null
     ) {
@@ -63,7 +66,7 @@ class KeyWriter implements EncryptedKeyWriterInterface
     /**
      * Get the encrypter.
      *
-     * @return PasswordEncrypterInterface The encrypter.
+     * @return EncrypterInterface The encrypter.
      */
     public function encrypter()
     {
@@ -86,41 +89,35 @@ class KeyWriter implements EncryptedKeyWriterInterface
      * @param KeyInterface $key  The key.
      * @param string       $path The path to write to.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeFile(KeyInterface $key, $path)
     {
         $keyString = $this->writeString($key);
 
         if (@!$this->isolator()->file_put_contents($path, $keyString)) {
-            throw new Exception\KeyWriteException($path);
+            throw new KeyWriteException($path);
         }
     }
 
     /**
      * Write a key, encrypted with a password, to the supplied path.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
-     * @param string       $path       The path to write to.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
+     * @param string                             $path       The path to write to.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeFileWithPassword(
-        $password,
-        $iterations,
         KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters,
         $path
     ) {
-        $keyString = $this->writeStringWithPassword(
-            $password,
-            $iterations,
-            $key
-        );
+        $keyString = $this->writeStringWithPassword($key, $parameters);
 
         if (@!$this->isolator()->file_put_contents($path, $keyString)) {
-            throw new Exception\KeyWriteException($path);
+            throw new KeyWriteException($path);
         }
     }
 
@@ -131,40 +128,36 @@ class KeyWriter implements EncryptedKeyWriterInterface
      * @param stream       $stream The stream to write to.
      * @param string|null  $path   The path, if known.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeStream(KeyInterface $key, $stream, $path = null)
     {
         $result = @fwrite($stream, $this->writeString($key));
         if (!$result) {
-            throw new Exception\KeyWriteException($path);
+            throw new KeyWriteException($path);
         }
     }
 
     /**
      * Write a key, encrypted with a password, to the supplied stream.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
-     * @param stream       $stream     The stream to write to.
-     * @param string|null  $path       The path, if known.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
+     * @param stream                             $stream     The stream to write to.
+     * @param string|null                        $path       The path, if known.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeStreamWithPassword(
-        $password,
-        $iterations,
         KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters,
         $stream,
         $path = null
     ) {
-        $result = @fwrite(
-            $stream,
-            $this->writeStringWithPassword($password, $iterations, $key)
-        );
+        $result =
+            @fwrite($stream, $this->writeStringWithPassword($key, $parameters));
         if (!$result) {
-            throw new Exception\KeyWriteException($path);
+            throw new KeyWriteException($path);
         }
     }
 
@@ -189,14 +182,11 @@ class KeyWriter implements EncryptedKeyWriterInterface
 
         $data .= "    \"type\": \"lockbox-key\",\n    \"version\": 1,\n";
 
-        $data .= '    "encryptionSecret": ' .
-            json_encode($this->encoder()->encode($key->encryptionSecret())) .
+        $data .= '    "encryptSecret": ' .
+            json_encode($this->encoder()->encode($key->encryptSecret())) .
             ",\n";
-        $data .= '    "authenticationSecret": ' .
-            json_encode(
-                $this->encoder()->encode($key->authenticationSecret())
-            ) .
-            "\n";
+        $data .= '    "authSecret": ' .
+            json_encode($this->encoder()->encode($key->authSecret())) . "\n";
 
         return $data . "}\n";
     }
@@ -204,27 +194,21 @@ class KeyWriter implements EncryptedKeyWriterInterface
     /**
      * Write a key, encrypted with a password, to a string.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      *
      * @return string The key string.
      */
     public function writeStringWithPassword(
-        $password,
-        $iterations,
-        KeyInterface $key
+        KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters
     ) {
-        return
-            chunk_split(
-                $this->encrypter()->encrypt(
-                    $password,
-                    $iterations,
-                    $this->writeString($key)
-                ),
-                64,
-                "\n"
-            );
+        return chunk_split(
+            $this->encrypter()
+                ->encrypt($parameters, $this->writeString($key)),
+            64,
+            "\n"
+        );
     }
 
     /**

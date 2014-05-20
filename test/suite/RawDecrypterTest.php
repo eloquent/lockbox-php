@@ -12,29 +12,33 @@
 namespace Eloquent\Lockbox;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Transform\Factory\DecryptTransformFactory;
+use Eloquent\Lockbox\Cipher\Factory\DecryptCipherFactory;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\RawDecrypter
+ * @covers \Eloquent\Lockbox\AbstractRawDecrypter
+ */
 class RawDecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->transformFactory = new DecryptTransformFactory;
-        $this->decrypter = new RawDecrypter($this->transformFactory);
+        $this->cipherFactory = new DecryptCipherFactory;
+        $this->decrypter = new RawDecrypter($this->cipherFactory);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->transformFactory, $this->decrypter->transformFactory());
+        $this->assertSame($this->cipherFactory, $this->decrypter->cipherFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->decrypter = new RawDecrypter;
 
-        $this->assertSame(DecryptTransformFactory::instance(), $this->decrypter->transformFactory());
+        $this->assertSame(DecryptCipherFactory::instance(), $this->decrypter->cipherFactory());
     }
 
     public function testInstance()

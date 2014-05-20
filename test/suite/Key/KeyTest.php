@@ -15,45 +15,40 @@ use PHPUnit_Framework_TestCase;
 
 class KeyTest extends PHPUnit_Framework_TestCase
 {
-
-    public function validEncryptionSecretData()
+    public function validSecretData()
     {
+        //                              encryptSecret                       encryptSecretBits authSecret                                                          authSecretBits
         return array(
-            '256 bit, 512 bit' => array('12345678901234567890123456789012', 256, '1234567890123456789012345678901234567890123456789012345678901234', 512),
-            '256 bit, 384 bit' => array('12345678901234567890123456789012', 256, '123456789012345678901234567890123456789012345678',                 384),
-            '256 bit, 256 bit' => array('12345678901234567890123456789012', 256, '12345678901234567890123456789012',                                 256),
-            '256 bit, 224 bit' => array('12345678901234567890123456789012', 256, '1234567890123456789012345678',                                     224),
-            '192 bit, 512 bit' => array('123456789012345678901234',         192, '1234567890123456789012345678901234567890123456789012345678901234', 512),
-            '192 bit, 384 bit' => array('123456789012345678901234',         192, '123456789012345678901234567890123456789012345678',                 384),
-            '192 bit, 256 bit' => array('123456789012345678901234',         192, '12345678901234567890123456789012',                                 256),
-            '192 bit, 224 bit' => array('123456789012345678901234',         192, '1234567890123456789012345678',                                     224),
-            '128 bit, 512 bit' => array('1234567890123456',                 128, '1234567890123456789012345678901234567890123456789012345678901234', 512),
-            '128 bit, 384 bit' => array('1234567890123456',                 128, '123456789012345678901234567890123456789012345678',                 384),
-            '128 bit, 256 bit' => array('1234567890123456',                 128, '12345678901234567890123456789012',                                 256),
-            '128 bit, 224 bit' => array('1234567890123456',                 128, '1234567890123456789012345678',                                     224),
+            '256 bit, 512 bit' => array('12345678901234567890123456789012', 256,              '1234567890123456789012345678901234567890123456789012345678901234', 512),
+            '256 bit, 384 bit' => array('12345678901234567890123456789012', 256,              '123456789012345678901234567890123456789012345678',                 384),
+            '256 bit, 256 bit' => array('12345678901234567890123456789012', 256,              '12345678901234567890123456789012',                                 256),
+            '256 bit, 224 bit' => array('12345678901234567890123456789012', 256,              '1234567890123456789012345678',                                     224),
+            '192 bit, 512 bit' => array('123456789012345678901234',         192,              '1234567890123456789012345678901234567890123456789012345678901234', 512),
+            '192 bit, 384 bit' => array('123456789012345678901234',         192,              '123456789012345678901234567890123456789012345678',                 384),
+            '192 bit, 256 bit' => array('123456789012345678901234',         192,              '12345678901234567890123456789012',                                 256),
+            '192 bit, 224 bit' => array('123456789012345678901234',         192,              '1234567890123456789012345678',                                     224),
+            '128 bit, 512 bit' => array('1234567890123456',                 128,              '1234567890123456789012345678901234567890123456789012345678901234', 512),
+            '128 bit, 384 bit' => array('1234567890123456',                 128,              '123456789012345678901234567890123456789012345678',                 384),
+            '128 bit, 256 bit' => array('1234567890123456',                 128,              '12345678901234567890123456789012',                                 256),
+            '128 bit, 224 bit' => array('1234567890123456',                 128,              '1234567890123456789012345678',                                     224),
         );
     }
 
     /**
-     * @dataProvider validEncryptionSecretData
+     * @dataProvider validSecretData
      */
-    public function testConstructor($encryptionSecret, $encryptionSecretBits, $authenticationSecret, $authenticationSecretBits)
+    public function testConstructor($encryptSecret, $encryptSecretBits, $authSecret, $authSecretBits)
     {
-        $this->key = new Key(
-            $encryptionSecret,
-            $authenticationSecret,
-            'name',
-            'description'
-        );
+        $this->key = new Key($encryptSecret, $authSecret, 'name', 'description');
 
-        $this->assertSame($encryptionSecret, $this->key->encryptionSecret());
-        $this->assertSame($authenticationSecret, $this->key->authenticationSecret());
+        $this->assertSame($encryptSecret, $this->key->encryptSecret());
+        $this->assertSame($authSecret, $this->key->authSecret());
         $this->assertSame('name', $this->key->name());
         $this->assertSame('description', $this->key->description());
-        $this->assertSame($encryptionSecretBits / 8, $this->key->encryptionSecretBytes());
-        $this->assertSame($encryptionSecretBits, $this->key->encryptionSecretBits());
-        $this->assertSame($authenticationSecretBits / 8, $this->key->authenticationSecretBytes());
-        $this->assertSame($authenticationSecretBits, $this->key->authenticationSecretBits());
+        $this->assertSame($encryptSecretBits / 8, $this->key->encryptSecretBytes());
+        $this->assertSame($encryptSecretBits, $this->key->encryptSecretBits());
+        $this->assertSame($authSecretBits / 8, $this->key->authSecretBytes());
+        $this->assertSame($authSecretBits, $this->key->authSecretBits());
     }
 
     public function testNoNameAndDescription()
@@ -64,27 +59,27 @@ class KeyTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->key->description());
     }
 
-    public function testInvalidEncryptionSecret()
+    public function testInvalidEncryptSecret()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSecretException');
         new Key(null, '12345678901234567890123456789012');
     }
 
-    public function testInvalidAuthenticationSecret()
+    public function testInvalidAuthSecret()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidSecretException');
         new Key('12345678901234567890123456789012', null);
     }
 
-    public function testInvalidEncryptionSecretSize()
+    public function testInvalidEncryptSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptSecretSizeException');
         new Key('123456789012345678901234567890123', '12345678901234567890123456789012');
     }
 
-    public function testInvalidAuthenticationSecretSize()
+    public function testInvalidAuthSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthSecretSizeException');
         new Key('12345678901234567890123456789012', '123456789012345678901234567890123');
     }
 }

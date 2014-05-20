@@ -11,90 +11,29 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\BoundEncrypterInterface;
+use Eloquent\Lockbox\AbstractBoundEncrypter;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+use Eloquent\Lockbox\EncrypterInterface;
 
 /**
- * Binds a password to an encrypter.
+ * Binds a set of parameters to a password encrypter.
  */
-class BoundPasswordEncrypter implements BoundEncrypterInterface
+class BoundPasswordEncrypter extends AbstractBoundEncrypter
 {
     /**
      * Construct a new bound password encrypter.
      *
-     * @param string                          $password   The password to encrypt with.
-     * @param integer                         $iterations The number of hash iterations to use.
-     * @param PasswordEncrypterInterface|null $encrypter  The encrypter to use.
+     * @param CipherParametersInterface $parameters The parameters to use.
+     * @param EncrypterInterface|null   $encrypter  The encrypter to use.
      */
     public function __construct(
-        $password,
-        $iterations,
-        PasswordEncrypterInterface $encrypter = null
+        CipherParametersInterface $parameters,
+        EncrypterInterface $encrypter = null
     ) {
         if (null === $encrypter) {
             $encrypter = PasswordEncrypter::instance();
         }
 
-        $this->password = $password;
-        $this->iterations = $iterations;
-        $this->encrypter = $encrypter;
+        parent::__construct($parameters, $encrypter);
     }
-
-    /**
-     * Get the password.
-     *
-     * @return string The password.
-     */
-    public function password()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Get the number of hash iterations.
-     *
-     * @return integer The hash iterations.
-     */
-    public function iterations()
-    {
-        return $this->iterations;
-    }
-
-    /**
-     * Get the encrypter.
-     *
-     * @return PasswordEncrypterInterface The encrypter.
-     */
-    public function encrypter()
-    {
-        return $this->encrypter;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($data)
-    {
-        return $this->encrypter()
-            ->encrypt($this->password(), $this->iterations(), $data);
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @return TransformStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream()
-    {
-        return $this->encrypter()
-            ->createEncryptStream($this->password(), $this->iterations());
-    }
-
-    private $password;
-    private $iterations;
-    private $encrypter;
 }

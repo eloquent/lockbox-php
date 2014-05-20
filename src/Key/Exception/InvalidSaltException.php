@@ -17,22 +17,22 @@ use Exception;
  * The supplied salt is invalid.
  */
 final class InvalidSaltException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid salt exception.
      *
-     * @param mixed          $salt     The invalid salt.
-     * @param Exception|null $previous The cause, if available.
+     * @param mixed          $salt  The invalid salt.
+     * @param Exception|null $cause The cause, if available.
      */
-    public function __construct($salt, Exception $previous = null)
+    public function __construct($salt, Exception $cause = null)
     {
         $this->salt = $salt;
 
         parent::__construct(
             sprintf('Invalid salt %s.', var_export($salt, true)),
             0,
-            $previous
+            $cause
         );
     }
 

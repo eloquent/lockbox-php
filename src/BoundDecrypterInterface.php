@@ -1,4 +1,4 @@
-<?php
+<?php // @codeCoverageIgnoreStart
 
 /*
  * This file is part of the Lockbox package.
@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Result\DecryptionResultInterface;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
+use Eloquent\Lockbox\Stream\CipherStreamInterface;
 
 /**
  * The interface implemented by bound decrypters.
@@ -24,14 +24,14 @@ interface BoundDecrypterInterface
      *
      * @param string $data The data to decrypt.
      *
-     * @return DecryptionResultInterface The decryption result.
+     * @return CipherResultInterface The decrypt result.
      */
     public function decrypt($data);
 
     /**
      * Create a new decrypt stream.
      *
-     * @return TransformStreamInterface The newly created decrypt stream.
+     * @return CipherStreamInterface The newly created decrypt stream.
      */
     public function createDecryptStream();
 }

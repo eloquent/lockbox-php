@@ -12,37 +12,33 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Padding\PkcsPadding;
-use Eloquent\Lockbox\Transform\Factory\PasswordDecryptTransformFactory;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordDecryptCipherFactory;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\Password\RawPasswordDecrypter
+ * @covers \Eloquent\Lockbox\AbstractRawDecrypter
+ */
 class RawPasswordDecrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->transformFactory = new PasswordDecryptTransformFactory;
-        $this->keyDeriver = new KeyDeriver;
-        $this->unpadder = new PkcsPadding;
-        $this->decrypter = new RawPasswordDecrypter($this->transformFactory, $this->keyDeriver, $this->unpadder);
+        $this->cipherFactory = new PasswordDecryptCipherFactory;
+        $this->decrypter = new RawPasswordDecrypter($this->cipherFactory);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->transformFactory, $this->decrypter->transformFactory());
-        $this->assertSame($this->keyDeriver, $this->decrypter->keyDeriver());
-        $this->assertSame($this->unpadder, $this->decrypter->unpadder());
+        $this->assertSame($this->cipherFactory, $this->decrypter->cipherFactory());
     }
 
     public function testConstructorDefaults()
     {
         $this->decrypter = new RawPasswordDecrypter;
 
-        $this->assertSame(PasswordDecryptTransformFactory::instance(), $this->decrypter->transformFactory());
-        $this->assertSame(KeyDeriver::instance(), $this->decrypter->keyDeriver());
-        $this->assertSame(PkcsPadding::instance(), $this->decrypter->unpadder());
+        $this->assertSame(PasswordDecryptCipherFactory::instance(), $this->decrypter->cipherFactory());
     }
 
     public function testInstance()

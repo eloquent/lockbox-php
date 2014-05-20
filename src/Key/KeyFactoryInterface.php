@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+
 /**
  * The interface implemented by encryption key factories.
  */
@@ -19,17 +21,17 @@ interface KeyFactoryInterface
     /**
      * Create a new key from existing key data.
      *
-     * @param string      $encryptionSecret     The encryption secret.
-     * @param string      $authenticationSecret The authentication secret.
-     * @param string|null $name                 The name.
-     * @param string|null $description          The description.
+     * @param string      $encryptSecret The encrypt secret.
+     * @param string      $authSecret    The auth secret.
+     * @param string|null $name          The name.
+     * @param string|null $description   The description.
      *
-     * @return KeyInterface                           The key.
-     * @throws Exception\InvalidKeyExceptionInterface If the key is invalid.
+     * @return KeyInterface                          The key.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function createKey(
-        $encryptionSecret,
-        $authenticationSecret,
+        $encryptSecret,
+        $authSecret,
         $name = null,
         $description = null
     );

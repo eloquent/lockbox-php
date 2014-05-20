@@ -11,73 +11,27 @@
 
 namespace Eloquent\Lockbox;
 
-use Eloquent\Confetti\TransformStreamInterface;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 
 /**
- * Binds a key to an encrypter.
+ * Binds a set of parameters to an encrypter.
  */
-class BoundEncrypter implements BoundEncrypterInterface
+class BoundEncrypter extends AbstractBoundEncrypter
 {
     /**
      * Construct a new bound encrypter.
      *
-     * @param Key\KeyInterface        $key       The key to use.
-     * @param EncrypterInterface|null $encrypter The encrypter to use.
+     * @param CipherParametersInterface $parameters The parameters to use.
+     * @param EncrypterInterface|null   $encrypter  The encrypter to use.
      */
     public function __construct(
-        Key\KeyInterface $key,
+        CipherParametersInterface $parameters,
         EncrypterInterface $encrypter = null
     ) {
         if (null === $encrypter) {
             $encrypter = Encrypter::instance();
         }
 
-        $this->key = $key;
-        $this->encrypter = $encrypter;
+        parent::__construct($parameters, $encrypter);
     }
-
-    /**
-     * Get the key.
-     *
-     * @return Key\KeyInterface The key.
-     */
-    public function key()
-    {
-        return $this->key;
-    }
-
-    /**
-     * Get the encrypter.
-     *
-     * @return EncrypterInterface The encrypter;
-     */
-    public function encrypter()
-    {
-        return $this->encrypter;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string $data The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($data)
-    {
-        return $this->encrypter()->encrypt($this->key(), $data);
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @return TransformStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream()
-    {
-        return $this->encrypter()->createEncryptStream($this->key());
-    }
-
-    private $key;
-    private $encrypter;
 }

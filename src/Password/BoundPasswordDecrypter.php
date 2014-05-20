@@ -11,75 +11,29 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\BoundDecrypterInterface;
-use Eloquent\Lockbox\Result\PasswordDecryptionResultInterface;
+use Eloquent\Lockbox\AbstractBoundDecrypter;
+use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
+use Eloquent\Lockbox\DecrypterInterface;
 
 /**
- * Binds a password to a decrypter.
+ * Binds a set of parameters to a password decrypter.
  */
-class BoundPasswordDecrypter implements BoundDecrypterInterface
+class BoundPasswordDecrypter extends AbstractBoundDecrypter
 {
     /**
-     * Construct a new bound decrypter.
+     * Construct a new bound password decrypter.
      *
-     * @param string                          $password  The password to decrypt with.
-     * @param PasswordDecrypterInterface|null $decrypter The decrypter to use.
+     * @param CipherParametersInterface $parameters The parameters to use.
+     * @param DecrypterInterface|null   $decrypter  The decrypter to use.
      */
     public function __construct(
-        $password,
-        PasswordDecrypterInterface $decrypter = null
+        CipherParametersInterface $parameters,
+        DecrypterInterface $decrypter = null
     ) {
         if (null === $decrypter) {
             $decrypter = PasswordDecrypter::instance();
         }
 
-        $this->password = $password;
-        $this->decrypter = $decrypter;
+        parent::__construct($parameters, $decrypter);
     }
-
-    /**
-     * Get the password.
-     *
-     * @return string The password.
-     */
-    public function password()
-    {
-        return $this->password;
-    }
-
-    /**
-     * Get the decrypter.
-     *
-     * @return PasswordDecrypterInterface The decrypter;
-     */
-    public function decrypter()
-    {
-        return $this->decrypter;
-    }
-
-    /**
-     * Decrypt a data packet.
-     *
-     * @param string $data The data to decrypt.
-     *
-     * @return PasswordDecryptionResultInterface The decryption result.
-     */
-    public function decrypt($data)
-    {
-        return $this->decrypter()->decrypt($this->password(), $data);
-    }
-
-    /**
-     * Create a new decrypt stream.
-     *
-     * @return TransformStreamInterface The newly created decrypt stream.
-     */
-    public function createDecryptStream()
-    {
-        return $this->decrypter()->createDecryptStream($this->password());
-    }
-
-    private $password;
-    private $decrypter;
 }

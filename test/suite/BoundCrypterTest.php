@@ -11,28 +11,36 @@
 
 namespace Eloquent\Lockbox;
 
+use Eloquent\Lockbox\Cipher\Parameters\EncryptParameters;
+use Eloquent\Lockbox\Key\Key;
 use PHPUnit_Framework_TestCase;
 
+/**
+ * @covers \Eloquent\Lockbox\BoundCrypter
+ * @covers \Eloquent\Lockbox\AbstractBoundCrypter
+ */
 class BoundCrypterTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->key = new Key\Key('1234567890123456', '12345678901234567890123456789012');
+        $this->decryptParameters = new Key('1234567890123456', '1234567890123456789012345678');
+        $this->encryptParameters = new EncryptParameters($this->decryptParameters, '1234567890123456');
         $this->innerCrypter = new Crypter;
-        $this->crypter = new BoundCrypter($this->key, $this->innerCrypter);
+        $this->crypter = new BoundCrypter($this->encryptParameters, $this->decryptParameters, $this->innerCrypter);
     }
 
     public function testConstructor()
     {
-        $this->assertSame($this->key, $this->crypter->key());
+        $this->assertSame($this->encryptParameters, $this->crypter->encryptParameters());
+        $this->assertSame($this->decryptParameters, $this->crypter->decryptParameters());
         $this->assertSame($this->innerCrypter, $this->crypter->crypter());
     }
 
     public function testConstructorDefaults()
     {
-        $this->crypter = new BoundCrypter($this->key);
+        $this->crypter = new BoundCrypter($this->encryptParameters, $this->decryptParameters);
 
         $this->assertSame(Crypter::instance(), $this->crypter->crypter());
     }

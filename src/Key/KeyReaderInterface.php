@@ -1,4 +1,4 @@
-<?php
+<?php // @codeCoverageIgnoreStart
 
 /*
  * This file is part of the Lockbox package.
@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\KeyReadException;
+
 /**
  * The interface implemented by key readers.
  */
@@ -21,8 +23,8 @@ interface KeyReaderInterface
      *
      * @param string $path The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readFile($path);
 
@@ -32,8 +34,8 @@ interface KeyReaderInterface
      * @param stream      $stream The stream to read from.
      * @param string|null $path   The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStream($stream, $path = null);
 
@@ -43,8 +45,8 @@ interface KeyReaderInterface
      * @param string      $data The string to read from.
      * @param string|null $path The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readString($data, $path = null);
 }

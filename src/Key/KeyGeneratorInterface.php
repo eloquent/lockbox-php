@@ -1,4 +1,4 @@
-<?php
+<?php // @codeCoverageIgnoreStart
 
 /*
  * This file is part of the Lockbox package.
@@ -11,6 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+
 /**
  * The interface implemented by encryption key generators.
  */
@@ -19,18 +21,18 @@ interface KeyGeneratorInterface
     /**
      * Generate a new key.
      *
-     * @param string|null  $name                     The name.
-     * @param string|null  $description              The description.
-     * @param integer|null $encryptionSecretBits     The size of the encryption secret in bits.
-     * @param integer|null $authenticationSecretBits The size of the authentication secret in bits.
+     * @param string|null  $name              The name.
+     * @param string|null  $description       The description.
+     * @param integer|null $encryptSecretBits The size of the encrypt secret in bits.
+     * @param integer|null $authSecretBits    The size of the auth secret in bits.
      *
-     * @return KeyInterface                           The generated key.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return KeyInterface                          The generated key.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function generateKey(
         $name = null,
         $description = null,
-        $encryptionSecretBits = null,
-        $authenticationSecretBits = null
+        $encryptSecretBits = null,
+        $authSecretBits = null
     );
 }

@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
+use Eloquent\Lockbox\Password\PasswordInterface;
+
 /**
  * The interface implemented by encryption key derivers.
  */
@@ -19,17 +22,17 @@ interface KeyDeriverInterface
     /**
      * Derive a key from a password.
      *
-     * @param string      $password    The password.
-     * @param integer     $iterations  The number of hash iterations to use.
-     * @param string|null $salt        The salt to use, or null to generate a random salt.
-     * @param string|null $name        The name.
-     * @param string|null $description The description.
+     * @param PasswordInterface $password    The password.
+     * @param integer           $iterations  The number of hash iterations to use.
+     * @param string|null       $salt        The salt to use, or null to generate a random salt.
+     * @param string|null       $name        The name.
+     * @param string|null       $description The description.
      *
-     * @return tuple<KeyInterface,string>             A 2-tuple of the derived key, and the salt used.
-     * @throws Exception\InvalidKeyExceptionInterface If the supplied arguments are invalid.
+     * @return tuple<KeyInterface,string>            A 2-tuple of the derived key, and the salt used.
+     * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function deriveKeyFromPassword(
-        $password,
+        PasswordInterface $password,
         $iterations,
         $salt = null,
         $name = null,

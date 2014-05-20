@@ -11,20 +11,20 @@
 
 namespace Eloquent\Lockbox\Password;
 
-use Eloquent\Confetti\TransformStream;
-use Eloquent\Confetti\TransformStreamInterface;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactory;
-use Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface;
+use Eloquent\Lockbox\AbstractRawEncrypter;
+use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
+use Eloquent\Lockbox\EncrypterInterface;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 
 /**
  * Encrypts data and produces raw output using passwords.
  */
-class RawPasswordEncrypter implements PasswordEncrypterInterface
+class RawPasswordEncrypter extends AbstractRawEncrypter
 {
     /**
      * Get the static instance of this encrypter.
      *
-     * @return PasswordEncrypterInterface The static encrypter.
+     * @return EncrypterInterface The static encrypter.
      */
     public static function instance()
     {
@@ -38,61 +38,16 @@ class RawPasswordEncrypter implements PasswordEncrypterInterface
     /**
      * Construct a new raw password encrypter.
      *
-     * @param PasswordEncryptTransformFactoryInterface|null $transformFactory The transform factory to use.
+     * @param CipherFactoryInterface|null $cipherFactory The cipher factory to use.
      */
-    public function __construct(
-        PasswordEncryptTransformFactoryInterface $transformFactory = null
-    ) {
-        if (null === $transformFactory) {
-            $transformFactory = PasswordEncryptTransformFactory::instance();
+    public function __construct(CipherFactoryInterface $cipherFactory = null)
+    {
+        if (null === $cipherFactory) {
+            $cipherFactory = PasswordEncryptCipherFactory::instance();
         }
 
-        $this->transformFactory = $transformFactory;
-    }
-
-    /**
-     * Get the transform factory.
-     *
-     * @return PasswordEncryptTransformFactoryInterface The transform factory.
-     */
-    public function transformFactory()
-    {
-        return $this->transformFactory;
-    }
-
-    /**
-     * Encrypt a data packet.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     * @param string  $data       The data to encrypt.
-     *
-     * @return string The encrypted data.
-     */
-    public function encrypt($password, $iterations, $data)
-    {
-        list($data) = $this->transformFactory()
-            ->createTransform($password, $iterations)
-            ->transform($data, $context, true);
-
-        return $data;
-    }
-
-    /**
-     * Create a new encrypt stream.
-     *
-     * @param string  $password   The password to encrypt with.
-     * @param integer $iterations The number of hash iterations to use.
-     *
-     * @return TransformStreamInterface The newly created encrypt stream.
-     */
-    public function createEncryptStream($password, $iterations)
-    {
-        return new TransformStream(
-            $this->transformFactory()->createTransform($password, $iterations)
-        );
+        parent::__construct($cipherFactory);
     }
 
     private static $instance;
-    private $transformFactory;
 }

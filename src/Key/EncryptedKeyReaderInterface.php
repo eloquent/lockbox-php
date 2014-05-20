@@ -1,4 +1,4 @@
-<?php
+<?php // @codeCoverageIgnoreStart
 
 /*
  * This file is part of the Lockbox package.
@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\KeyReadException;
+use Eloquent\Lockbox\Password\PasswordInterface;
+
 /**
  * The interface implemented by encrypted key readers.
  */
@@ -19,13 +22,13 @@ interface EncryptedKeyReaderInterface extends KeyReaderInterface
     /**
      * Read a key from the supplied path, and decrypt with a password.
      *
-     * @param string $password The password.
-     * @param string $path     The path to read from.
+     * @param PasswordInterface $password The password.
+     * @param string            $path     The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readFileWithPassword($password, $path);
+    public function readFileWithPassword(PasswordInterface $password, $path);
 
     /**
      * Read a key from the supplied path, and decrypt with an optional password.
@@ -36,22 +39,26 @@ interface EncryptedKeyReaderInterface extends KeyReaderInterface
      * @param callable $callback The password callback.
      * @param string   $path     The path to read from.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readFileWithPasswordCallback($callback, $path);
 
     /**
      * Read a key from the supplied stream, and decrypt with a password.
      *
-     * @param string      $password The password.
-     * @param stream      $stream   The stream to read from.
-     * @param string|null $path     The path, if known.
+     * @param PasswordInterface $password The password.
+     * @param stream            $stream   The stream to read from.
+     * @param string|null       $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readStreamWithPassword($password, $stream, $path = null);
+    public function readStreamWithPassword(
+        PasswordInterface $password,
+        $stream,
+        $path = null
+    );
 
     /**
      * Read a key from the supplied stream, and decrypt with an optional
@@ -64,8 +71,8 @@ interface EncryptedKeyReaderInterface extends KeyReaderInterface
      * @param stream      $stream   The stream to read from.
      * @param string|null $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStreamWithPasswordCallback(
         $callback,
@@ -76,14 +83,18 @@ interface EncryptedKeyReaderInterface extends KeyReaderInterface
     /**
      * Read a key from the supplied string, and decrypt with a password.
      *
-     * @param string      $password The password.
-     * @param string      $data     The string to read from.
-     * @param string|null $path     The path, if known.
+     * @param PasswordInterface $password The password.
+     * @param string            $data     The string to read from.
+     * @param string|null       $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
-    public function readStringWithPassword($password, $data, $path = null);
+    public function readStringWithPassword(
+        PasswordInterface $password,
+        $data,
+        $path = null
+    );
 
     /**
      * Read a key from the supplied string, and decrypt with a password.
@@ -92,8 +103,8 @@ interface EncryptedKeyReaderInterface extends KeyReaderInterface
      * @param string      $data     The string to read from.
      * @param string|null $path     The path, if known.
      *
-     * @return KeyInterface               The key.
-     * @throws Exception\KeyReadException If the key cannot be read, or if the key is invalid.
+     * @return KeyInterface     The key.
+     * @throws KeyReadException If the key cannot be read, or if the key is invalid.
      */
     public function readStringWithPasswordCallback(
         $callback,

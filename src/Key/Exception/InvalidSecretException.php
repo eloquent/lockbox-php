@@ -17,22 +17,22 @@ use Exception;
  * The supplied secret is invalid.
  */
 final class InvalidSecretException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid secret exception.
      *
-     * @param mixed          $secret   The invalid secret.
-     * @param Exception|null $previous The cause, if available.
+     * @param mixed          $secret The invalid secret.
+     * @param Exception|null $cause  The cause, if available.
      */
-    public function __construct($secret, Exception $previous = null)
+    public function __construct($secret, Exception $cause = null)
     {
         $this->secret = $secret;
 
         parent::__construct(
             sprintf('Invalid secret %s.', var_export($secret, true)),
             0,
-            $previous
+            $cause
         );
     }
 

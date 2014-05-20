@@ -17,22 +17,22 @@ use Exception;
  * The salt size is invalid.
  */
 final class InvalidSaltSizeException extends Exception implements
-    InvalidKeyExceptionInterface
+    InvalidKeyParameterExceptionInterface
 {
     /**
      * Construct a new invalid salt size exception.
      *
-     * @param integer        $size     The invalid salt size.
-     * @param Exception|null $previous The cause, if available.
+     * @param integer        $size  The invalid salt size.
+     * @param Exception|null $cause The cause, if available.
      */
-    public function __construct($size, Exception $previous = null)
+    public function __construct($size, Exception $cause = null)
     {
         $this->size = $size;
 
         parent::__construct(
             sprintf('Invalid salt size %d. Salt must be 512 bits.', $size),
             0,
-            $previous
+            $cause
         );
     }
 

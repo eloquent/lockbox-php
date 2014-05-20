@@ -13,8 +13,11 @@ namespace Eloquent\Lockbox\Key;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Liberator\Liberator;
+use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
+use Eloquent\Lockbox\Password\Password;
 use Eloquent\Lockbox\Password\PasswordEncrypter;
-use Eloquent\Lockbox\Transform\PasswordEncryptTransform;
+use Eloquent\Lockbox\Password\RawPasswordEncrypter;
 use Icecave\Isolator\Isolator;
 use PHPUnit_Framework_TestCase;
 use Phake;
@@ -25,10 +28,10 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->transformFactory = Phake::mock(
-            'Eloquent\Lockbox\Transform\Factory\PasswordEncryptTransformFactoryInterface'
-        );
-        $this->encrypter = new PasswordEncrypter($this->transformFactory);
+        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
+        $this->keyDeriver = new KeyDeriver($this->randomSource);
+        $this->cipherFactory = new PasswordEncryptCipherFactory($this->randomSource, $this->keyDeriver);
+        $this->encrypter = new PasswordEncrypter(new RawPasswordEncrypter($this->cipherFactory));
         $this->encoder = new Base64Url;
         $this->isolator = Phake::mock(Isolator::className());
         $this->writer = new KeyWriter($this->encrypter, $this->encoder, $this->isolator);
@@ -47,8 +50,8 @@ class KeyWriterTest extends PHPUnit_Framework_TestCase
     "description": "description",
     "type": "lockbox-key",
     "version": 1,
-    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
-    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+    "encryptSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
+    "authSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
 
 EOD;
@@ -56,8 +59,8 @@ EOD;
 {
     "type": "lockbox-key",
     "version": 1,
-    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
-    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+    "encryptSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
+    "authSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
 
 EOD;
@@ -67,40 +70,30 @@ AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaIkMi2nO33jSCq
 d-PyQhN7QlQqvRgk91OJAfQNx8R6msw6mTqLqdQGsoaDNn_ijuCHgSPkcIb1SDDR
 7WotmgkNrFB4DmQZwwS0JRkf8bospNcm9YBG_siLrOn1Q_GShPJ67KndCnrUkiuw
-A1kQswfNhqYfHE6eYM8oTqHXOEO7d8PQwAhCMXiHWZeev7EMXACQQZiIokZQC1zx
--xBPGy5ulLS1mVpdtce3AmkegN87I5u5CZtLObVbNCJ79YkYASCP6I_rnqJYKGRY
-clvzNIzS8-moGPSaS4pGe2L6QeUYSAVcUCSowoVFIRg2zH-eU_OodUMBodRb5HTX
-NXFzWE3EDKiJvpb168_dTgCEZRFfYpw-PY16CPRBHABnBlWC_CRE_S0rcWnMsMGh
-dMhpnoMo7dMTV-Vc0DhKI9QtMLDhPA
+A1kQswfNhqYfHE6eYM8oTqHXOEMNtkD0aS9Spna3cJo2pePxLN1cuBnBteHcMPcn
+KS2cAEdHxqhh5uZjfsOCPe72R64YiG8tHcalAIl65Dab62GIZNT-Z7FtvEVPw3Yu
+VGyfbV7pq-OnU89gHnzRz4pgtcNmCD4Otss0TZAnSbqwgmC5qUPucJdZetGOnLRG
+KRxgNRgnoMOHTJgxa1saY9SNjTmsuIyqiKXEPIu5lnbaRlcZc-5VEKZ52UJBULU-
+d4Fk9A
 
 EOD;
         $this->keyMinimalStringEncrypted = <<<'EOD'
 AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaahwBMpOBVXCgF
-T1Ohh60pZsF7hIP1CBZ2gOYirhC_W_Mf5lZ_JZZHMotEliRZSEgPDe5bZYdOSvLv
-T23KWBG-EG1J2AKU_5oEDcsqCDaSFdihYKGF2a3ZawrPGBXaPu6UaVv6e0zSY_uj
-6lUqasG17hzwQ8lsqeFbatiui-xuiqbJbdrMPpukzp_H2AqieseWfTcEpNuX4MOm
-hNjhk8IF-KcnOnrvPNN6NU9Fchcn21SBi5chj4nvnUg1Icy_hg6QoyCW7pQuA_tP
-GV6gLGQkG2udOCa3ncYIw7rRK8xfWZPX-EVN4g
+T1Ohh60pZsF7hIP1CBZ2gOYirhC_W_Mf5lZ_JZZHMotEliRZSEgPDe5bZYe2X7u9
+jwgK_tb_M7DUHrM9JZovYT_idOCFhG0TezW-9akE93KjXw912cicnUSXZsbJPjRP
+CbwPOREHWrexLCX7v_mJAFve6JOr5plnKyWmlxXdCxXMmXrUTLro9jLCfdV_wTwd
+S6Xp75O49bApB6QDfogtFS37eHGKSLLGQOMRxeRD5vCiNeyFzXD-wBamjsAGM-Kq
+zOopKXDBccm2MsrrnRLvqQYgLYldVpAsAwA9zQ
 
 EOD;
 
-        $this->password = 'password';
+        $this->password = new Password('password');
         $this->iterations = 10;
+        $this->parameters = new PasswordEncryptParameters($this->password, $this->iterations);
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
         $this->iv = '1234567890123456';
 
-        $this->randomSource = Phake::mock('Eloquent\Lockbox\Random\RandomSourceInterface');
-        $this->keyDeriver = new KeyDeriver(null, $this->randomSource);
-        $this->transform = new PasswordEncryptTransform(
-            $this->password,
-            $this->iterations,
-            $this->keyDeriver,
-            $this->randomSource
-        );
-
-        Phake::when($this->transformFactory)->createTransform($this->password, $this->iterations)
-            ->thenReturn($this->transform);
         Phake::when($this->randomSource)->generate(64)->thenReturn($this->salt);
         Phake::when($this->randomSource)->generate(16)->thenReturn($this->iv);
     }
@@ -158,9 +151,7 @@ EOD;
         Phake::when($this->isolator)->file_put_contents('/path/to/file', $this->keyFullStringEncrypted)
             ->thenReturn(111);
 
-        $this->assertNull(
-            $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyFull, '/path/to/file')
-        );
+        $this->assertNull($this->writer->writeFileWithPassword($this->keyFull, $this->parameters, '/path/to/file'));
     }
 
     public function testWriteFileWithPasswordMinimal()
@@ -168,9 +159,7 @@ EOD;
         Phake::when($this->isolator)->file_put_contents('/path/to/file', $this->keyMinimalStringEncrypted)
             ->thenReturn(111);
 
-        $this->assertNull(
-            $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyMinimal, '/path/to/file')
-        );
+        $this->assertNull($this->writer->writeFileWithPassword($this->keyMinimal, $this->parameters, '/path/to/file'));
     }
 
     public function testWriteFileWithPasswordFailure()
@@ -182,7 +171,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to '/path/to/file'."
         );
-        $this->writer->writeFileWithPassword($this->password, $this->iterations, $this->keyMinimal, '/path/to/file');
+        $this->writer->writeFileWithPassword($this->keyMinimal, $this->parameters, '/path/to/file');
     }
 
     public function testWriteStreamFull()
@@ -225,7 +214,7 @@ EOD;
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->stream = fopen($path, 'wb');
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyFull, $this->stream);
+        $this->writer->writeStreamWithPassword($this->keyFull, $this->parameters, $this->stream);
 
         $this->assertSame($this->keyFullStringEncrypted, file_get_contents($path));
     }
@@ -234,7 +223,7 @@ EOD;
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
         $this->stream = fopen($path, 'wb');
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, $this->stream);
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, $this->stream);
 
         $this->assertSame($this->keyMinimalStringEncrypted, file_get_contents($path));
     }
@@ -245,8 +234,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to '/path/to/file'."
         );
-        $this->writer
-            ->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, null, '/path/to/file');
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, null, '/path/to/file');
     }
 
     public function testWriteStreamWithPasswordFailureWithoutPath()
@@ -255,7 +243,7 @@ EOD;
             'Eloquent\Lockbox\Key\Exception\KeyWriteException',
             "Unable to write key to stream."
         );
-        $this->writer->writeStreamWithPassword($this->password, $this->iterations, $this->keyMinimal, null);
+        $this->writer->writeStreamWithPassword($this->keyMinimal, $this->parameters, null);
     }
 
     public function testWriteStringFull()
@@ -272,7 +260,7 @@ EOD;
     {
         $this->assertSame(
             $this->keyFullStringEncrypted,
-            $this->writer->writeStringWithPassword($this->password, $this->iterations, $this->keyFull)
+            $this->writer->writeStringWithPassword($this->keyFull, $this->parameters)
         );
     }
 
@@ -280,7 +268,7 @@ EOD;
     {
         $this->assertSame(
             $this->keyMinimalStringEncrypted,
-            $this->writer->writeStringWithPassword($this->password, $this->iterations, $this->keyMinimal)
+            $this->writer->writeStringWithPassword($this->keyMinimal, $this->parameters)
         );
     }
 

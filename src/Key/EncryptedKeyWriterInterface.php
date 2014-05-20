@@ -1,4 +1,4 @@
-<?php
+<?php // @codeCoverageIgnoreStart
 
 /*
  * This file is part of the Lockbox package.
@@ -11,6 +11,9 @@
 
 namespace Eloquent\Lockbox\Key;
 
+use Eloquent\Lockbox\Key\Exception\KeyWriteException;
+use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParametersInterface;
+
 /**
  * The interface implemented by encrypted key writers.
  */
@@ -19,35 +22,31 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
     /**
      * Write a key, encrypted with a password, to the supplied path.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
-     * @param string       $path       The path to write to.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
+     * @param string                             $path       The path to write to.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeFileWithPassword(
-        $password,
-        $iterations,
         KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters,
         $path
     );
 
     /**
      * Write a key, encrypted with a password, to the supplied stream.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
-     * @param stream       $stream     The stream to write to.
-     * @param string|null  $path       The path, if known.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
+     * @param stream                             $stream     The stream to write to.
+     * @param string|null                        $path       The path, if known.
      *
-     * @throws Exception\KeyWriteException If the key cannot be written.
+     * @throws KeyWriteException If the key cannot be written.
      */
     public function writeStreamWithPassword(
-        $password,
-        $iterations,
         KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters,
         $stream,
         $path = null
     );
@@ -55,15 +54,13 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
     /**
      * Write a key, encrypted with a password, to a string.
      *
-     * @param string       $password   The password.
-     * @param integer      $iterations The number of hash iterations to use.
-     * @param KeyInterface $key        The key.
+     * @param KeyInterface                       $key        The key.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      *
      * @return string The key string.
      */
     public function writeStringWithPassword(
-        $password,
-        $iterations,
-        KeyInterface $key
+        KeyInterface $key,
+        PasswordEncryptParametersInterface $parameters
     );
 }
