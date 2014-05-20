@@ -16,6 +16,7 @@ use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
+use Eloquent\Lockbox\Padding\UnpadderInterface;
 use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 
 /**

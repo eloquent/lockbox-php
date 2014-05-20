@@ -9,25 +9,25 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Cipher\Result\Factory;
+namespace Eloquent\Lockbox\Password\Cipher\Result\Factory;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Cipher\Result\CipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptResult;
 use PHPUnit_Framework_TestCase;
 
-class CipherResultFactoryTest extends PHPUnit_Framework_TestCase
+class PasswordDecryptResultFactoryTest extends PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
         parent::setUp();
 
-        $this->factory = new CipherResultFactory;
+        $this->factory = new PasswordDecryptResultFactory;
     }
 
     public function testCreateCipher()
     {
-        $expected = new CipherResult(CipherResultType::SUCCESS());
+        $expected = new PasswordDecryptResult(CipherResultType::SUCCESS());
         $actual = $this->factory->createResult(CipherResultType::SUCCESS());
 
         $this->assertEquals($expected, $actual);

@@ -19,6 +19,13 @@ use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 interface PasswordDecryptResultInterface extends CipherResultInterface
 {
     /**
+     * Set the number of hash iterations used.
+     *
+     * @param integer|null $iterations The hash iterations, or null if unsuccessful.
+     */
+    public function setIterations($iterations);
+
+    /**
      * Get the number of hash iterations used.
      *
      * @return integer|null The hash iterations, or null if unsuccessful.

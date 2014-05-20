@@ -12,6 +12,7 @@
 namespace Eloquent\Lockbox\Cipher\Result\Factory;
 
 use Eloquent\Lockbox\Cipher\Result\CipherResult;
+use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 
 /**
@@ -37,11 +38,12 @@ class CipherResultFactory implements CipherResultFactoryInterface
      * Construct a new cipher result.
      *
      * @param CipherResultType $type The result type.
-     * @param string|null      $data The data, or null if unavailable.
+     *
+     * @return CipherResultInterface The newly created result.
      */
-    public function createResult(CipherResultType $type, $data = null)
+    public function createResult(CipherResultType $type)
     {
-        return new CipherResult($type, $data);
+        return new CipherResult($type);
     }
 
     private static $instance;

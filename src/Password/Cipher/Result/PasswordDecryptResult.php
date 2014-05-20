@@ -38,6 +38,16 @@ class PasswordDecryptResult extends AbstractCipherResult implements
     }
 
     /**
+     * Set the number of hash iterations used.
+     *
+     * @param integer|null $iterations The hash iterations, or null if unsuccessful.
+     */
+    public function setIterations($iterations)
+    {
+        $this->iterations = $iterations;
+    }
+
+    /**
      * Get the number of hash iterations used.
      *
      * @return integer|null The hash iterations, or null if unsuccessful.
