@@ -14,9 +14,9 @@ namespace Eloquent\Lockbox\Password\Cipher\Result;
 use Eloquent\Lockbox\Cipher\Result\CipherResultInterface;
 
 /**
- * The interface implemented by password decryption results.
+ * The interface implemented by password decrypt results.
  */
-interface PasswordDecryptionResultInterface extends CipherResultInterface
+interface PasswordDecryptResultInterface extends CipherResultInterface
 {
     /**
      * Get the number of hash iterations used.

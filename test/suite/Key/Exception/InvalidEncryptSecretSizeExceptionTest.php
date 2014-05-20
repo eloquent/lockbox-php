@@ -14,16 +14,16 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 use PHPUnit_Framework_TestCase;
 
-class InvalidEncryptionSecretSizeExceptionTest extends PHPUnit_Framework_TestCase
+class InvalidEncryptSecretSizeExceptionTest extends PHPUnit_Framework_TestCase
 {
     public function testException()
     {
         $cause = new Exception;
-        $exception = new InvalidEncryptionSecretSizeException(111, $cause);
+        $exception = new InvalidEncryptSecretSizeException(111, $cause);
 
         $this->assertSame(111, $exception->size());
         $this->assertSame(
-            "Invalid encryption secret size 111. Encryption secret must be 128, 192, or 256 bits.",
+            "Invalid encrypt secret size 111. Encrypt secret must be 128, 192, or 256 bits.",
             $exception->getMessage()
         );
         $this->assertSame(0, $exception->getCode());

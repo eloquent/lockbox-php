@@ -15,7 +15,7 @@ use Eloquent\Endec\DecoderInterface;
 use Eloquent\Lockbox\AbstractDecrypter;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
 use Eloquent\Lockbox\DecrypterInterface;
-use Eloquent\Lockbox\Password\Cipher\Result\Factory\PasswordDecryptionResultFactory;
+use Eloquent\Lockbox\Password\Cipher\Result\Factory\PasswordDecryptResultFactory;
 
 /**
  * Decrypts encoded data using passwords.
@@ -52,7 +52,7 @@ class PasswordDecrypter extends AbstractDecrypter
             $rawDecrypter = RawPasswordDecrypter::instance();
         }
         if (null === $resultFactory) {
-            $resultFactory = PasswordDecryptionResultFactory::instance();
+            $resultFactory = PasswordDecryptResultFactory::instance();
         }
 
         parent::__construct($rawDecrypter, $decoder, $resultFactory);

@@ -15,13 +15,13 @@ use Eloquent\Lockbox\Cipher\Result\AbstractCipherResult;
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 
 /**
- * The interface implemented by password decryption results.
+ * The interface implemented by password decrypt results.
  */
-class PasswordDecryptionResult extends AbstractCipherResult implements
-    PasswordDecryptionResultInterface
+class PasswordDecryptResult extends AbstractCipherResult implements
+    PasswordDecryptResultInterface
 {
     /**
-     * Construct a new password decryption result.
+     * Construct a new password decrypt result.
      *
      * @param CipherResultType $type       The result type.
      * @param integer|null     $iterations The hash iterations, or null if unsuccessful.

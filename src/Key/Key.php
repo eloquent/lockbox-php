@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
-use Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException;
-use Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidAuthSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidEncryptSecretSizeException;
 use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
 use Eloquent\Lockbox\Key\Exception\InvalidSecretException;
 
@@ -24,43 +24,41 @@ class Key implements KeyInterface
     /**
      * Construct a new key.
      *
-     * @param string      $encryptionSecret     The encryption secret.
-     * @param string      $authenticationSecret The authentication secret.
-     * @param string|null $name                 The name.
-     * @param string|null $description          The description.
+     * @param string      $encryptSecret The encrypt secret.
+     * @param string      $authSecret    The auth secret.
+     * @param string|null $name          The name.
+     * @param string|null $description   The description.
      *
      * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function __construct(
-        $encryptionSecret,
-        $authenticationSecret,
+        $encryptSecret,
+        $authSecret,
         $name = null,
         $description = null
     ) {
-        if (!is_string($encryptionSecret)) {
-            throw new InvalidSecretException($encryptionSecret);
+        if (!is_string($encryptSecret)) {
+            throw new InvalidSecretException($encryptSecret);
         }
-        if (!is_string($authenticationSecret)) {
-            throw new InvalidSecretException($authenticationSecret);
+        if (!is_string($authSecret)) {
+            throw new InvalidSecretException($authSecret);
         }
 
-        $encryptionSecretBytes = strlen($encryptionSecret);
-        $encryptionSecretBits = $encryptionSecretBytes * 8;
-        switch ($encryptionSecretBytes) {
+        $encryptSecretBytes = strlen($encryptSecret);
+        $encryptSecretBits = $encryptSecretBytes * 8;
+        switch ($encryptSecretBytes) {
             case 32:
             case 24:
             case 16:
                 break;
 
             default:
-                throw new InvalidEncryptionSecretSizeException(
-                    $encryptionSecretBits
-                );
+                throw new InvalidEncryptSecretSizeException($encryptSecretBits);
         }
 
-        $authenticationSecretBytes = strlen($authenticationSecret);
-        $authenticationSecretBits = $authenticationSecretBytes * 8;
-        switch ($authenticationSecretBytes) {
+        $authSecretBytes = strlen($authSecret);
+        $authSecretBits = $authSecretBytes * 8;
+        switch ($authSecretBytes) {
             case 64:
             case 48:
             case 32:
@@ -68,79 +66,77 @@ class Key implements KeyInterface
                 break;
 
             default:
-                throw new InvalidAuthenticationSecretSizeException(
-                    $authenticationSecretBits
-                );
+                throw new InvalidAuthSecretSizeException($authSecretBits);
         }
 
-        $this->encryptionSecret = $encryptionSecret;
-        $this->encryptionSecretBytes = $encryptionSecretBytes;
-        $this->encryptionSecretBits = $encryptionSecretBits;
-        $this->authenticationSecret = $authenticationSecret;
-        $this->authenticationSecretBytes = $authenticationSecretBytes;
-        $this->authenticationSecretBits = $authenticationSecretBits;
+        $this->encryptSecret = $encryptSecret;
+        $this->encryptSecretBytes = $encryptSecretBytes;
+        $this->encryptSecretBits = $encryptSecretBits;
+        $this->authSecret = $authSecret;
+        $this->authSecretBytes = $authSecretBytes;
+        $this->authSecretBits = $authSecretBits;
         $this->name = $name;
         $this->description = $description;
     }
 
     /**
-     * Get the encryption secret.
+     * Get the encrypt secret.
      *
-     * @return string The encryption secret.
+     * @return string The encrypt secret.
      */
-    public function encryptionSecret()
+    public function encryptSecret()
     {
-        return $this->encryptionSecret;
+        return $this->encryptSecret;
     }
 
     /**
-     * Get the size of the encryption secret in bytes.
+     * Get the size of the encrypt secret in bytes.
      *
-     * @return integer The size of the encryption secret in bytes.
+     * @return integer The size of the encrypt secret in bytes.
      */
-    public function encryptionSecretBytes()
+    public function encryptSecretBytes()
     {
-        return $this->encryptionSecretBytes;
+        return $this->encryptSecretBytes;
     }
 
     /**
-     * Get the size of the encryption secret in bits.
+     * Get the size of the encrypt secret in bits.
      *
-     * @return integer The size of the encryption secret in bits.
+     * @return integer The size of the encrypt secret in bits.
      */
-    public function encryptionSecretBits()
+    public function encryptSecretBits()
     {
-        return $this->encryptionSecretBits;
+        return $this->encryptSecretBits;
     }
 
     /**
-     * Get the authentication secret.
+     * Get the auth secret.
      *
-     * @return string The authentication secret.
+     * @return string The auth secret.
      */
-    public function authenticationSecret()
+    public function authSecret()
     {
-        return $this->authenticationSecret;
+        return $this->authSecret;
     }
 
     /**
-     * Get the size of the authentication secret in bytes.
+     * Get the size of the auth secret in bytes.
      *
-     * @return integer The size of the authentication secret in bytes.
+     * @return integer The size of the auth secret in bytes.
      */
-    public function authenticationSecretBytes()
+    public function authSecretBytes()
     {
-        return $this->authenticationSecretBytes;
+        return $this->authSecretBytes;
     }
 
     /**
-     * Get the size of the authentication secret in bits.
+     * Get the size of the auth secret in bits.
      *
-     * @return integer The size of the authentication secret in bits.
+     * @return integer The size of the auth secret in bits.
      */
-    public function authenticationSecretBits()
+    public function authSecretBits()
     {
-        return $this->authenticationSecretBits;
+        return $this->authSecretBits;
     }
 
     /**
@@ -163,12 +159,12 @@ class Key implements KeyInterface
         return $this->description;
     }
 
-    private $encryptionSecret;
-    private $encryptionSecretBytes;
-    private $encryptionSecretBits;
-    private $authenticationSecret;
-    private $authenticationSecretBytes;
-    private $authenticationSecretBits;
+    private $encryptSecret;
+    private $encryptSecretBytes;
+    private $encryptSecretBits;
+    private $authSecret;
+    private $authSecretBytes;
+    private $authSecretBits;
     private $name;
     private $description;
 }

@@ -319,7 +319,7 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
     {
         return mcrypt_encrypt(
             MCRYPT_RIJNDAEL_128,
-            $this->parameters->encryptionSecret(),
+            $this->parameters->encryptSecret(),
             $data,
             MCRYPT_MODE_CBC,
             $this->iv
@@ -341,9 +341,9 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
     protected function authenticate($data, $size = null)
     {
         $mac = hash_hmac(
-            'sha' . $this->parameters->authenticationSecretBits(),
+            'sha' . $this->parameters->authSecretBits(),
             $data,
-            $this->parameters->authenticationSecret(),
+            $this->parameters->authSecret(),
             true
         );
 

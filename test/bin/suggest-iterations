@@ -57,7 +57,7 @@ $elapsed = microtime(true) - $startTime;
 printf(
     "Based on Moore's law and suggested best practices, " .
     "a minimum iteration count of %d is suggested. " .
-    "Based on current hardware, this would take ~%0.3f seconds.\n",
+    "On this machine, that would take ~%0.3f seconds.\n",
     $iterations,
     $elapsed
 );

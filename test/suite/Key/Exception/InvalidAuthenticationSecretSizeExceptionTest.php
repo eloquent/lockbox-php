@@ -19,11 +19,11 @@ class InvalidAuthenticationSecretSizeExceptionTest extends PHPUnit_Framework_Tes
     public function testException()
     {
         $cause = new Exception;
-        $exception = new InvalidAuthenticationSecretSizeException(111, $cause);
+        $exception = new InvalidAuthSecretSizeException(111, $cause);
 
         $this->assertSame(111, $exception->size());
         $this->assertSame(
-            "Invalid authentication secret size 111. Authentication secret must be 224, 256, 384, or 512 bits.",
+            "Invalid auth secret size 111. Auth secret must be 224, 256, 384, or 512 bits.",
             $exception->getMessage()
         );
         $this->assertSame(0, $exception->getCode());

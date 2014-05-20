@@ -14,13 +14,13 @@ namespace Eloquent\Lockbox\Key\Exception;
 use Exception;
 
 /**
- * The encryption secret size is invalid.
+ * The encrypt secret size is invalid.
  */
-final class InvalidEncryptionSecretSizeException extends Exception implements
+final class InvalidEncryptSecretSizeException extends Exception implements
     InvalidKeyParameterExceptionInterface
 {
     /**
-     * Construct a new invalid encryption secret size exception.
+     * Construct a new invalid encrypt secret size exception.
      *
      * @param integer        $size  The invalid secret size.
      * @param Exception|null $cause The cause, if available.
@@ -31,8 +31,8 @@ final class InvalidEncryptionSecretSizeException extends Exception implements
 
         parent::__construct(
             sprintf(
-                'Invalid encryption secret size %d. ' .
-                'Encryption secret must be 128, 192, or 256 bits.',
+                'Invalid encrypt secret size %d. ' .
+                'Encrypt secret must be 128, 192, or 256 bits.',
                 $size
             ),
             0,

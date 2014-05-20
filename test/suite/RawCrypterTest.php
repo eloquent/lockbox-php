@@ -56,20 +56,20 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     public function encryptionData()
     {
         $data = array();
-        foreach (array(16, 24, 32) as $encryptionSecretBytes) {
-            foreach (array(28, 32, 48, 64) as $authenticationSecretBytes) {
+        foreach (array(16, 24, 32) as $encryptSecretBytes) {
+            foreach (array(28, 32, 48, 64) as $authSecretBytes) {
                 foreach (array(0, 1, 1024) as $dataSize) {
                     $label = sprintf(
                         '%d byte(s), %dbit encryption, %dbit authentication',
                         $dataSize,
-                        $encryptionSecretBytes * 8,
-                        $authenticationSecretBytes * 8
+                        $encryptSecretBytes * 8,
+                        $authSecretBytes * 8
                     );
 
                     $data[$label] = array(
                         $dataSize,
-                        str_pad('', $encryptionSecretBytes, '1234567890'),
-                        str_pad('', $authenticationSecretBytes, '1234567890'),
+                        str_pad('', $encryptSecretBytes, '1234567890'),
+                        str_pad('', $authSecretBytes, '1234567890'),
                     );
                 }
             }
@@ -81,12 +81,12 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecrypt($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecrypt($dataSize, $encryptSecret, $authSecret)
     {
         $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
         $data = str_repeat('A', $dataSize);
-        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->decryptParameters = new Key($encryptSecret, $authSecret);
         $this->encryptParameters = new EncryptParameters($this->decryptParameters, $this->iv);
         $encrypted = $this->crypter->encrypt($this->encryptParameters, $data);
         $decryptionResult = $this->crypter->decrypt($this->decryptParameters, $encrypted);
@@ -98,11 +98,11 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecryptStreaming($dataSize, $encryptSecret, $authSecret)
     {
         $this->decrypter = new RawDecrypter;
         $this->crypter = new RawCrypter($this->encrypter, $this->decrypter);
-        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->decryptParameters = new Key($encryptSecret, $authSecret);
         $this->encryptParameters = new EncryptParameters($this->decryptParameters, $this->iv);
         $encryptStream = $this->crypter->createEncryptStream($this->encryptParameters);
         $decryptStream = $this->crypter->createDecryptStream($this->decryptParameters);
@@ -243,7 +243,7 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
         $header = $this->version . $this->type . $this->iv;
         $block = mcrypt_encrypt(
             MCRYPT_RIJNDAEL_128,
-            $this->decryptParameters->encryptionSecret(),
+            $this->decryptParameters->encryptSecret(),
             'foobar',
             MCRYPT_MODE_CBC,
             $this->iv
@@ -276,9 +276,9 @@ class RawCrypterTest extends PHPUnit_Framework_TestCase
     protected function authenticate($data, $size = null)
     {
         $mac = hash_hmac(
-            'sha' . $this->decryptParameters->authenticationSecretBits(),
+            'sha' . $this->decryptParameters->authSecretBits(),
             $data,
-            $this->decryptParameters->authenticationSecret(),
+            $this->decryptParameters->authSecret(),
             true
         );
 

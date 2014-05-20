@@ -24,7 +24,7 @@ interface BoundDecrypterInterface
      *
      * @param string $data The data to decrypt.
      *
-     * @return CipherResultInterface The decryption result.
+     * @return CipherResultInterface The decrypt result.
      */
     public function decrypt($data);
 

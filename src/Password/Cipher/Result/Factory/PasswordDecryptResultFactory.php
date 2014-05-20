@@ -13,12 +13,12 @@ namespace Eloquent\Lockbox\Password\Cipher\Result\Factory;
 
 use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
-use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptResult;
 
 /**
- * Creates password decryption results.
+ * Creates password decrypt results.
  */
-class PasswordDecryptionResultFactory implements CipherResultFactoryInterface
+class PasswordDecryptResultFactory implements CipherResultFactoryInterface
 {
     /**
      * Get the static instance of this factory.
@@ -42,7 +42,7 @@ class PasswordDecryptionResultFactory implements CipherResultFactoryInterface
      */
     public function createResult(CipherResultType $type, $data = null)
     {
-        return new PasswordDecryptionResult($type, $data);
+        return new PasswordDecryptResult($type, $data);
     }
 
     private static $instance;

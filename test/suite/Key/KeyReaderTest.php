@@ -39,8 +39,8 @@ class KeyReaderTest extends PHPUnit_Framework_TestCase
     "description": "description",
     "type": "lockbox-key",
     "version": 1,
-    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
-    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+    "encryptSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI",
+    "authSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
 
 EOD;
@@ -48,8 +48,8 @@ EOD;
 {
     "type": "lockbox-key",
     "version": 1,
-    "encryptionSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
-    "authenticationSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
+    "encryptSecret": "MTIzNDU2Nzg5MDEyMzQ1Ng",
+    "authSecret": "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"
 }
 
 EOD;
@@ -59,21 +59,21 @@ AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaIkMi2nO33jSCq
 d-PyQhN7QlQqvRgk91OJAfQNx8R6msw6mTqLqdQGsoaDNn_ijuCHgSPkcIb1SDDR
 7WotmgkNrFB4DmQZwwS0JRkf8bospNcm9YBG_siLrOn1Q_GShPJ67KndCnrUkiuw
-A1kQswfNhqYfHE6eYM8oTqHXOEO7d8PQwAhCMXiHWZeev7EMXACQQZiIokZQC1zx
--xBPGy5ulLS1mVpdtce3AmkegN87I5u5CZtLObVbNCJ79YkYASCP6I_rnqJYKGRY
-clvzNIzS8-moGPSaS4pGe2L6QeUYSAVcUCSowoVFIRg2zH-eU_OodUMBodRb5HTX
-NXFzWE3EDKiJvpb168_dTgCEZRFfYpw-PY16CPRBHABnBlWC_CRE_S0rcWnMsMGh
-dMhpnoMo7dMTV-Vc0DhKI9QtMLDhPA
+A1kQswfNhqYfHE6eYM8oTqHXOEMNtkD0aS9Spna3cJo2pePxLN1cuBnBteHcMPcn
+KS2cAEdHxqhh5uZjfsOCPe72R64YiG8tHcalAIl65Dab62GIZNT-Z7FtvEVPw3Yu
+VGyfbV7pq-OnU89gHnzRz4pgtcNmCD4Otss0TZAnSbqwgmC5qUPucJdZetGOnLRG
+KRxgNRgnoMOHTJgxa1saY9SNjTmsuIyqiKXEPIu5lnbaRlcZc-5VEKZ52UJBULU-
+d4Fk9A
 
 EOD;
         $this->keyMinimalStringEncrypted = <<<'EOD'
 AQIAAAAKMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy
 MzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDEyMzQ1Njc4OTAxMjM0NTaahwBMpOBVXCgF
-T1Ohh60pZsF7hIP1CBZ2gOYirhC_W_Mf5lZ_JZZHMotEliRZSEgPDe5bZYdOSvLv
-T23KWBG-EG1J2AKU_5oEDcsqCDaSFdihYKGF2a3ZawrPGBXaPu6UaVv6e0zSY_uj
-6lUqasG17hzwQ8lsqeFbatiui-xuiqbJbdrMPpukzp_H2AqieseWfTcEpNuX4MOm
-hNjhk8IF-KcnOnrvPNN6NU9Fchcn21SBi5chj4nvnUg1Icy_hg6QoyCW7pQuA_tP
-GV6gLGQkG2udOCa3ncYIw7rRK8xfWZPX-EVN4g
+T1Ohh60pZsF7hIP1CBZ2gOYirhC_W_Mf5lZ_JZZHMotEliRZSEgPDe5bZYe2X7u9
+jwgK_tb_M7DUHrM9JZovYT_idOCFhG0TezW-9akE93KjXw912cicnUSXZsbJPjRP
+CbwPOREHWrexLCX7v_mJAFve6JOr5plnKyWmlxXdCxXMmXrUTLro9jLCfdV_wTwd
+S6Xp75O49bApB6QDfogtFS37eHGKSLLGQOMRxeRD5vCiNeyFzXD-wBamjsAGM-Kq
+zOopKXDBccm2MsrrnRLvqQYgLYldVpAsAwA9zQ
 
 EOD;
 
@@ -108,8 +108,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullString);
         $key = $this->reader->readFile('/path/to/file');
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -119,8 +119,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalString);
         $key = $this->reader->readFile('/path/to/file');
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -154,8 +154,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullStringEncrypted);
         $key = $this->reader->readFileWithPassword($this->password, '/path/to/file');
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -165,8 +165,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalStringEncrypted);
         $key = $this->reader->readFileWithPassword($this->password, '/path/to/file');
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -200,8 +200,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullString);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -211,8 +211,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalString);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -222,8 +222,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyFullStringEncrypted);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -233,8 +233,8 @@ EOD;
         Phake::when($this->isolator)->file_get_contents('/path/to/file')->thenReturn($this->keyMinimalStringEncrypted);
         $key = $this->reader->readFileWithPasswordCallback($this->passwordCallback, '/path/to/file');
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -268,8 +268,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullString), 'rb');
         $key = $this->reader->readStream($stream);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -279,8 +279,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalString), 'rb');
         $key = $this->reader->readStream($stream);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -305,8 +305,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPassword($this->password, $stream);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -316,8 +316,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPassword($this->password, $stream);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -342,8 +342,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullString), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -353,8 +353,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalString), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -364,8 +364,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyFullStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -375,8 +375,8 @@ EOD;
         $stream = fopen('data://text/plain;base64,' . base64_encode($this->keyMinimalStringEncrypted), 'rb');
         $key = $this->reader->readStreamWithPasswordCallback($this->passwordCallback, $stream);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -400,8 +400,8 @@ EOD;
     {
         $key = $this->reader->readString($this->keyFullString);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -410,8 +410,8 @@ EOD;
     {
         $key = $this->reader->readString($this->keyMinimalString);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -435,16 +435,16 @@ EOD;
     {
         return array(
             'Invalid JSON'                         => array('{'),
-            'Missing type'                         => array('{"version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Invalid type'                         => array('{"type":"lockbox-foo","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Missing version'                      => array('{"type":"lockbox-key","encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Invalid version'                      => array('{"type":"lockbox-key","version":"1","encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Missing encryption secret'            => array('{"type":"lockbox-key","version":1,"authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Invalid base64 encryption secret'     => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1N","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Invalid encryption secret data'       => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
-            'Missing authentication secret'        => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
-            'Invalid base64 authentication secret' => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1N"}'),
-            'Invalid authentication secret data'   => array('{"type":"lockbox-key","version":1,"encryptionSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authenticationSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz"}'),
+            'Missing type'                         => array('{"version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid type'                         => array('{"type":"lockbox-foo","version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing version'                      => array('{"type":"lockbox-key","encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid version'                      => array('{"type":"lockbox-key","version":"1","encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing encryption secret'            => array('{"type":"lockbox-key","version":1,"authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid base64 encryption secret'     => array('{"type":"lockbox-key","version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1N","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Invalid encryption secret data'       => array('{"type":"lockbox-key","version":1,"encryptSecret":"MTIzNDU2","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTM"}'),
+            'Missing authentication secret'        => array('{"type":"lockbox-key","version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng"}'),
+            'Invalid base64 authentication secret' => array('{"type":"lockbox-key","version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1N"}'),
+            'Invalid authentication secret data'   => array('{"type":"lockbox-key","version":1,"encryptSecret":"MTIzNDU2Nzg5MDEyMzQ1Ng","authSecret":"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIz"}'),
         );
     }
 
@@ -473,8 +473,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPassword($this->password, $this->keyFullStringEncrypted);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -483,8 +483,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPassword($this->password, $this->keyMinimalStringEncrypted);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -514,8 +514,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyFullString);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -524,8 +524,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyMinimalString);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
@@ -534,8 +534,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyFullStringEncrypted);
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -544,8 +544,8 @@ EOD;
     {
         $key = $this->reader->readStringWithPasswordCallback($this->passwordCallback, $this->keyMinimalStringEncrypted);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }

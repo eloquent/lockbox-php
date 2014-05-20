@@ -35,26 +35,21 @@ class KeyFactory implements KeyFactoryInterface
     /**
      * Create a new key from existing key data.
      *
-     * @param string      $encryptionSecret     The encryption secret.
-     * @param string      $authenticationSecret The authentication secret.
-     * @param string|null $name                 The name.
-     * @param string|null $description          The description.
+     * @param string      $encryptSecret The encrypt secret.
+     * @param string      $authSecret    The auth secret.
+     * @param string|null $name          The name.
+     * @param string|null $description   The description.
      *
      * @return KeyInterface                          The key.
      * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
      */
     public function createKey(
-        $encryptionSecret,
-        $authenticationSecret,
+        $encryptSecret,
+        $authSecret,
         $name = null,
         $description = null
     ) {
-        return new Key(
-            $encryptionSecret,
-            $authenticationSecret,
-            $name,
-            $description
-        );
+        return new Key($encryptSecret, $authSecret, $name, $description);
     }
 
     private static $instance;

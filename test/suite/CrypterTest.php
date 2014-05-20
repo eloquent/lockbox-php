@@ -55,20 +55,20 @@ class CrypterTest extends PHPUnit_Framework_TestCase
     public function encryptionData()
     {
         $data = array();
-        foreach (array(16, 24, 32) as $encryptionSecretBytes) {
-            foreach (array(28, 32, 48, 64) as $authenticationSecretBytes) {
+        foreach (array(16, 24, 32) as $encryptSecretBytes) {
+            foreach (array(28, 32, 48, 64) as $authSecretBytes) {
                 foreach (array(0, 1, 1024) as $dataSize) {
                     $label = sprintf(
                         '%d byte(s), %dbit encryption, %dbit authentication',
                         $dataSize,
-                        $encryptionSecretBytes * 8,
-                        $authenticationSecretBytes * 8
+                        $encryptSecretBytes * 8,
+                        $authSecretBytes * 8
                     );
 
                     $data[$label] = array(
                         $dataSize,
-                        str_pad('', $encryptionSecretBytes, '1234567890'),
-                        str_pad('', $authenticationSecretBytes, '1234567890'),
+                        str_pad('', $encryptSecretBytes, '1234567890'),
+                        str_pad('', $authSecretBytes, '1234567890'),
                     );
                 }
             }
@@ -80,10 +80,10 @@ class CrypterTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecrypt($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecrypt($dataSize, $encryptSecret, $authSecret)
     {
         $data = str_repeat('A', $dataSize);
-        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->decryptParameters = new Key($encryptSecret, $authSecret);
         $this->encryptParameters = new EncryptParameters($this->decryptParameters);
         $encrypted = $this->crypter->encrypt($this->encryptParameters, $data);
         $decryptionResult = $this->crypter->decrypt($this->decryptParameters, $encrypted);
@@ -95,9 +95,9 @@ class CrypterTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider encryptionData
      */
-    public function testEncryptDecryptStreaming($dataSize, $encryptionSecret, $authenticationSecret)
+    public function testEncryptDecryptStreaming($dataSize, $encryptSecret, $authSecret)
     {
-        $this->decryptParameters = new Key($encryptionSecret, $authenticationSecret);
+        $this->decryptParameters = new Key($encryptSecret, $authSecret);
         $encryptStream = $this->crypter->createEncryptStream($this->decryptParameters);
         $decryptStream = $this->crypter->createDecryptStream($this->decryptParameters);
         $encryptStream->pipe($decryptStream);

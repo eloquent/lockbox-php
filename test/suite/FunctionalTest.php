@@ -135,10 +135,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsEncryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsEncryption($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $actual = $this->encrypter->encrypt(new Key($encryptionSecret, $authenticationSecret), $data);
+        $actual = $this->encrypter->encrypt(new Key($encryptSecret, $authSecret), $data);
 
         $this->assertSame($encrypted, $actual);
     }
@@ -146,10 +146,10 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsEncryptionStreaming($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsEncryptionStreaming($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn($iv);
-        $stream = $this->encrypter->createEncryptStream(new Key($encryptionSecret, $authenticationSecret));
+        $stream = $this->encrypter->createEncryptStream(new Key($encryptSecret, $authSecret));
         $actual = '';
         $stream->on(
             'data',
@@ -174,9 +174,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsDecryption($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsDecryption($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
-        $result = $this->decrypter->decrypt(new Key($encryptionSecret, $authenticationSecret), $encrypted);
+        $result = $this->decrypter->decrypt(new Key($encryptSecret, $authSecret), $encrypted);
 
         $this->assertTrue($result->isSuccessful());
         $this->assertSame($data, $result->data());
@@ -185,9 +185,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider specVectorData
      */
-    public function testSpecVectorsDecryptionStreaming($data, $encryptionSecret, $authenticationSecret, $iv, $encrypted)
+    public function testSpecVectorsDecryptionStreaming($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
-        $stream = $this->decrypter->createDecryptStream(new Key($encryptionSecret, $authenticationSecret));
+        $stream = $this->decrypter->createDecryptStream(new Key($encryptSecret, $authSecret));
         $actual = '';
         $stream->on(
             'data',
@@ -490,17 +490,12 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      * @dataProvider keyDerivationSpecVectorData
      * @large
      */
-    public function testKeyDerivationSpecVectors(
-        $password,
-        $iterations,
-        $salt,
-        $expectedEncryptionSecret,
-        $expectedAuthenticationSecret
-    ) {
+    public function testKeyDerivationSpecVectors($password, $iterations, $salt, $encryptSecret, $authSecret)
+    {
         list($key) = $this->keyDeriver->deriveKeyFromPassword(new Password($password), $iterations, $salt);
 
-        $this->assertSame($expectedEncryptionSecret, $this->base64Url->encode($key->encryptionSecret()));
-        $this->assertSame($expectedAuthenticationSecret, $this->base64Url->encode($key->authenticationSecret()));
+        $this->assertSame($encryptSecret, $this->base64Url->encode($key->encryptSecret()));
+        $this->assertSame($authSecret, $this->base64Url->encode($key->authSecret()));
     }
 
     public function testRealKeyReadWrite()

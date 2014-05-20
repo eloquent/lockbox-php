@@ -272,13 +272,7 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
     public function testDecryptFailureBadPadding()
     {
         $header = $this->version . $this->type . $this->iterationsData . $this->salt . $this->iv;
-        $block = mcrypt_encrypt(
-            MCRYPT_RIJNDAEL_128,
-            $this->key->encryptionSecret(),
-            'foobar',
-            MCRYPT_MODE_CBC,
-            $this->iv
-        );
+        $block = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $this->key->encryptSecret(), 'foobar', MCRYPT_MODE_CBC, $this->iv);
         $data = $header . $block . $this->authenticate($block, 2) . $this->authenticate($header . $block);
         $result = $this->crypter->decrypt($this->decryptParameters, $data);
 
@@ -300,12 +294,7 @@ class RawPasswordCrypterTest extends PHPUnit_Framework_TestCase
 
     protected function authenticate($data, $size = null)
     {
-        $mac = hash_hmac(
-            'sha256',
-            $data,
-            $this->key->authenticationSecret(),
-            true
-        );
+        $mac = hash_hmac('sha256', $data, $this->key->authSecret(), true);
 
         if (null !== $size) {
             $mac = substr($mac, 0, $size);

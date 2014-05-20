@@ -50,7 +50,7 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
     {
         $this->salt = '1234567890123456789012345678901234567890123456789012345678901234';
 
-        //                           password                       iterations encryptionSecret                               authenticationSecret
+        //                           password                       iterations encryptSecret                                  authSecret
         return array(
             'Test vector 1' => array('',                            1000,      '2k1fkksUHSjVMxOMNkPBihtocgu1ziAI4CVRFfC7ClM', 'lNXoGLA83xvvlAUuHCQEw9OcsUloYygz2Oq4PFRMUh4'),
             'Test vector 2' => array('foo',                         1000,      '9eWWednk0FFnvE_NXA0uElPqBvSRDxTNNfKjj8j-w74', 'H8-n0cCupLeoCYckdGFWlwWc8GAl_XvBokZMgWbhB1U'),
@@ -65,17 +65,13 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider keyDerivationData
      */
-    public function testDeriveKeyFromPassword(
-        $password,
-        $iterations,
-        $expectedEncryptionSecret,
-        $expectedAuthenticationSecret
-    ) {
+    public function testDeriveKeyFromPassword($password, $iterations, $encryptSecret, $authSecret)
+    {
         list($key) = $this->deriver
             ->deriveKeyFromPassword(new Password($password), $iterations, $this->salt, 'name', 'description');
 
-        $this->assertSame($expectedEncryptionSecret, $this->base64Url->encode($key->encryptionSecret()));
-        $this->assertSame($expectedAuthenticationSecret, $this->base64Url->encode($key->authenticationSecret()));
+        $this->assertSame($encryptSecret, $this->base64Url->encode($key->encryptSecret()));
+        $this->assertSame($authSecret, $this->base64Url->encode($key->authSecret()));
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -87,12 +83,9 @@ class KeyDeriverTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(
             'pcVNTpc-PE-kn5dDsuK6UDMQXXJmAQpOygkGavbvTXE',
-            $this->base64Url->encode($key->encryptionSecret())
+            $this->base64Url->encode($key->encryptSecret())
         );
-        $this->assertSame(
-            '1HoCzL6MzfPLCUXIkCdNrQT4v7vpjltxDGbT2qTLqZk',
-            $this->base64Url->encode($key->authenticationSecret())
-        );
+        $this->assertSame('1HoCzL6MzfPLCUXIkCdNrQT4v7vpjltxDGbT2qTLqZk', $this->base64Url->encode($key->authSecret()));
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }

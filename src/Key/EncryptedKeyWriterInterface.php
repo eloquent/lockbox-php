@@ -23,7 +23,7 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
      * Write a key, encrypted with a password, to the supplied path.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      * @param string                             $path       The path to write to.
      *
      * @throws KeyWriteException If the key cannot be written.
@@ -38,7 +38,7 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
      * Write a key, encrypted with a password, to the supplied stream.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      * @param stream                             $stream     The stream to write to.
      * @param string|null                        $path       The path, if known.
      *
@@ -55,7 +55,7 @@ interface EncryptedKeyWriterInterface extends KeyWriterInterface
      * Write a key, encrypted with a password, to a string.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      *
      * @return string The key string.
      */

@@ -99,11 +99,11 @@ class DecryptCipher implements CipherInterface
         $this->isMcryptInitialized = false;
 
         $this->hashContext = hash_init(
-            'sha' . $this->key->authenticationSecretBits(),
+            'sha' . $this->key->authSecretBits(),
             HASH_HMAC,
-            $this->key->authenticationSecret()
+            $this->key->authSecret()
         );
-        $this->macSize = $this->key->authenticationSecretBytes();
+        $this->macSize = $this->key->authSecretBytes();
 
         $this->reset();
     }
@@ -306,7 +306,7 @@ class DecryptCipher implements CipherInterface
 
         mcrypt_generic_init(
             $this->mcryptModule,
-            $this->key->encryptionSecret(),
+            $this->key->encryptSecret(),
             substr($header, 2, 16)
         );
         $this->isMcryptInitialized = true;

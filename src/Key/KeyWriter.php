@@ -104,7 +104,7 @@ class KeyWriter implements EncryptedKeyWriterInterface
      * Write a key, encrypted with a password, to the supplied path.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      * @param string                             $path       The path to write to.
      *
      * @throws KeyWriteException If the key cannot be written.
@@ -142,7 +142,7 @@ class KeyWriter implements EncryptedKeyWriterInterface
      * Write a key, encrypted with a password, to the supplied stream.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      * @param stream                             $stream     The stream to write to.
      * @param string|null                        $path       The path, if known.
      *
@@ -182,14 +182,11 @@ class KeyWriter implements EncryptedKeyWriterInterface
 
         $data .= "    \"type\": \"lockbox-key\",\n    \"version\": 1,\n";
 
-        $data .= '    "encryptionSecret": ' .
-            json_encode($this->encoder()->encode($key->encryptionSecret())) .
+        $data .= '    "encryptSecret": ' .
+            json_encode($this->encoder()->encode($key->encryptSecret())) .
             ",\n";
-        $data .= '    "authenticationSecret": ' .
-            json_encode(
-                $this->encoder()->encode($key->authenticationSecret())
-            ) .
-            "\n";
+        $data .= '    "authSecret": ' .
+            json_encode($this->encoder()->encode($key->authSecret())) . "\n";
 
         return $data . "}\n";
     }
@@ -198,7 +195,7 @@ class KeyWriter implements EncryptedKeyWriterInterface
      * Write a key, encrypted with a password, to a string.
      *
      * @param KeyInterface                       $key        The key.
-     * @param PasswordEncryptParametersInterface $parameters The encryption parameters.
+     * @param PasswordEncryptParametersInterface $parameters The encrypt parameters.
      *
      * @return string The key string.
      */

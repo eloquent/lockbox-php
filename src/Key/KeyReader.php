@@ -257,29 +257,27 @@ class KeyReader implements EncryptedKeyReaderInterface
             throw new KeyReadException($path);
         }
 
-        $encryptionSecret = null;
-        if (isset($data->encryptionSecret)) {
+        $encryptSecret = null;
+        if (isset($data->encryptSecret)) {
             try {
-                $encryptionSecret = $this->decoder()
-                    ->decode($data->encryptionSecret);
+                $encryptSecret = $this->decoder()->decode($data->encryptSecret);
             } catch (EncodingExceptionInterface $e) {
                 throw new KeyReadException($path, $e);
             }
         }
-        if (!$encryptionSecret) {
+        if (!$encryptSecret) {
             throw new KeyReadException($path);
         }
 
-        $authenticationSecret = null;
-        if (isset($data->authenticationSecret)) {
+        $authSecret = null;
+        if (isset($data->authSecret)) {
             try {
-                $authenticationSecret = $this->decoder()
-                    ->decode($data->authenticationSecret);
+                $authSecret = $this->decoder()->decode($data->authSecret);
             } catch (EncodingExceptionInterface $e) {
                 throw new KeyReadException($path, $e);
             }
         }
-        if (!$authenticationSecret) {
+        if (!$authSecret) {
             throw new KeyReadException($path);
         }
 
@@ -294,12 +292,7 @@ class KeyReader implements EncryptedKeyReaderInterface
         }
 
         try {
-            $key = new Key(
-                $encryptionSecret,
-                $authenticationSecret,
-                $name,
-                $description
-            );
+            $key = new Key($encryptSecret, $authSecret, $name, $description);
         } catch (InvalidKeyParameterExceptionInterface $e) {
             throw new KeyReadException($path, $e);
         }

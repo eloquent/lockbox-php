@@ -11,8 +11,8 @@
 
 namespace Eloquent\Lockbox\Key;
 
-use Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException;
-use Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidAuthSecretSizeException;
+use Eloquent\Lockbox\Key\Exception\InvalidEncryptSecretSizeException;
 use Eloquent\Lockbox\Key\Exception\InvalidKeyParameterExceptionInterface;
 use Eloquent\Lockbox\Random\DevUrandom;
 use Eloquent\Lockbox\Random\RandomSourceInterface;
@@ -80,10 +80,10 @@ class KeyGenerator implements KeyGeneratorInterface
     /**
      * Generate a new key.
      *
-     * @param string|null  $name                     The name.
-     * @param string|null  $description              The description.
-     * @param integer|null $encryptionSecretBits     The size of the encryption secret in bits.
-     * @param integer|null $authenticationSecretBits The size of the authentication secret in bits.
+     * @param string|null  $name              The name.
+     * @param string|null  $description       The description.
+     * @param integer|null $encryptSecretBits The size of the encrypt secret in bits.
+     * @param integer|null $authSecretBits    The size of the auth secret in bits.
      *
      * @return KeyInterface                          The generated key.
      * @throws InvalidKeyParameterExceptionInterface If the supplied arguments are invalid.
@@ -91,29 +91,27 @@ class KeyGenerator implements KeyGeneratorInterface
     public function generateKey(
         $name = null,
         $description = null,
-        $encryptionSecretBits = null,
-        $authenticationSecretBits = null
+        $encryptSecretBits = null,
+        $authSecretBits = null
     ) {
-        if (null === $encryptionSecretBits) {
-            $encryptionSecretBits = 256;
+        if (null === $encryptSecretBits) {
+            $encryptSecretBits = 256;
         }
-        if (null === $authenticationSecretBits) {
-            $authenticationSecretBits = 256;
+        if (null === $authSecretBits) {
+            $authSecretBits = 256;
         }
 
-        switch ($encryptionSecretBits) {
+        switch ($encryptSecretBits) {
             case 256:
             case 192:
             case 128:
                 break;
 
             default:
-                throw new InvalidEncryptionSecretSizeException(
-                    $encryptionSecretBits
-                );
+                throw new InvalidEncryptSecretSizeException($encryptSecretBits);
         }
 
-        switch ($authenticationSecretBits) {
+        switch ($authSecretBits) {
             case 512:
             case 384:
             case 256:
@@ -121,14 +119,12 @@ class KeyGenerator implements KeyGeneratorInterface
                 break;
 
             default:
-                throw new InvalidAuthenticationSecretSizeException(
-                    $authenticationSecretBits
-                );
+                throw new InvalidAuthSecretSizeException($authSecretBits);
         }
 
         return $this->factory()->createKey(
-            $this->randomSource()->generate($encryptionSecretBits / 8),
-            $this->randomSource()->generate($authenticationSecretBits / 8),
+            $this->randomSource()->generate($encryptSecretBits / 8),
+            $this->randomSource()->generate($authSecretBits / 8),
             $name,
             $description
         );

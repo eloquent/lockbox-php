@@ -24,7 +24,7 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Padding\UnpadderInterface;
-use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptionResult;
+use Eloquent\Lockbox\Password\Cipher\Result\PasswordDecryptResult;
 use Eloquent\Lockbox\Password\PasswordInterface;
 
 /**
@@ -286,7 +286,7 @@ class PasswordDecryptCipher implements CipherInterface
             $iterations = null;
         }
 
-        return new PasswordDecryptionResult($type, $iterations);
+        return new PasswordDecryptResult($type, $iterations);
     }
 
     private function processHeader(&$size)
@@ -326,16 +326,13 @@ class PasswordDecryptCipher implements CipherInterface
 
         mcrypt_generic_init(
             $this->mcryptModule,
-            $this->key->encryptionSecret(),
+            $this->key->encryptSecret(),
             substr($header, 70, 16)
         );
         $this->isMcryptInitialized = true;
 
-        $this->hashContext = hash_init(
-            'sha256',
-            HASH_HMAC,
-            $this->key->authenticationSecret()
-        );
+        $this->hashContext =
+            hash_init('sha256', HASH_HMAC, $this->key->authSecret());
         $this->finalHashContext = hash_copy($this->hashContext);
         hash_update($this->finalHashContext, $header);
 
@@ -380,11 +377,7 @@ class PasswordDecryptCipher implements CipherInterface
             substr($header, 6, 64)
         );
 
-        $hashContext = hash_init(
-            'sha256',
-            HASH_HMAC,
-            $key->authenticationSecret()
-        );
+        $hashContext = hash_init('sha256', HASH_HMAC, $key->authSecret());
         hash_update($hashContext, $header);
 
         foreach (str_split($ciphertext, 18) as $block) {

@@ -19,46 +19,46 @@ use Eloquent\Lockbox\Cipher\Parameters\CipherParametersInterface;
 interface KeyInterface extends CipherParametersInterface
 {
     /**
-     * Get the encryption secret.
+     * Get the encrypt secret.
      *
-     * @return string The encryption secret.
+     * @return string The encrypt secret.
      */
-    public function encryptionSecret();
+    public function encryptSecret();
 
     /**
-     * Get the size of the encryption secret in bytes.
+     * Get the size of the encrypt secret in bytes.
      *
-     * @return integer The size of the encryption secret in bytes.
+     * @return integer The size of the encrypt secret in bytes.
      */
-    public function encryptionSecretBytes();
+    public function encryptSecretBytes();
 
     /**
-     * Get the size of the encryption secret in bits.
+     * Get the size of the encrypt secret in bits.
      *
-     * @return integer The size of the encryption secret in bits.
+     * @return integer The size of the encrypt secret in bits.
      */
-    public function encryptionSecretBits();
+    public function encryptSecretBits();
 
     /**
-     * Get the authentication secret.
+     * Get the auth secret.
      *
-     * @return string The authentication secret.
+     * @return string The auth secret.
      */
-    public function authenticationSecret();
+    public function authSecret();
 
     /**
-     * Get the size of the authentication secret in bytes.
+     * Get the size of the auth secret in bytes.
      *
-     * @return integer The size of the authentication secret in bytes.
+     * @return integer The size of the auth secret in bytes.
      */
-    public function authenticationSecretBytes();
+    public function authSecretBytes();
 
     /**
-     * Get the size of the authentication secret in bits.
+     * Get the size of the auth secret in bits.
      *
-     * @return integer The size of the authentication secret in bits.
+     * @return integer The size of the auth secret in bits.
      */
-    public function authenticationSecretBits();
+    public function authSecretBits();
 
     /**
      * Get the name.

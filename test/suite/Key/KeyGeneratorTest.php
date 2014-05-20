@@ -47,8 +47,8 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
         Phake::when($this->randomSource)->generate(28)->thenReturn('1234567890123456789012345678');
         $key = $this->generator->generateKey('name', 'description', 128, 224);
 
-        $this->assertSame('1234567890123456', $key->encryptionSecret());
-        $this->assertSame('1234567890123456789012345678', $key->authenticationSecret());
+        $this->assertSame('1234567890123456', $key->encryptSecret());
+        $this->assertSame('1234567890123456789012345678', $key->authSecret());
         $this->assertSame('name', $key->name());
         $this->assertSame('description', $key->description());
     }
@@ -60,21 +60,21 @@ class KeyGeneratorTest extends PHPUnit_Framework_TestCase
             ->thenReturn('12345678901234567890123456789013');
         $key = $this->generator->generateKey();
 
-        $this->assertSame('12345678901234567890123456789012', $key->encryptionSecret());
-        $this->assertSame('12345678901234567890123456789013', $key->authenticationSecret());
+        $this->assertSame('12345678901234567890123456789012', $key->encryptSecret());
+        $this->assertSame('12345678901234567890123456789013', $key->authSecret());
         $this->assertNull($key->name());
         $this->assertNull($key->description());
     }
 
-    public function testGenerateKeyFailureInvalidEncryptionSecretSize()
+    public function testGenerateKeyFailureInvalidEncryptSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptSecretSizeException');
         $this->generator->generateKey(null, null, 257);
     }
 
-    public function testGenerateKeyFailureInvalidAuthenticationSecretSize()
+    public function testGenerateKeyFailureInvalidAuthSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthSecretSizeException');
         $this->generator->generateKey(null, null, null, 513);
     }
 

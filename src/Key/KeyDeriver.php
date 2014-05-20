@@ -115,7 +115,7 @@ class KeyDeriver implements KeyDeriverInterface
             }
         }
 
-        list($encryptionSecret, $authenticationSecret) = str_split(
+        list($encryptSecret, $authSecret) = str_split(
             hash_pbkdf2(
                 'sha512',
                 $password->string(),
@@ -128,12 +128,8 @@ class KeyDeriver implements KeyDeriverInterface
         );
 
         return array(
-            $this->factory()->createKey(
-                $encryptionSecret,
-                $authenticationSecret,
-                $name,
-                $description
-            ),
+            $this->factory()
+                ->createKey($encryptSecret, $authSecret, $name, $description),
             $salt,
         );
     }

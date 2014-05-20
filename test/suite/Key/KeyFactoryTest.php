@@ -25,7 +25,7 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
 
     public function validSecretData()
     {
-        //                              encryptionSecret                    authenticationSecret
+        //                              encryptSecret                       authSecret
         return array(
             '256 bit, 512 bit' => array('12345678901234567890123456789012', '1234567890123456789012345678901234567890123456789012345678901234'),
             '256 bit, 384 bit' => array('12345678901234567890123456789012', '123456789012345678901234567890123456789012345678'),
@@ -45,12 +45,12 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider validSecretData
      */
-    public function testCreateKey($encryptionSecret, $authenticationSecret)
+    public function testCreateKey($encryptSecret, $authSecret)
     {
-        $this->key = $this->factory->createKey($encryptionSecret, $authenticationSecret, 'name', 'description');
+        $this->key = $this->factory->createKey($encryptSecret, $authSecret, 'name', 'description');
 
-        $this->assertSame($encryptionSecret, $this->key->encryptionSecret());
-        $this->assertSame($authenticationSecret, $this->key->authenticationSecret());
+        $this->assertSame($encryptSecret, $this->key->encryptSecret());
+        $this->assertSame($authSecret, $this->key->authSecret());
         $this->assertSame('name', $this->key->name());
         $this->assertSame('description', $this->key->description());
     }
@@ -63,15 +63,15 @@ class KeyFactoryTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->key->description());
     }
 
-    public function testCreateKeyInvalidEncryptionSecretSize()
+    public function testCreateKeyInvalidEncryptSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptionSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidEncryptSecretSizeException');
         $this->factory->createKey('123456789012345678901234567890123', '12345678901234567890123456789012');
     }
 
-    public function testCreateKeyInvalidAuthenticationSecretSize()
+    public function testCreateKeyInvalidAuthSecretSize()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthenticationSecretSizeException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\InvalidAuthSecretSizeException');
         $this->factory->createKey('12345678901234567890123456789012', '123456789012345678901234567890123');
     }
 

@@ -88,7 +88,7 @@ abstract class AbstractDecrypter implements DecrypterInterface
      * @param CipherParametersInterface $parameters The parameters to decrypt with.
      * @param string                    $data       The data to decrypt.
      *
-     * @return CipherResultInterface The decryption result.
+     * @return CipherResultInterface The decrypt result.
      */
     public function decrypt(CipherParametersInterface $parameters, $data)
     {
