@@ -12,7 +12,6 @@
 namespace Eloquent\Lockbox\Stream;
 
 use Eloquent\Lockbox\Cipher\CipherInterface;
-use Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException;
 use Eloquent\Lockbox\Stream\Exception\StreamClosedException;
 use Evenement\EventEmitter;
 use React\Stream\Util;
@@ -27,15 +26,9 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
      * Construct a new cipher stream.
      *
      * @param CipherInterface $cipher The cipher to use.
-     *
-     * @throws CipherNotInitializedException If the supplied cipher is not initialized.
      */
     public function __construct(CipherInterface $cipher)
     {
-        if (!$cipher->isInitialized()) {
-            throw new CipherNotInitializedException;
-        }
-
         $this->cipher = $cipher;
 
         $this->isClosed = $this->isPaused = $this->hasError = false;
@@ -84,7 +77,7 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
         if ($this->isClosed) {
             $this->emit(
                 'error',
-                array(new StreamClosedException, $this)
+                array(new StreamClosedException($this), $this)
             );
 
             return false;
@@ -107,6 +100,8 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
             if (!$result->isSuccessful()) {
                 $this->hasError = true;
                 $this->emit('error', array($result, $this));
+
+                $this->doClose();
             }
         }
 
