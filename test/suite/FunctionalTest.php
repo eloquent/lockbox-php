@@ -136,6 +136,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider specVectorData
+     * @large
      */
     public function testSpecVectorsEncryption($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
@@ -147,6 +148,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider specVectorData
+     * @large
      */
     public function testSpecVectorsEncryptionStreaming($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
@@ -175,6 +177,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider specVectorData
+     * @large
      */
     public function testSpecVectorsDecryption($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
@@ -186,6 +189,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider specVectorData
+     * @large
      */
     public function testSpecVectorsDecryptionStreaming($data, $encryptSecret, $authSecret, $iv, $encrypted)
     {
@@ -220,6 +224,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame($data, $actual);
     }
 
+    /**
+     * @large
+     */
     public function testEncryptDecryptWithGeneratedKey()
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
@@ -398,6 +405,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame($iterations, $result->iterations());
     }
 
+    /**
+     * @large
+     */
     public function testEncryptDecryptWithPassword()
     {
         Phake::when($this->randomSource)->generate(16)->thenReturn(mcrypt_create_iv(16, MCRYPT_DEV_URANDOM));
@@ -500,6 +510,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame($authSecret, $this->base64Url->encode($key->authSecret()));
     }
 
+    /**
+     * @large
+     */
     public function testRealKeyReadWrite()
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
@@ -511,6 +524,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($key, $actual);
     }
 
+    /**
+     * @large
+     */
     public function testRealKeyReadWriteEncrypted()
     {
         $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
@@ -526,12 +542,18 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($key, $actual);
     }
 
+    /**
+     * @large
+     */
     public function testRealKeyReadFailure()
     {
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException');
         $this->keyReader->readFile('/path/to/nonexistant');
     }
 
+    /**
+     * @large
+     */
     public function testRealKeyWriteFailure()
     {
         $key = $this->keyReader->readFile(__DIR__ . '/../fixture/key/key-256-256.lockbox.key');
@@ -540,6 +562,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->keyWriter->writeFile($key, '/path/to/nonexistant');
     }
 
+    /**
+     * @large
+     */
     public function testStreamFilters()
     {
         Lockbox::registerFilters();
@@ -561,6 +586,9 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
         $this->assertSame('foobar', $actual);
     }
 
+    /**
+     * @large
+     */
     public function testPasswordStreamFilters()
     {
         Lockbox::registerFilters();
