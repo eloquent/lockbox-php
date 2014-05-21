@@ -84,12 +84,13 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new Decrypter;
 
 $encrypted =
-    'AQHJqPyMjO0oNSwu1HctzQp9_OQe2tmuQyMWWnetqT-N6vdB9O27NcCyfErbywGh' .
-    'I04N0Cr5CcFiOLHkpn3yTvGravUE8RsvesmvldJU8iIZYw';
+    'AQF_VjJS9sAL75uuUP_HTu9Do_3itIDaHLLXmh_JLOBRqQeZ_hnDwht4WtEkz3io' .
+    'iW0WIHb3lANyKqpShyiPcVdj_DbfYiIPEWab8e3vqwEUvoqFFNo';
 
-try {
-    echo $decrypter->decrypt($key, $encrypted);
-} catch (DecryptionFailedException $e) {
+$result = $decrypter->decrypt($key, $encrypted);
+if ($result->isSuccessful()) {
+    echo $result->data();
+} else {
     echo 'Decryption failed.';
 }
 ```
@@ -111,18 +112,19 @@ $key = $keyReader->readFile($keyPath);
 $decrypter = new BoundDecrypter($key);
 
 $encrypted = array(
-    'AQHJqPyMjO0oNSwu1HctzQp9_OQe2tmuQyMWWnetqT-N6vdB9O27NcCyfErbywGh' .
-    'I04N0Cr5CcFiOLHkpn3yTvGravUE8RsvesmvldJU8iIZYw',
-    'AQHXJbA8N8xITOTGVb7kUVLX0LDIHi4WHIpfOjtGiTvRYOmuXjGdUw7kFAaCrq_N' .
-    'D_HwU69xTYUJTBFpgwHr5hh1jt4AWPLlkGfROKovD6ZoMQ',
-    'AQHBx7LoNSXeswYbDzkqE7qoexOOXS-Lu87YERVsggufJ-LItt7ZzU-Lro8gsme9' .
-    'oCDXaduwwM6mKv0vROftOFb-W1fhd7xoIixC7EUC07gIdg',
+    'AQF_VjJS9sAL75uuUP_HTu9Do_3itIDaHLLXmh_JLOBRqQeZ_hnDwht4WtEkz3io' .
+    'iW0WIHb3lANyKqpShyiPcVdj_DbfYiIPEWab8e3vqwEUvoqFFNo',
+    'AQH44yTs7va1cDoBpX0xVLqIRow5fs8Jj5-DYDJ1R3YY9udBCexmvDs9BH1qJDjC' .
+    'RSqcGriKi_UkL5per1WHwdxWuPq8QsYiBqeC9e9zypl0Xi1QT3s',
+    'AQGg0MsYtH0Rboyqssivssupb_GKlBotCpdFtc6WpnMaji8_ZvmGUTRu2DKkxFhA' .
+    'dk_s0FWZ7NYFjSDt1puIrr7MlB7owNuR5KhUIj04Can0zDCYjJY',
 );
 
 foreach ($encrypted as $string) {
-    try {
-        echo $decrypter->decrypt($string);
-    } catch (DecryptionFailedException $e) {
+    $result = $decrypter->decrypt($string);
+    if ($result->isSuccessful()) {
+        echo $result->data();
+    } else {
         echo 'Decryption failed.';
     }
 }
