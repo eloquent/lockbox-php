@@ -9,14 +9,16 @@
  * that was distributed with this source code.
  */
 
-namespace Eloquent\Lockbox\Stream\Filter;
+namespace Eloquent\Lockbox\Password\Stream\Filter;
 
-use Eloquent\Lockbox\Cipher\EncryptCipher;
+use Eloquent\Lockbox\Cipher\CipherInterface;
+use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
+use Eloquent\Lockbox\Stream\Filter\AbstractCipherStreamFilter;
 
 /**
- * A stream filter for raw encryption with a key.
+ * A stream filter for encryption with a password.
  */
-class RawEncryptStreamFilter extends AbstractCipherStreamFilter
+class PasswordEncryptStreamFilter extends AbstractCipherStreamFilter
 {
     /**
      * Create the cipher.
@@ -25,6 +27,6 @@ class RawEncryptStreamFilter extends AbstractCipherStreamFilter
      */
     protected function createCipher()
     {
-        return new EncryptCipher;
+        return new PasswordEncryptCipher;
     }
 }

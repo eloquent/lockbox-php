@@ -14,7 +14,7 @@
     "require": {
         "php": ">=5.3",
         "ext-mcrypt": "*",
-        "eloquent/endec": "~0.2.0",
+        "eloquent/endec": "~0.2.1",
         "eloquent/enumeration": "~5",
         "eloquent/pbkdf2-compat": "~1",
         "icecave/isolator": "~2"

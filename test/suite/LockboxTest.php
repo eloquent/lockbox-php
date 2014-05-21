@@ -23,12 +23,22 @@ class LockboxTest extends PHPUnit_Framework_TestCase
         Lockbox::registerFilters($isolator);
 
         Phake::verify($isolator)->stream_filter_register(
-            'lockbox.encrypt-raw',
-            'Eloquent\Lockbox\Stream\Filter\RawEncryptStreamFilter'
+            'lockbox.encrypt',
+            'Eloquent\Lockbox\Stream\Filter\EncryptStreamFilter'
         );
         Phake::verify($isolator)->stream_filter_register(
-            'lockbox.decrypt-raw',
-            'Eloquent\Lockbox\Stream\Filter\RawDecryptStreamFilter'
+            'lockbox.decrypt',
+            'Eloquent\Lockbox\Stream\Filter\DecryptStreamFilter'
+        );
+        Phake::verify($isolator)->stream_filter_register(
+            'lockbox.password-encrypt',
+            'Eloquent\Lockbox\Password\Stream\Filter' .
+            '\PasswordEncryptStreamFilter'
+        );
+        Phake::verify($isolator)->stream_filter_register(
+            'lockbox.password-decrypt',
+            'Eloquent\Lockbox\Password\Stream\Filter' .
+            '\PasswordDecryptStreamFilter'
         );
     }
 }

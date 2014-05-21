@@ -11,12 +11,13 @@
 
 namespace Eloquent\Lockbox\Stream\Filter;
 
-use Eloquent\Lockbox\Cipher\DecryptCipher;
+use Eloquent\Lockbox\Cipher\CipherInterface;
+use Eloquent\Lockbox\Cipher\EncryptCipher;
 
 /**
- * A stream filter for raw decryption with a key.
+ * A stream filter for encryption with a key.
  */
-class RawDecryptStreamFilter extends AbstractCipherStreamFilter
+class EncryptStreamFilter extends AbstractCipherStreamFilter
 {
     /**
      * Create the cipher.
@@ -25,6 +26,6 @@ class RawDecryptStreamFilter extends AbstractCipherStreamFilter
      */
     protected function createCipher()
     {
-        return new DecryptCipher;
+        return new EncryptCipher;
     }
 }

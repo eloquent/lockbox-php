@@ -10,6 +10,7 @@
  */
 
 use Eloquent\Endec\Base64\Base64Url;
+use Eloquent\Endec\Endec;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
@@ -18,6 +19,7 @@ use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\Key\KeyReader;
 use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Lockbox;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Password\Password;
@@ -536,5 +538,48 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
 
         $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyWriteException');
         $this->keyWriter->writeFile($key, '/path/to/nonexistant');
+    }
+
+    public function testStreamFilters()
+    {
+        Lockbox::registerFilters();
+        Endec::registerFilters();
+        $key = $this->keyReader->readFile(__DIR__ . '/../fixture/key/key-256-256.lockbox.key');
+        $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
+        $stream = fopen($path, 'wb');
+        stream_filter_append($stream, 'lockbox.encrypt', STREAM_FILTER_WRITE, $key);
+        stream_filter_append($stream, 'endec.base64url-encode');
+        fwrite($stream, 'foobar');
+        fclose($stream);
+        $stream = fopen($path, 'rb');
+        stream_filter_append($stream, 'endec.base64url-decode');
+        stream_filter_append($stream, 'lockbox.decrypt', STREAM_FILTER_READ, $key);
+        $actual = stream_get_contents($stream);
+        fclose($stream);
+        unlink($path);
+
+        $this->assertSame('foobar', $actual);
+    }
+
+    public function testPasswordStreamFilters()
+    {
+        Lockbox::registerFilters();
+        Endec::registerFilters();
+        $password = new Password('password');
+        $encryptParameters = new PasswordEncryptParameters($password, 10);
+        $path = sprintf('%s/%s', sys_get_temp_dir(), uniqid('lockbox-'));
+        $stream = fopen($path, 'wb');
+        stream_filter_append($stream, 'lockbox.password-encrypt', STREAM_FILTER_WRITE, $encryptParameters);
+        stream_filter_append($stream, 'endec.base64url-encode');
+        fwrite($stream, 'foobar');
+        fclose($stream);
+        $stream = fopen($path, 'rb');
+        stream_filter_append($stream, 'endec.base64url-decode');
+        stream_filter_append($stream, 'lockbox.password-decrypt', STREAM_FILTER_READ, $password);
+        $actual = stream_get_contents($stream);
+        fclose($stream);
+        unlink($path);
+
+        $this->assertSame('foobar', $actual);
     }
 }

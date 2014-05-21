@@ -28,12 +28,22 @@ abstract class Lockbox
         $isolator = Isolator::get($isolator);
 
         $isolator->stream_filter_register(
-            'lockbox.encrypt-raw',
-            'Eloquent\Lockbox\Stream\Filter\RawEncryptStreamFilter'
+            'lockbox.encrypt',
+            'Eloquent\Lockbox\Stream\Filter\EncryptStreamFilter'
         );
         $isolator->stream_filter_register(
-            'lockbox.decrypt-raw',
-            'Eloquent\Lockbox\Stream\Filter\RawDecryptStreamFilter'
+            'lockbox.decrypt',
+            'Eloquent\Lockbox\Stream\Filter\DecryptStreamFilter'
+        );
+        $isolator->stream_filter_register(
+            'lockbox.password-encrypt',
+            'Eloquent\Lockbox\Password\Stream\Filter' .
+            '\PasswordEncryptStreamFilter'
+        );
+        $isolator->stream_filter_register(
+            'lockbox.password-decrypt',
+            'Eloquent\Lockbox\Password\Stream\Filter' .
+            '\PasswordDecryptStreamFilter'
         );
     }
 }
