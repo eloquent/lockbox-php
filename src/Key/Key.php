@@ -159,6 +159,24 @@ class Key implements KeyInterface
         return $this->description;
     }
 
+    /**
+     * Erase these parameters, removing any sensitive data.
+     */
+    public function erase()
+    {
+        unset($this->encryptSecret);
+        unset($this->authSecret);
+        unset($this->name);
+        unset($this->description);
+        $this->encryptSecretBytes = 16;
+        $this->encryptSecretBits = $this->encryptSecretBytes * 8;
+        $this->encryptSecret = str_repeat("\0", $this->encryptSecretBytes);
+        $this->authSecretBytes = 28;
+        $this->authSecretBits = $this->authSecretBytes * 8;
+        $this->authSecret = str_repeat("\0", $this->authSecretBytes);
+        $this->name = $this->description = null;
+    }
+
     private $encryptSecret;
     private $encryptSecretBytes;
     private $encryptSecretBits;

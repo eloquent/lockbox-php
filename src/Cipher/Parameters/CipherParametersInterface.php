@@ -16,4 +16,8 @@ namespace Eloquent\Lockbox\Cipher\Parameters;
  */
 interface CipherParametersInterface
 {
+    /**
+     * Erase these parameters, removing any sensitive data.
+     */
+    public function erase();
 }

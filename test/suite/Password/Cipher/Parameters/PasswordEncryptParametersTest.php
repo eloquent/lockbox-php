@@ -41,4 +41,14 @@ class PasswordEncryptParametersTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->parameters->salt());
         $this->assertNull($this->parameters->iv());
     }
+
+    public function testErase()
+    {
+        $this->parameters->erase();
+
+        $this->assertSame('', $this->parameters->password()->string());
+        $this->assertSame(1, $this->parameters->iterations());
+        $this->assertNull($this->parameters->salt());
+        $this->assertNull($this->parameters->iv());
+    }
 }

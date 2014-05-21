@@ -69,5 +69,14 @@ class Password implements PasswordInterface
         return $this->string();
     }
 
+    /**
+     * Erase these parameters, removing any sensitive data.
+     */
+    public function erase()
+    {
+        unset($this->password);
+        $this->password = '';
+    }
+
     private $password;
 }

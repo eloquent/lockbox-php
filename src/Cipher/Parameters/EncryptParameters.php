@@ -50,6 +50,17 @@ class EncryptParameters implements EncryptParametersInterface
         return $this->iv;
     }
 
+    /**
+     * Erase these parameters, removing any sensitive data.
+     */
+    public function erase()
+    {
+        $this->key()->erase();
+
+        unset($this->iv);
+        $this->iv = null;
+    }
+
     private $key;
     private $iv;
 }

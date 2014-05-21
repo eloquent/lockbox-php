@@ -37,4 +37,13 @@ class EncryptParametersTest extends PHPUnit_Framework_TestCase
 
         $this->assertNull($this->parameters->iv());
     }
+
+    public function testErase()
+    {
+        $this->parameters->erase();
+
+        $this->assertSame(str_repeat("\0", 16), $this->parameters->key()->encryptSecret());
+        $this->assertSame(str_repeat("\0", 28), $this->parameters->key()->authSecret());
+        $this->assertNull($this->parameters->iv());
+    }
 }

@@ -39,4 +39,11 @@ class PasswordTest extends PHPUnit_Framework_TestCase
         $this->assertSame($this->password, Password::adapt($this->password));
         $this->assertEquals(new Password('password'), Password::adapt('password'));
     }
+
+    public function testErase()
+    {
+        $this->password->erase();
+
+        $this->assertSame('', $this->password->string());
+    }
 }

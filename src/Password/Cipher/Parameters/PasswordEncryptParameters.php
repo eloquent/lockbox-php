@@ -79,6 +79,19 @@ class PasswordEncryptParameters implements PasswordEncryptParametersInterface
         return $this->iv;
     }
 
+    /**
+     * Erase these parameters, removing any sensitive data.
+     */
+    public function erase()
+    {
+        $this->password()->erase();
+
+        unset($this->salt);
+        unset($this->iv);
+        $this->salt = $this->iv = null;
+        $this->iterations = 1;
+    }
+
     private $password;
     private $iterations;
     private $salt;
