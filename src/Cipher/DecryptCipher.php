@@ -50,9 +50,8 @@ class DecryptCipher implements CipherInterface
 
         $this->unpadder = $unpadder;
         $this->resultFactory = $resultFactory;
-        $this->isInitialized = false;
 
-        $this->reset();
+        $this->deinitialize();
     }
 
     /**
@@ -279,6 +278,30 @@ class DecryptCipher implements CipherInterface
         if (null !== $this->hashContext) {
             $this->finalHashContext = hash_copy($this->hashContext);
         }
+    }
+
+    /**
+     * Reset this cipher to its initial state, and clear any sensitive data.
+     */
+    public function deinitialize()
+    {
+        if ($this->isMcryptInitialized) {
+            mcrypt_generic_deinit($this->mcryptModule);
+        }
+
+        unset($this->key);
+        unset($this->macSize);
+        unset($this->mcryptModule);
+        unset($this->hashContext);
+        unset($this->finalHashContext);
+        unset($this->buffer);
+        unset($this->result);
+
+        $this->key = $this->macSize = $this->mcryptModule = $this->hashContext =
+            $this->finalHashContext = $this->result = null;
+        $this->isInitialized = $this->isHeaderReceived = $this->isFinalized =
+            $this->isMcryptInitialized = false;
+        $this->buffer = '';
     }
 
     private function processHeader(&$size)

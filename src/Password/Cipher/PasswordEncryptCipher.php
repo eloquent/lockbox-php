@@ -84,6 +84,19 @@ class PasswordEncryptCipher extends AbstractEncryptCipher
     }
 
     /**
+     * Reset this cipher to its initial state, and clear any sensitive data.
+     */
+    public function deinitialize()
+    {
+        parent::deinitialize();
+
+        unset($this->iterations);
+        unset($this->salt);
+
+        $this->iterations = $this->salt = null;
+    }
+
+    /**
      * Get the encryption header.
      *
      * @param string $iv The initialization vector.

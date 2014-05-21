@@ -210,6 +210,8 @@ class CipherStream extends EventEmitter implements CipherStreamInterface
         if (!$this->hasError) {
             $this->emit('success', array($this));
         }
+
+        $this->cipher->deinitialize();
     }
 
     private $cipher;

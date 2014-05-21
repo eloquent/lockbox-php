@@ -84,4 +84,9 @@ interface CipherInterface
      * Reset this cipher to the state just after the last initialize() call.
      */
     public function reset();
+
+    /**
+     * Reset this cipher to its initial state, and clear any sensitive data.
+     */
+    public function deinitialize();
 }

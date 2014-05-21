@@ -65,9 +65,8 @@ class PasswordDecryptCipher implements CipherInterface
         $this->keyDeriver = $keyDeriver;
         $this->unpadder = $unpadder;
         $this->resultFactory = $resultFactory;
-        $this->isInitialized = false;
 
-        $this->reset();
+        $this->deinitialize();
     }
 
     /**
@@ -305,6 +304,31 @@ class PasswordDecryptCipher implements CipherInterface
         $this->isMcryptInitialized = false;
 
         $this->hashContext = $this->finalHashContext = null;
+    }
+
+    /**
+     * Reset this cipher to its initial state, and clear any sensitive data.
+     */
+    public function deinitialize()
+    {
+        if ($this->isMcryptInitialized) {
+            mcrypt_generic_deinit($this->mcryptModule);
+        }
+
+        unset($this->password);
+        unset($this->iterations);
+        unset($this->key);
+        unset($this->mcryptModule);
+        unset($this->hashContext);
+        unset($this->finalHashContext);
+        unset($this->buffer);
+        unset($this->result);
+
+        $this->password = $this->iterations = $this->key = $this->mcryptModule =
+            $this->hashContext = $this->finalHashContext = $this->result = null;
+        $this->isInitialized = $this->isHeaderReceived = $this->isFinalized =
+            $this->isMcryptInitialized = false;
+        $this->buffer = '';
     }
 
     private function processHeader(&$size)

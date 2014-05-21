@@ -298,6 +298,14 @@ class DecryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame($input, $output);
     }
 
+    public function testDeinitialize()
+    {
+        $this->cipher->initialize($this->parameters);
+        $this->cipher->deinitialize();
+
+        $this->assertFalse($this->cipher->isInitialized());
+    }
+
     public function testProcessFailureNotInitialized()
     {
         $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException');

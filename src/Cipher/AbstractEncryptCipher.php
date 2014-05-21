@@ -55,9 +55,8 @@ abstract class AbstractEncryptCipher implements CipherInterface
         $this->randomSource = $randomSource;
         $this->padder = $padder;
         $this->resultFactory = $resultFactory;
-        $this->isInitialized = $this->isMcryptInitialized = false;
 
-        $this->reset();
+        $this->deinitialize();
     }
 
     /**
@@ -248,6 +247,31 @@ abstract class AbstractEncryptCipher implements CipherInterface
             $this->finalHashContext = hash_copy($this->hashContext);
             hash_update($this->finalHashContext, $this->header);
         }
+    }
+
+    /**
+     * Reset this cipher to its initial state, and clear any sensitive data.
+     */
+    public function deinitialize()
+    {
+        if ($this->isMcryptInitialized) {
+            mcrypt_generic_deinit($this->mcryptModule);
+        }
+
+        unset($this->key);
+        unset($this->iv);
+        unset($this->header);
+        unset($this->mcryptModule);
+        unset($this->hashContext);
+        unset($this->finalHashContext);
+        unset($this->buffer);
+        unset($this->result);
+
+        $this->key = $this->iv = $this->header = $this->mcryptModule =
+            $this->hashContext = $this->finalHashContext = $this->result = null;
+        $this->isInitialized = $this->isHeaderSent = $this->isFinalized =
+            $this->isMcryptInitialized = false;
+        $this->buffer = '';
     }
 
     /**

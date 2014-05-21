@@ -249,6 +249,14 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->assertSame('SUCCESS', $result->type()->key());
     }
 
+    public function testDeinitialize()
+    {
+        $this->cipher->initialize($this->parameters);
+        $this->cipher->deinitialize();
+
+        $this->assertFalse($this->cipher->isInitialized());
+    }
+
     public function testProcessFailureNotInitialized()
     {
         $this->setExpectedException('Eloquent\Lockbox\Cipher\Exception\CipherNotInitializedException');

@@ -62,6 +62,8 @@ abstract class AbstractRawDecrypter implements DecrypterInterface
             $result->setData($data);
         }
 
+        $cipher->deinitialize();
+
         return $result;
     }
 

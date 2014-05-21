@@ -54,7 +54,10 @@ abstract class AbstractRawEncrypter implements EncrypterInterface
         $cipher = $this->cipherFactory()->createCipher();
         $cipher->initialize($parameters);
 
-        return $cipher->finalize($data);
+        $data = $cipher->finalize($data);
+        $cipher->deinitialize();
+
+        return $data;
     }
 
     /**

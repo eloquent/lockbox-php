@@ -65,10 +65,16 @@ abstract class AbstractCipherStreamFilter extends php_user_filter
                 $this->cipher->hasResult() &&
                 !$this->cipher->result()->isSuccessful()
             ) {
+                $this->cipher->deinitialize();
+
                 return PSFS_ERR_FATAL;
             }
 
             $bucket = stream_bucket_make_writeable($input);
+        }
+
+        if ($isEnd) {
+            $this->cipher->deinitialize();
         }
 
         if ($hasOutput || $isEnd) {
