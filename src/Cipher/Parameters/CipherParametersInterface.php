@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Cipher\Parameters;
 
 /**
- * The interface used to identify cipher parameters.
+ * The interface implemented by cipher parameters.
  */
 interface CipherParametersInterface
 {

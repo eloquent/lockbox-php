@@ -85,15 +85,11 @@ class KeyTest extends PHPUnit_Framework_TestCase
 
     public function testErase()
     {
-        $this->key = new Key('1234567890123456', '12345678901234567890123456789012', 'name', 'description');
+        $this->key = new Key('1234567890123456', '1234567890123456789012345678', 'name', 'description');
         $this->key->erase();
 
         $this->assertSame(str_repeat("\0", 16), $this->key->encryptSecret());
-        $this->assertSame(16, $this->key->encryptSecretBytes());
-        $this->assertSame(128, $this->key->encryptSecretBits());
         $this->assertSame(str_repeat("\0", 28), $this->key->authSecret());
-        $this->assertSame(28, $this->key->authSecretBytes());
-        $this->assertSame(224, $this->key->authSecretBits());
         $this->assertNull($this->key->name());
         $this->assertNull($this->key->description());
     }

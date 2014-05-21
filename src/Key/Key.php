@@ -168,11 +168,7 @@ class Key implements KeyInterface
         unset($this->authSecret);
         unset($this->name);
         unset($this->description);
-        $this->encryptSecretBytes = 16;
-        $this->encryptSecretBits = $this->encryptSecretBytes * 8;
         $this->encryptSecret = str_repeat("\0", $this->encryptSecretBytes);
-        $this->authSecretBytes = 28;
-        $this->authSecretBits = $this->authSecretBytes * 8;
         $this->authSecret = str_repeat("\0", $this->authSecretBytes);
         $this->name = $this->description = null;
     }

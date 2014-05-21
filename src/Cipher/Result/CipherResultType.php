@@ -33,15 +33,15 @@ final class CipherResultType extends AbstractMultiton
      */
     protected static function initializeMembers()
     {
-        new static('SUCCESS', true);
+        new static('SUCCESS', true);              // Indicates a successful result.
 
-        new static('INVALID_SIZE', false);
-        new static('INVALID_ENCODING', false);
-        new static('INVALID_MAC', false);
-        new static('UNSUPPORTED_VERSION', false);
-        new static('UNSUPPORTED_TYPE', false);
-        new static('INVALID_PADDING', false);
-        new static('TOO_MANY_ITERATIONS', false);
+        new static('INVALID_SIZE', false);        // The input data was an invalid size and could not be processed.
+        new static('INVALID_ENCODING', false);    // The input data was not encoded, or the encoding was invalid.
+        new static('INVALID_MAC', false);         // One or more message authentication codes were invalid.
+        new static('UNSUPPORTED_VERSION', false); // An unsupported version identifier was encountered.
+        new static('UNSUPPORTED_TYPE', false);    // An unsupported type identifier was encountered.
+        new static('INVALID_PADDING', false);     // The input data was not correctly padded.
+        new static('TOO_MANY_ITERATIONS', false); // The requested number of hash iterations exceeded the configured limit.
     }
 
     /**
