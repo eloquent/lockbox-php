@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use Eloquent\Lockbox\Cipher\Result\CipherResultType;
 use Eloquent\Lockbox\Key\KeyGenerator;
 use Eloquent\Lockbox\RawCrypter;
-use Eloquent\Lockbox\Result\DecryptionResultType;
 
 require __DIR__ . '/../../vendor/autoload.php';
 
@@ -51,7 +51,7 @@ $invalidPadding .= authenticate($key, $header . $block0Unpadded . $block1Unpadde
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
     $result = $crypter->decrypt($key, $invalidPadding);
-    if (DecryptionResultType::INVALID_PADDING() !== $result->type()) {
+    if (CipherResultType::INVALID_PADDING() !== $result->type()) {
         throw new RuntimeException('Test is broken.');
     }
 }
@@ -72,7 +72,7 @@ $partialPadding .= authenticate($key, $header . $block0 . chr(15) . str_repeat(c
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
     $result = $crypter->decrypt($key, $partialPadding);
-    if (DecryptionResultType::INVALID_PADDING() !== $result->type()) {
+    if (CipherResultType::INVALID_PADDING() !== $result->type()) {
         throw new RuntimeException('Test is broken.');
     }
 }
@@ -89,7 +89,7 @@ $badMac = substr($encrypted, 0, 18) . mcrypt_create_iv($size - 50) . substr($enc
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
     $result = $crypter->decrypt($key, $badMac);
-    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+    if (CipherResultType::INVALID_MAC() !== $result->type()) {
         throw new RuntimeException('Test is broken.');
     }
 }
@@ -106,7 +106,7 @@ $badBlockMac = substr($encrypted, 0, 34) . '  ' . substr($encrypted, 36);
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
     $result = $crypter->decrypt($key, $badBlockMac);
-    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+    if (CipherResultType::INVALID_MAC() !== $result->type()) {
         throw new RuntimeException('Test is broken.');
     }
 }
@@ -125,7 +125,7 @@ $partialMac[$size - 1] = chr(~ord($partialMac[$size - 1]));
 $startTime = microtime(true);
 for ($i = 0; $i < $iterations; $i++) {
     $result = $crypter->decrypt($key, $partialMac);
-    if (DecryptionResultType::INVALID_MAC() !== $result->type()) {
+    if (CipherResultType::INVALID_MAC() !== $result->type()) {
         throw new RuntimeException('Test is broken.');
     }
 }
@@ -138,7 +138,7 @@ printf(
 
 
 function authenticate($key, $data, $size = null) {
-    $mac = hash_hmac('sha256', $data, $key->authenticationSecret(), true);
+    $mac = hash_hmac('sha256', $data, $key->authSecret(), true);
 
     if (null !== $size) {
         $mac = substr($mac, 0, $size);
@@ -150,7 +150,7 @@ function authenticate($key, $data, $size = null) {
 function encryptAes($key, $iv, $data) {
     return mcrypt_encrypt(
         MCRYPT_RIJNDAEL_128,
-        $key->encryptionSecret(),
+        $key->encryptSecret(),
         $data,
         MCRYPT_MODE_CBC,
         $iv
