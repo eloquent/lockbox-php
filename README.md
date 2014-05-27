@@ -22,8 +22,8 @@ ensure the safety of data. For more information, see the [Lockbox website].
 ### Generating and writing keys
 
 ```php
-use Eloquent\Lockbox\Key\KeyGenerator;
-use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Key\Generator\KeyGenerator;
+use Eloquent\Lockbox\Key\Persistence\KeyWriter;
 
 $keyGenerator = new KeyGenerator;
 $key = $keyGenerator->generateKey();
@@ -40,7 +40,7 @@ this feature is planned.
 
 ```php
 use Eloquent\Lockbox\Encrypter;
-use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
@@ -56,8 +56,8 @@ echo $encrypter->encrypt($key, 'Super secret data.');
 are convenient for encrypting multiple data packets.
 
 ```php
-use Eloquent\Lockbox\BoundEncrypter;
-use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Bound\BoundEncrypter;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
@@ -74,8 +74,7 @@ echo $encrypter->encrypt('Mega secret data.');
 
 ```php
 use Eloquent\Lockbox\Decrypter;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
-use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;
@@ -101,9 +100,8 @@ if ($result->isSuccessful()) {
 are convenient for decrypting multiple data packets.
 
 ```php
-use Eloquent\Lockbox\BoundDecrypter;
-use Eloquent\Lockbox\Exception\DecryptionFailedException;
-use Eloquent\Lockbox\Key\KeyReader;
+use Eloquent\Lockbox\Bound\BoundDecrypter;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
 
 $keyPath = '/path/to/lockbox.key';
 $keyReader = new KeyReader;

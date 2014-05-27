@@ -13,8 +13,8 @@ namespace Eloquent\Lockbox\Password\Cipher;
 
 use Eloquent\Endec\Base64\Base64Url;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
 use Eloquent\Lockbox\Key\Key;
-use Eloquent\Lockbox\Key\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use Eloquent\Lockbox\Password\Password;

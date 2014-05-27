@@ -14,11 +14,11 @@ use Eloquent\Endec\Endec;
 use Eloquent\Lockbox\Cipher\Factory\EncryptCipherFactory;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
+use Eloquent\Lockbox\Key\Generator\KeyGenerator;
 use Eloquent\Lockbox\Key\Key;
-use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Key\KeyGenerator;
-use Eloquent\Lockbox\Key\KeyReader;
-use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
+use Eloquent\Lockbox\Key\Persistence\KeyWriter;
 use Eloquent\Lockbox\Lockbox;
 use Eloquent\Lockbox\Password\Cipher\Factory\PasswordEncryptCipherFactory;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
@@ -547,7 +547,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
      */
     public function testRealKeyReadFailure()
     {
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyReadException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Persistence\Exception\KeyReadException');
         $this->keyReader->readFile('/path/to/nonexistant');
     }
 
@@ -558,7 +558,7 @@ class FunctionalTest extends PHPUnit_Framework_TestCase
     {
         $key = $this->keyReader->readFile(__DIR__ . '/../fixture/key/key-256-256.lockbox.key');
 
-        $this->setExpectedException('Eloquent\Lockbox\Key\Exception\KeyWriteException');
+        $this->setExpectedException('Eloquent\Lockbox\Key\Persistence\Exception\KeyWriteException');
         $this->keyWriter->writeFile($key, '/path/to/nonexistant');
     }
 

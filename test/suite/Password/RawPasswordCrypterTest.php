@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Password;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
 use Eloquent\Lockbox\Password\Cipher\Parameters\PasswordEncryptParameters;
 use PHPUnit_Framework_TestCase;
 

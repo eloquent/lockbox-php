@@ -9,14 +9,14 @@
  * that was distributed with this source code.
  */
 
-use Eloquent\Lockbox\BoundDecrypter;
-use Eloquent\Lockbox\BoundEncrypter;
+use Eloquent\Lockbox\Bound\BoundDecrypter;
+use Eloquent\Lockbox\Bound\BoundEncrypter;
 use Eloquent\Lockbox\Decrypter;
 use Eloquent\Lockbox\Encrypter;
+use Eloquent\Lockbox\Key\Generator\KeyGenerator;
 use Eloquent\Lockbox\Key\Key;
-use Eloquent\Lockbox\Key\KeyGenerator;
-use Eloquent\Lockbox\Key\KeyReader;
-use Eloquent\Lockbox\Key\KeyWriter;
+use Eloquent\Lockbox\Key\Persistence\KeyReader;
+use Eloquent\Lockbox\Key\Persistence\KeyWriter;
 
 class DocumentationTest extends PHPUnit_Framework_TestCase
 {

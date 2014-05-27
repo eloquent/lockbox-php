@@ -15,8 +15,8 @@ use Eloquent\Lockbox\Cipher\CipherInterface;
 use Eloquent\Lockbox\Cipher\Factory\CipherFactoryInterface;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactoryInterface;
-use Eloquent\Lockbox\Key\KeyDeriver;
-use Eloquent\Lockbox\Key\KeyDeriverInterface;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriverInterface;
 use Eloquent\Lockbox\Padding\PadderInterface;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
@@ -56,11 +56,11 @@ class PasswordEncryptCipherFactory implements CipherFactoryInterface
         PadderInterface $padder = null,
         CipherResultFactoryInterface $resultFactory = null
     ) {
-        if (null === $keyDeriver) {
-            $keyDeriver = KeyDeriver::instance();
-        }
         if (null === $randomSource) {
             $randomSource = DevUrandom::instance();
+        }
+        if (null === $keyDeriver) {
+            $keyDeriver = KeyDeriver::instance();
         }
         if (null === $padder) {
             $padder = PkcsPadding::instance();

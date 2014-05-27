@@ -25,7 +25,7 @@ class CipherResultFactoryTest extends PHPUnit_Framework_TestCase
         $this->factory = new CipherResultFactory;
     }
 
-    public function testCreateCipher()
+    public function testCreateResult()
     {
         $expected = new CipherResult(CipherResultType::SUCCESS());
         $actual = $this->factory->createResult(CipherResultType::SUCCESS());

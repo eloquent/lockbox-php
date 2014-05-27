@@ -13,7 +13,7 @@ namespace Eloquent\Lockbox\Password\Cipher\Factory;
 
 use Eloquent\Liberator\Liberator;
 use Eloquent\Lockbox\Cipher\Result\Factory\CipherResultFactory;
-use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordEncryptCipher;
 use Eloquent\Lockbox\Random\DevUrandom;

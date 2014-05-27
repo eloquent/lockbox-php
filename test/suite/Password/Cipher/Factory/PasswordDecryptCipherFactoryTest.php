@@ -12,7 +12,7 @@
 namespace Eloquent\Lockbox\Password\Cipher\Factory;
 
 use Eloquent\Liberator\Liberator;
-use Eloquent\Lockbox\Key\KeyDeriver;
+use Eloquent\Lockbox\Key\Deriver\KeyDeriver;
 use Eloquent\Lockbox\Padding\PkcsPadding;
 use Eloquent\Lockbox\Password\Cipher\PasswordDecryptCipher;
 use Eloquent\Lockbox\Password\Cipher\Result\Factory\PasswordDecryptResultFactory;
