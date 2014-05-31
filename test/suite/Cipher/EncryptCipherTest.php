@@ -77,6 +77,88 @@ class EncryptCipherTest extends PHPUnit_Framework_TestCase
         $this->cipher->initialize(new Password('password'));
     }
 
+    public function cipherData()
+    {
+        return array(
+            '256 bit, 512 bit' => array(
+                '12345678901234567890123456789012',
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                'AQExMjM0NTY3ODkwMTIzNDU2-52MUa225X51XTBKiD5rgjfzvMHF1k0E1wJZF9PD0tex9pZixcrftPsdcKOCjwhSfsRYtDUTmG5F5SIlx7QEB9fymhPsmbc8c-9vZ8cn38HsAfiWwCUuc7yP3Fcq1cqRLihdzA',
+            ),
+            '256 bit, 384 bit' => array(
+                '12345678901234567890123456789012',
+                '123456789012345678901234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2-52MUa225X51XTBKiD5rgtuDvMHF1k0E1wJZF9PD0tex9r24P3Ip335CF0sGslPZf_PPU87lJRQAJv-rnmqIccESgUPwyvjy-x8FXRPM21z4jKz2',
+            ),
+            '256 bit, 256 bit' => array(
+                '12345678901234567890123456789012',
+                '12345678901234567890123456789012',
+                'AQExMjM0NTY3ODkwMTIzNDU2-52MUa225X51XTBKiD5rgmQvvMHF1k0E1wJZF9PD0tex9nYF1Pr_43mxlTV7Hw1NUAJnuKNnV31orIiK9_m15fKwN0I',
+            ),
+            '256 bit, 224 bit' => array(
+                '12345678901234567890123456789012',
+                '1234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2-52MUa225X51XTBKiD5rgpWEvMHF1k0E1wJZF9PD0tex9vtJlbG64hHb7elb6S__Tj0o8pBO70NwE1tlXa7TAw',
+            ),
+            '192 bit, 512 bit' => array(
+                '123456789012345678901234',
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                'AQExMjM0NTY3ODkwMTIzNDU2ZiJx4Wbdaz2HLlN5ZBX8SFQLzUx2Sq5K1gxg2D6nsqWv3qiKIPmOOigLu0W-jfP8zmtBKEo80z0Th5puc44flddzrp_w4Thh_qLvfMS4_bD3I847n2fqXuzWbs1N86spqOvt4w',
+            ),
+            '192 bit, 384 bit' => array(
+                '123456789012345678901234',
+                '123456789012345678901234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2ZiJx4Wbdaz2HLlN5ZBX8SGgRzUx2Sq5K1gxg2D6nsqWv3vpgrAbT4Mdgv8MngUwRZQB19P53bF_eDus7S7EpGCjC0_Rjby4Y5tOWBKUtjc9jElq8',
+            ),
+            '192 bit, 256 bit' => array(
+                '123456789012345678901234',
+                '12345678901234567890123456789012',
+                'AQExMjM0NTY3ODkwMTIzNDU2ZiJx4Wbdaz2HLlN5ZBX8SIgkzUx2Sq5K1gxg2D6nsqWv3oPCwrevPjlniPnVGxxVs5v0prayCqRmUel4uv5wb6pwnDc',
+            ),
+            '192 bit, 224 bit' => array(
+                '123456789012345678901234',
+                '1234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2ZiJx4Wbdaz2HLlN5ZBX8SIsXzUx2Sq5K1gxg2D6nsqWv3vE-nGxDe1hspfrcKMxBLkMcEVEdWFL2SXlEgRDnqA',
+            ),
+            '128 bit, 512 bit' => array(
+                '1234567890123456',
+                '1234567890123456789012345678901234567890123456789012345678901234',
+                'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlK8KJu2o4QnrWgwEVekzq_uQOSdoCUVzi6UhonDKk-dZn3E9BYOLwJezinMo__NEseH0nanE64NfxPkzJbMgeMKyTz25EnTn-s1HRfQX_kpFHI36XA',
+            ),
+            '128 bit, 384 bit' => array(
+                '1234567890123456',
+                '123456789012345678901234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlLN4Ju2o4QnrWgwEVekzq_uQOWS4f1QSrAOjm6wBvKMh365KJZvX-Qe58zptzdMGKjasUbdyQwnA6tIAjkcDD4OFJ-Ep',
+            ),
+            '128 bit, 256 bit' => array(
+                '1234567890123456',
+                '12345678901234567890123456789012',
+                'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlKLsJu2o4QnrWgwEVekzq_uQOX8keBLLicSXw4LgVMHQwH7t_3s8b1gJf9HamzaZdgg3AWQ',
+            ),
+            '128 bit, 224 bit' => array(
+                '1234567890123456',
+                '1234567890123456789012345678',
+                'AQExMjM0NTY3ODkwMTIzNDU2T5xLPdYzBeLJW8xyiDdJlARuJu2o4QnrWgwEVekzq_uQOat_qDHhGSRzIGUQo-U-BdePDs_-jLRS8U4RCmUjyg',
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider cipherData
+     */
+    public function testCipher($encryptSecret, $authSecret, $expected)
+    {
+        $this->cipher->initialize(new Key($encryptSecret, $authSecret));
+        $output = $this->cipher->finalize('foobarbazquxdoomsplat');
+        $result = $this->cipher->result();
+        $expected = $this->base64Url->decode($expected);
+
+        $this->assertSameCiphertext($expected, $output);
+        $this->assertTrue($this->cipher->isFinalized());
+        $this->assertTrue($this->cipher->hasResult());
+        $this->assertSame('SUCCESS', $result->type()->key());
+    }
+
     public function testCipherWithKeyAndIvParameters()
     {
         $this->cipher->initialize($this->parameters);
